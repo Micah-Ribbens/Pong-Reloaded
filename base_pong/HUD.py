@@ -1,10 +1,10 @@
-from UtilityClasses import UtilityFunctions
-from important_variables import (
+from base_pong.UtilityClasses import UtilityFunctions
+from base_pong.important_variables import (
     screen_length,
     screen_height,
     window
 )
-from velocity_calculator import VelocityCalculator
+from base_pong.velocity_calculator import VelocityCalculator
 import pygame
 pygame.init()
 
