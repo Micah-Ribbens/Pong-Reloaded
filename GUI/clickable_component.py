@@ -11,9 +11,16 @@ class ClickableComponent(GameObject):
 
     def __init__(self):
         self.click_event = Event()
+    
+    def run(self):
+        self.run_click_event()
 
     def got_clicked(self):
+        # This is just a safety net in case components of this don't call run_click_event
+        # The issue with it being here though it that it assumes the got_clicked() is called every cycle
+        # So it's ideal if components of this call run()
         self.run_click_event()
+
         is_clicked = True
         area = pygame.Rect(self.x_coordinate, self.y_coordinate, self.length,
                            self.height)

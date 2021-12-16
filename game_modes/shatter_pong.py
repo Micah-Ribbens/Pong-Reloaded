@@ -5,6 +5,7 @@ from base_pong.players import Player
 from base_pong.engines import CollisionsEngine, CollisionsFinder
 from base_pong.utility_classes import GameObject, Segment
 from game_modes.normal_pong import NormalPong
+from base_pong.colors import *
 
 
 class ShatterPong(PongType):
@@ -46,7 +47,7 @@ class ShatterPong(PongType):
     def draw_paddle(paddle):
         middle_segment = Segment(
             is_percentage=True,
-            color=GameObject.white,
+            color=white,
             amount_from_top=50,
             amount_from_left=0,
             length_amount=100,

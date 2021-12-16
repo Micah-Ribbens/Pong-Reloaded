@@ -17,12 +17,12 @@ while True:
             pygame.quit()
     game_window.fill(background_color)
     StartScreen.run()
+
     pygame.display.update()
     VelocityCalculator.time = time.time() - start_time
 
     # Breaking ends this while loop allowing the code below- GameRunner.run_game() to run the game
-    # if StartScreen.game_is_started():
-    #     StartScreen.run_setup_before_game()
-    #     break
+    if StartScreen.start_button.got_clicked():
+        break
 
 GameRunner.run_game()

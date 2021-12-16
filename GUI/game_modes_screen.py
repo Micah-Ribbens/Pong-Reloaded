@@ -8,11 +8,11 @@ from game_modes.game_mode_selector import GameModeSelector
 
 class GameModesScreen(SubScreen):
     pong_type_menu = DropDownMenu(
-        "Pong Types", GameModeSelector.all_pong_types, white, blue, 15)
+        "Pong Types", GameModeSelector.all_pong_types, white, blue, 15, GameModeSelector.all_pong_types.index("Normal Pong"))
     player_menu = DropDownMenu(
-        "Number Of Players", GameModeSelector.all_player_options, white, blue, 15)
+        "Number Of Players", GameModeSelector.all_player_options, white, blue, 15, GameModeSelector.all_player_options.index("Single Player"))
     game_mode_menu = DropDownMenu(
-        "Game Modes", GameModeSelector.all_game_modes, white, blue, 15)
+        "Game Modes", GameModeSelector.all_game_modes, white, blue, 15, GameModeSelector.all_game_modes.index("Random"))
     length_used_up = 0
     height_used_up = 0
     name = "Game Modes"
@@ -36,10 +36,9 @@ class GameModesScreen(SubScreen):
 
     def run():
         GameModesScreen.render()
-
-    # Function is used to set up GameModeSelector class to have game_mode and pont_type initialized
-    def run_setup_before_game():
         GameModeSelector.game_mode = GameModesScreen.game_mode_menu.get_selected_item()
 
         if GameModesScreen.game_mode_menu.get_selected_item() == "Pick Pong Type":
             GameModeSelector.pong_type = GameModesScreen.pong_type_menu.get_selected_item()
+
+        

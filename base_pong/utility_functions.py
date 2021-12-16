@@ -39,3 +39,12 @@ def draw_font(message, font, **kwargs):
         text_rect.center = (screen_length / 2,
                             screen_height / 2)
     game_window.blit(text, text_rect)
+
+# length is what percent_right and percent_length are a percent of and height is what percent_down and percent_height are a percent of
+def percentages_to_numbers(percent_right, percent_down, percent_length, percent_height, length, height):
+    return [
+        percentage_to_number(percent_right, length), 
+        percentage_to_number(percent_down, height),
+        percentage_to_number(percent_length, length),
+        percentage_to_number(percent_height, height)
+        ]

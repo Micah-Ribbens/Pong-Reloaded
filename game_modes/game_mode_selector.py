@@ -6,7 +6,8 @@ from game_modes.portal_pong import PortalPong
 from game_modes.shatter_pong import ShatterPong
 from game_modes.split_pong import SplitPong
 class GameModeSelector:
-    game_mode = ""
+    # If a game mode isn't selected from the GUI, then the game mode will be Random
+    game_mode = "Random"
     # Only assigned a value if game mode is "Pick Pong Type"
     pong_type = ""
 
@@ -40,11 +41,13 @@ class GameModeSelector:
             "Random": GameModeSelector.all_pong_types
         }
         pong_type = None
+
         if game_mode_to_pong_types.__contains__(GameModeSelector.game_mode):
             pong_types = game_mode_to_pong_types.get(GameModeSelector.game_mode)
             pong_type = GameModeSelector.get_random_pong_type(pong_types)
 
         elif GameModeSelector.game_mode == "Pick Pong Type":
+            print("IS PONG TYPE")
             pong_type = GameModeSelector.get_pong_type_class(GameModeSelector.pong_type)
 
         return pong_type
