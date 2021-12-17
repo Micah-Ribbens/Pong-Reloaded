@@ -47,7 +47,6 @@ class GameModeSelector:
             pong_type = GameModeSelector.get_random_pong_type(pong_types)
 
         elif GameModeSelector.game_mode == "Pick Pong Type":
-            print("IS PONG TYPE")
             pong_type = GameModeSelector.get_pong_type_class(GameModeSelector.pong_type)
 
         return pong_type

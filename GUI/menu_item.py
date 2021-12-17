@@ -31,20 +31,19 @@ class MenuItem(TextBox):
 
         # Saving the length and height, so I can draw a section of the text box normally then add a buffer at the right_edge and bottom
         # The length and height will be modified below, then reverted back
-        length = self.length
-        height = self.height
-        buffer_length = VelocityCalculator.give_measurement(screen_length, 1)
-        buffer_height = VelocityCalculator.give_measurement(screen_height, 2)
+        # length = self.length
+        # height = self.height
+        # buffer_length = VelocityCalculator.give_measurement(screen_length, 1)
+        # buffer_height = VelocityCalculator.give_measurement(screen_height, 2)
 
-        self.length -= buffer_length
-        self.height -= buffer_height
+        # self.length -= buffer_length
+        # self.height -= buffer_height
         TextBox.render(self)
 
-        GameObject.draw(GameObject(self.right_edge, self.y_coordinate, height, buffer_length, background_color))
-        GameObject.draw(GameObject(self.x_coordinate, self.bottom, buffer_height, length, background_color))
+        # GameObject.draw(GameObject(self.right_edge, self.y_coordinate, height, buffer_length, background_color))
 
-        self.length = length
-        self.height = height
+        # self.length = length
+        # self.height = height
 
 
 

@@ -23,6 +23,33 @@ class Segment:
         self.length_amount, self.width_amount = kwargs.get(
             "length_amount"), kwargs.get("width_amount")
 
+class Dimensions:
+    x_coordinate = 0
+    y_coordinate = 0
+    height = 0 
+    length = 0
+
+    def __init__(self, x_coordinate, y_coordinate, length, height):
+        self.x_coordinate, self.y_coordinate = x_coordinate, y_coordinate
+        self.length, self.height = length, height
+    
+    # @property automatically changes this "attribute" when the x_coordinate or length changes
+    # Can be treated as an attribute
+    @property
+    def right_edge(self):
+        return self.x_coordinate + self.length
+
+    @property
+    def bottom(self):
+        return self.y_coordinate + self.height
+
+    @property
+    def x_midpoint(self):
+        return self.x_coordinate + self.length / 2
+
+    @property
+    def y_midpoint(self):
+        return self.y_coordinate + self.height / 2
 
 class GameObject:
     x_coordinate = 0

@@ -1,15 +1,16 @@
 from GUI.button import Button
 from GUI.clickable_component import ClickableComponent
-from base_pong.utility_functions import draw_font, percentage_to_number
+from GUI.grid import Grid
+from base_pong.utility_functions import draw_font, percentage_to_number, percentages_to_numbers
 from GUI.menu_item import MenuItem
 from base_pong.players import Player
 from base_pong.ball import Ball
 from base_pong.important_variables import *
 from base_pong.velocity_calculator import VelocityCalculator
-from game_mechanics import GameRunner
+from game_screen import GameScreen
 from base_pong.colors import *
-from base_pong.utility_classes import Event
-from GUI.screen import SubScreen
+from base_pong.utility_classes import Dimensions, Event
+from GUI.sub_screen import SubScreen
 # Paddle Dimension and Ball Dimensions
 
 
@@ -45,14 +46,23 @@ class AlterSizesScreen(SubScreen):
                                            Player().power], ["power"], .25),
                                   MenuItem("Ball Speed", [Ball().base_forwards_velocity], ["base_velocity"], VelocityCalculator.give_velocity(screen_length, 2))]
 
-        AlterSizesScreen.set_item_bounds(
-            AlterSizesScreen.menus[0], length_used_up, height_used_up, 0, 80, 50, 10)
-        AlterSizesScreen.set_item_bounds(
-            AlterSizesScreen.menus[1], length_used_up, height_used_up, 50, 80, 50, 10)
-        AlterSizesScreen.set_item_bounds(
-            AlterSizesScreen.menus[2], length_used_up, height_used_up, 0, 90, 50, 10)
-        AlterSizesScreen.set_item_bounds(
-            AlterSizesScreen.menus[3], length_used_up, height_used_up, 50, 90, 50, 10)
+        x_coordinate, y_coordinate, length, height = percentages_to_numbers(0, 0, 100, 100, screen_length, screen_height)
+
+        grid = Grid(Dimensions(x_coordinate, y_coordinate, length, height), 2, None, False)
+
+        max_height = VelocityCalculator.give_measurement(screen_height, 10)
+        grid.turn_into_grid(AlterSizesScreen.menus, None, max_height)
+
+        for menu in AlterSizesScreen.menus:
+            menu.str()
+        # AlterSizesScreen.set_item_bounds(
+        #     AlterSizesScreen.menus[0], length_used_up, height_used_up, 0, 80, 50, 10)
+        # AlterSizesScreen.set_item_bounds(
+        #     AlterSizesScreen.menus[1], length_used_up, height_used_up, 50, 80, 50, 10)
+        # AlterSizesScreen.set_item_bounds(
+        #     AlterSizesScreen.menus[2], length_used_up, height_used_up, 0, 90, 50, 10)
+        # AlterSizesScreen.set_item_bounds(
+        #     AlterSizesScreen.menus[3], length_used_up, height_used_up, 50, 90, 50, 10)
 
     def do_menu_item_logic():
         controlls = pygame.key.get_pressed()
@@ -108,8 +118,8 @@ class AlterSizesScreen(SubScreen):
 
     def change_class_attributes():
         modified_properties = ["length", "height", "power"]
-        GameRunner.player1.change_properties(
+        GameScreen.player1.change_properties(
             modified_properties, AlterSizesScreen.paddle)
-        GameRunner.player2.change_properties(
+        GameScreen.player2.change_properties(
             modified_properties, AlterSizesScreen.paddle)
-        GameRunner.ball = AlterSizesScreen.ball
+        GameScreen.ball = AlterSizesScreen.ball

@@ -1,7 +1,7 @@
 from GUI.button import Button
 from GUI.clickable_component import ClickableComponent
 from GUI.drop_down_menu import DropDownMenu
-from GUI.screen import SubScreen
+from GUI.sub_screen import SubScreen
 from base_pong.colors import *
 from game_modes.game_mode_selector import GameModeSelector
 
