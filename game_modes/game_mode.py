@@ -1,9 +1,7 @@
 from base_pong.utility_classes import HistoryKeeper
-from base_pong.engines import CollisionsEngine
+from base_pong.score_keeper import ScoreKeeper
 import abc
 # from game_modes.normal_pong import NormalPong
-
-
 class PongType(abc.ABC):
     @abc.abstractmethod
     def run(ball, paddle1, paddle2):
@@ -26,3 +24,9 @@ class PongType(abc.ABC):
         HistoryKeeper.add(paddle1, paddle1.name, True)
         HistoryKeeper.add(paddle2, paddle2.name, True)
         HistoryKeeper.add(ball, "ball", True)
+    
+    def player1_has_scored(ball, player1):
+        return ScoreKeeper.player_has_scored(ball, True)
+    
+    def player2_has_scored(ball, player2):
+        return ScoreKeeper.player_has_scored(ball, False)

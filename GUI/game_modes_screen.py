@@ -8,11 +8,11 @@ from game_modes.game_mode_selector import GameModeSelector
 
 class GameModesScreen(SubScreen):
     pong_type_menu = DropDownMenu(
-        "Pong Types", GameModeSelector.all_pong_types, white, blue, 15, GameModeSelector.all_pong_types.index("Normal Pong"))
+        "Pong Types", GameModeSelector.all_pong_types, white, blue, 15, GameModeSelector.all_pong_types.index(GameModeSelector.pong_type))
     player_menu = DropDownMenu(
-        "Number Of Players", GameModeSelector.all_player_options, white, blue, 15, GameModeSelector.all_player_options.index("Single Player"))
+        "Number Of Players", GameModeSelector.all_player_options, white, blue, 15, GameModeSelector.all_player_options.index(GameModeSelector.number_of_players))
     game_mode_menu = DropDownMenu(
-        "Game Modes", GameModeSelector.all_game_modes, white, blue, 15, GameModeSelector.all_game_modes.index("Random"))
+        "Game Modes", GameModeSelector.all_game_modes, white, blue, 15, GameModeSelector.all_game_modes.index(GameModeSelector.game_mode))
     length_used_up = 0
     height_used_up = 0
     name = "Game Modes"
@@ -24,6 +24,8 @@ class GameModesScreen(SubScreen):
             GameModesScreen.player_menu, length_used_up, height_used_up, 35, 5, 30, 6)
         GameModesScreen.set_item_bounds(
             GameModesScreen.pong_type_menu, length_used_up, height_used_up, 70, 5, 30, 6)
+        GameModeSelector.pong_type = GameModesScreen.pong_type_menu.selected_item
+        GameModeSelector.game_mode = GameModesScreen.game_mode_menu.selected_item
 
     def render():
         GameModesScreen.player_menu.run()

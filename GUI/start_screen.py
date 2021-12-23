@@ -6,7 +6,7 @@ from base_pong.colors import *
 from base_pong.velocity_calculator import VelocityCalculator
 from base_pong.important_variables import *
 from GUI.screen import Screen
-from base_pong.utility_classes import Dimensions
+from base_pong.drawable_objects import Dimensions
 from base_pong.utility_functions import percentages_to_numbers
 
 

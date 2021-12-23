@@ -1,20 +1,35 @@
-from base_pong.utility_classes import GameObject, HistoryKeeper
+from base_pong.utility_classes import HistoryKeeper
+from base_pong.drawable_objects import Ellipse
 from base_pong.velocity_calculator import VelocityCalculator
 from base_pong.important_variables import *
 from base_pong.colors import *
+from base_pong.utility_classes import Fraction
 
 
-class Ball(GameObject):
+class Ball(Ellipse):
     is_moving_right = False
     is_moving_down = True
     base_forwards_velocity = VelocityCalculator.give_velocity(
         screen_length, 300)
     forwards_velocity = base_forwards_velocity
+    # Forwards and upwards velocity start out as the same number
+    upwards_velocity = base_forwards_velocity
+    # Normal meaning what the velocities would be if there was no tip hits affected the ball
+    normal_upwards_velocity = base_forwards_velocity
+    normal_forwards_velocity = base_forwards_velocity
     can_move = True
     height = VelocityCalculator.give_measurement(screen_height, 5)
     time_since_ground = 0
     attributes = ["x_coordinate", "y_coordinate",
                   "length", "height", "forwards_velocity"]
+    TIP_HIT = 0
+    MIDDLE_HIT = 1
+    active_tip_hits = 0
+    # Everytime there is a tip hit then the forwards_velocity will be multiplies by this fraction
+    # If the fractions was 1/2 for instance then everytime there is a tip hit then the forwards_velocity would halve
+    # That other half would be added to the upwards velocity and if it is a middle hit the tip hits would be "reversed"
+    forwards_velocity_multiplier: Fraction = Fraction(3, 4)
+    
 
     def __init__(self):
         self.length = VelocityCalculator.give_measurement(screen_height, 5)
@@ -24,13 +39,43 @@ class Ball(GameObject):
         self.x_coordinate = screen_length // 2
         self.y_coordinate = screen_height // 2
         self.forwards_velocity = self.base_forwards_velocity
+        self.upwards_velocity = self.base_forwards_velocity
+        self.normal_forwards_velocity = self.base_forwards_velocity
+        self.normal_upwards_velocity = self.base_forwards_velocity
         self.color = white
 
     def movement(self):
         HistoryKeeper.add(self, "ball", True)
         x_change = VelocityCalculator.calc_distance(self.forwards_velocity)
         self.x_coordinate += x_change if self.is_moving_right else -x_change
+    
+    def tip_hit(self, paddle_hit_multiplier):
+        # Every tip hit makes the forwards_velocity go down and the amount that the forwards velocity goes does is how much the upwards velocity
+        # Will go up and that will be "reverted" if there is a middle hit; so if every time theirs a tip hit the forwards velocity is multiplied
+        # By 1/2 that would mean if there were 2 active tip hits that would mean the forwards velocity would be 1/4 of what it is normally
+        # The remaining 3/4 (1 - 1/4 = 3/4) would be added to the upwards velocity
+        self.active_tip_hits += 1
+        fraction_of_forwards_velocity = self.forwards_velocity_multiplier.get_fraction_to_power(self.active_tip_hits)
+        self.change_velocities(fraction_of_forwards_velocity)
 
-    def draw(self):
-        pygame.draw.ellipse(game_window, self.color, (self.x_coordinate,
-                            self.y_coordinate, self.length, self.height))
+        self.normal_forwards_velocity *= paddle_hit_multiplier
+        self.normal_upwards_velocity *= paddle_hit_multiplier
+    
+    def middle_hit(self, paddle_hit_multiplier):
+        if self.active_tip_hits >= 1:
+            # The minus one will "revert" an active tip hit
+            fraction_of_forwards_velocity = self.forwards_velocity_multiplier.get_fraction_to_power(self.active_tip_hits - 1)
+            self.change_velocities(fraction_of_forwards_velocity)
+        
+        self.normal_forwards_velocity *= paddle_hit_multiplier
+        self.normal_upwards_velocity *= paddle_hit_multiplier
+        # The number of active tip hits can't be in the negatives
+        if self.active_tip_hits >= 1:
+            self.active_tip_hits -= 1
+        
+
+    def change_velocities(self, fraction_of_forwards_velocity):
+        self.forwards_velocity = self.normal_forwards_velocity * fraction_of_forwards_velocity.get_number()
+
+        added_velocity = self.normal_forwards_velocity * fraction_of_forwards_velocity.get_fraction_to_become_one().get_number()
+        self.upwards_velocity = self.normal_upwards_velocity + added_velocity

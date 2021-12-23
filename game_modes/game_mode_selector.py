@@ -8,8 +8,9 @@ from game_modes.split_pong import SplitPong
 class GameModeSelector:
     # If a game mode isn't selected from the GUI, then the game mode will be Random
     game_mode = "Random"
-    # Only assigned a value if game mode is "Pick Pong Type"
-    pong_type = ""
+    # If a pong_type isn't selected from the GUI, then the game mode will be Normal Pong
+    pong_type = "Normal Pong"
+    number_of_players = "2 Player"
 
     all_game_modes = ["Chaos", "Civilized", "Unique Twist", "Random", "Pick Pong Type"]
     all_player_options = ["Single Player", "2 Player"]
@@ -21,12 +22,12 @@ class GameModeSelector:
             "Gravity Pong": GravityPong,
             "Middle Paddle Pong": MiddlePaddlePong, 
             "Normal Pong": NormalPong, 
-            "PortalPong": PortalPong,
+            "Portal Pong": PortalPong,
             "Shatter Pong": ShatterPong, 
             "Split Pong": SplitPong
             }
         if not pong_type_to_class.__contains__(pong_type):
-            raise ValueError(f"No such pong type exists: {pong_type}")
+            raise ValueError("No such pong type exists: ")
         
         else:
             return pong_type_to_class.get(pong_type)
@@ -34,6 +35,7 @@ class GameModeSelector:
     def get_pong_type():
         # Each Game Mode has a list of possible pong types that are chosen at random after each reset
         # Reset meaning the start of the game or after someone scores
+        print(GameModeSelector.pong_type)
         game_mode_to_pong_types = {
             "Chaos": ["Gravity Pong", "Portal Pong", "Split Pong"],
             "Civilized": ["Normal Pong", "Shatter Pong", "Gravity Pong"],

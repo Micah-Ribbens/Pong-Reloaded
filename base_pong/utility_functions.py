@@ -48,3 +48,11 @@ def percentages_to_numbers(percent_right, percent_down, percent_length, percent_
         percentage_to_number(percent_length, length),
         percentage_to_number(percent_height, height)
         ]
+
+def lists_share_an_item(list1, list2):
+    is_true = False
+    for item in list1:
+        if list2.__contains__(item):
+            is_true = True
+
+    return is_true

@@ -9,10 +9,10 @@ from base_pong.important_variables import *
 from base_pong.velocity_calculator import VelocityCalculator
 from game_screen import GameScreen
 from base_pong.colors import *
-from base_pong.utility_classes import Dimensions, Event
+from base_pong.drawable_objects import Dimensions
+from base_pong.events import Event
 from GUI.sub_screen import SubScreen
 # Paddle Dimension and Ball Dimensions
-
 
 class AlterSizesScreen(SubScreen):
     paddle = Player()
@@ -44,7 +44,7 @@ class AlterSizesScreen(SubScreen):
                                            "height", "length"], 5),
                                   MenuItem("Paddle Power", [
                                            Player().power], ["power"], .25),
-                                  MenuItem("Ball Speed", [Ball().base_forwards_velocity], ["base_velocity"], VelocityCalculator.give_velocity(screen_length, 2))]
+                                  MenuItem("Ball Speed", [Ball().base_forwards_velocity], ["base_velocity"], int(VelocityCalculator.give_velocity(screen_length, 2)))]
 
         x_coordinate, y_coordinate, length, height = percentages_to_numbers(0, 0, 100, 100, screen_length, screen_height)
 
@@ -52,17 +52,6 @@ class AlterSizesScreen(SubScreen):
 
         max_height = VelocityCalculator.give_measurement(screen_height, 10)
         grid.turn_into_grid(AlterSizesScreen.menus, None, max_height)
-
-        for menu in AlterSizesScreen.menus:
-            menu.str()
-        # AlterSizesScreen.set_item_bounds(
-        #     AlterSizesScreen.menus[0], length_used_up, height_used_up, 0, 80, 50, 10)
-        # AlterSizesScreen.set_item_bounds(
-        #     AlterSizesScreen.menus[1], length_used_up, height_used_up, 50, 80, 50, 10)
-        # AlterSizesScreen.set_item_bounds(
-        #     AlterSizesScreen.menus[2], length_used_up, height_used_up, 0, 90, 50, 10)
-        # AlterSizesScreen.set_item_bounds(
-        #     AlterSizesScreen.menus[3], length_used_up, height_used_up, 50, 90, 50, 10)
 
     def do_menu_item_logic():
         controlls = pygame.key.get_pressed()

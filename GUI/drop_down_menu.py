@@ -1,7 +1,7 @@
 import pygame
 from GUI.clickable_component import ClickableComponent
 from GUI.text_box import TextBox
-from base_pong.utility_classes import GameObject
+from base_pong.drawable_objects import GameObject
 from base_pong.colors import *
 from base_pong.important_variables import *
 from base_pong.utility_functions import percentage_to_number, percentages_to_numbers
@@ -38,6 +38,7 @@ class DropDownMenu(ClickableComponent):
         self.title = title
         # This sets the text that is selected automatically without the user's input
         self.text = item_names[selected_index]
+        self.selected_item = item_names[selected_index]
 
         for item_name in item_names:
             self.add_item(item_name)
@@ -61,8 +62,10 @@ class DropDownMenu(ClickableComponent):
         self.render()
 
     def get_title_portion(self):
-        title_portion = TextBox(self.title, self.font_size, False, self.text_color, background_color)
-        title_portion.number_set_bounds(self.x_coordinate, self.y_coordinate, self.length, self.height)
+        title_portion = TextBox(
+            self.title, self.font_size, False, self.text_color, background_color)
+        title_portion.number_set_bounds(
+            self.x_coordinate, self.y_coordinate, self.length, self.height)
         return title_portion
 
     def render(self):
@@ -77,6 +80,7 @@ class DropDownMenu(ClickableComponent):
             self.x_coordinate, last_item.bottom, text_portion_length, self.height)
 
         # So it doesn't reset the clickable component every cycle making it impossible to tell if the component got clicked
+        # TODO set clickable part to entire drop down menu section not just text_portion
         if self.clickable_component is None:
             self.clickable_component = text_portion
 
@@ -91,28 +95,28 @@ class DropDownMenu(ClickableComponent):
 
         text_portion.run()
         divider.draw()
-        self.draw_arrow_portion(remaining_length, divider.right_edge, last_item.bottom)
+        self.draw_arrow_portion(
+            remaining_length, divider.right_edge, last_item.bottom)
         title_portion.run()
 
         if self.is_expanded:
             self.render_items(last_item)
 
-
-    
     def draw_arrow_portion(self, remaining_length, x_coordinate, y_coordinate):
         arrow_container = GameObject(x_coordinate, y_coordinate,
-                                   self.height, remaining_length, self.background_color)
+                                     self.height, remaining_length, self.background_color)
 
         # From here down is talking about the arrow part
         percent_down = 20
         percent_right = 20
-        
+
         # The offset percent_down and percent_right should be equal on both sides
         # Thats what the code below does
         percent_length = 100 - (percent_right * 2)
         percent_height = 100 - (percent_down * 2)
 
-        arrow_numbers = percentages_to_numbers(percent_right, percent_down, percent_length, percent_height, remaining_length, self.height)
+        arrow_numbers = percentages_to_numbers(
+            percent_right, percent_down, percent_length, percent_height, remaining_length, self.height)
         # number_to_right and number_downwards is how much right and how much down it should be in relation to the component
         number_to_right, number_downwards, length, height = arrow_numbers
 
@@ -127,9 +131,8 @@ class DropDownMenu(ClickableComponent):
 
         # arrow_container must be draw before the arrow, so the arrow can draw on top of the arrow_container
         arrow_container.draw()
-        pygame.draw.polygon(surface=game_window, color=white, 
+        pygame.draw.polygon(surface=game_window, color=white,
                             points=[(start_x_coordinate, start_y_coordinate), (start_x_coordinate + length, start_y_coordinate), (end_x_coordinate, end_y_coordinate)])
-
 
     def render_items(self, last_item):
         for item in self.items:
@@ -154,7 +157,7 @@ class DropDownMenu(ClickableComponent):
                 is_clicked = True
 
         return is_clicked
-    
+
     def got_clicked(self):
         # The clickable component is set during the first cycle making it impossible to be clicked if it isn't set yet
         is_clicked = False if self.clickable_component is None else self.clickable_component.got_clicked()

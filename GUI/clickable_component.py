@@ -1,4 +1,5 @@
-from base_pong.utility_classes import GameObject, Event
+from base_pong.drawable_objects import GameObject
+from base_pong.events import Event
 from base_pong.utility_functions import percentage_to_number
 from base_pong.important_variables import *
 from base_pong.velocity_calculator import VelocityCalculator
@@ -11,7 +12,7 @@ class ClickableComponent(GameObject):
 
     def __init__(self):
         self.click_event = Event()
-    
+
     def run(self):
         self.run_click_event()
 

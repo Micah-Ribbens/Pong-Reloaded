@@ -7,7 +7,7 @@ from base_pong.important_variables import *
 from base_pong.velocity_calculator import VelocityCalculator
 from base_pong.utility_functions import percentages_to_numbers
 from GUI.grid import Grid
-from base_pong.utility_classes import Dimensions
+from base_pong.drawable_objects import Dimensions
 
 class PauseScreen(Screen):
     continue_game_button = Button("Continue Game", 30, white, green)
@@ -15,7 +15,6 @@ class PauseScreen(Screen):
     game_paused_text_box = TextBox("Game Paused", 40, False, white, background_color)
 
     def set_up():
-        print("PAUSE SET UP")
         PauseScreen.game_paused_text_box.percentage_set_bounds(0, 0, 100, 40)
         buffer = VelocityCalculator.give_measurement(screen_height, 5)
 

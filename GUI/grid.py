@@ -47,10 +47,6 @@ class Grid:
 
             items[x].number_set_bounds(x_coordinate, y_coordinate, item_length, item_height)
 
-        # TODO FIX
-        for item in items:
-            item.str()
-
     def get_item_length(self, columns, item_max_length, length_buffer, number_of_items):
         # Must minus the length buffer * (number_of_items - 2) from the regular length because
         # Every item has the length_buffer after it besides the first and last item, so hence the minus 2

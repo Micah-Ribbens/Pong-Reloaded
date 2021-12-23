@@ -4,6 +4,7 @@ from base_pong.ball import Ball
 from game_modes.game_mode import PongType
 from game_modes.normal_pong import NormalPong
 from base_pong.score_keeper import ScoreKeeper
+from base_pong.important_variables import *
 from copy import deepcopy
 
 
@@ -35,10 +36,12 @@ class SplitPong(PongType):
         for ball in SplitPong.balls:
             NormalPong.ball_collisions(ball, paddle1, paddle2)
             ball.draw()
+
             ball_has_collided_with_paddle1 = CollisionsFinder.is_collision(
                 ball, paddle1)
             ball_has_collided_with_paddle2 = CollisionsFinder.is_collision(
                 ball, paddle2)
+
             ball_has_collided = ball_has_collided_with_paddle1 or ball_has_collided_with_paddle2
             HistoryKeeper.add(ball_has_collided,
                               f"ball_has_collided{id(ball)}", False)
@@ -67,7 +70,6 @@ class SplitPong(PongType):
 
         for ball in SplitPong.balls:
             NormalPong.ball_movement(ball)
-            ScoreKeeper.figure_out_scoring(ball)
 
     def reset(ball, paddle1, paddle2):
         # Meaning the base ball length has not been assigned yet
@@ -84,9 +86,22 @@ class SplitPong(PongType):
 
     # The code draws multiple balls, so it doesn't need a singular ball,
     # But since it inherits the method from game_modes which has 3 parameters
-    # It needs 3 parameters
+    # It needs 3 parameters; same thing for player1_has_scored() and player2_has_scored()
     def draw_game_objects(unneeded_ball, paddle1, paddle2):
         paddle1.draw()
         paddle2.draw()
         for ball in SplitPong.balls:
             ball.draw()
+    
+    def player1_has_scored(ball, player1):
+        return SplitPong.player_has_scored(player1.right_edge <= screen_length // 2)
+    
+    def player2_has_scored(ball, player2):
+        return SplitPong.player_has_scored(player2.right_edge <= screen_length // 2)
+    
+    def player_has_scored(player_is_leftside):
+        has_scored = False
+        for ball in SplitPong.balls:
+            if ScoreKeeper.player_has_scored(ball, player_is_leftside):
+                has_scored = True
+        return has_scored

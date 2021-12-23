@@ -13,7 +13,7 @@ class PhysicsEngine:
         a = PhysicsEngine.find_a(vertex, time_to_reach_vertex)
         return a * (current_time)*(current_time - time_to_reach_vertex * 2)
 
-
+# TODO make it so GravityPong has tip and middle hits
 class GravityPong(PongType):
     def ball_collisions(ball, paddle1, paddle2):
         CollisionsEngine.ball_collisions(ball, paddle1, paddle2)
@@ -22,8 +22,10 @@ class GravityPong(PongType):
 
         ball_has_collided = CollisionsFinder.is_collision(
             ball, paddle1) or CollisionsFinder.is_collision(ball, paddle2)
+
         if ball_has_collided:
             GravityPong.vertex *= vertex_increase
+
         vertex_is_too_big = GravityPong.vertex > max_vertex
         if vertex_is_too_big:
             GravityPong.vertex = max_vertex

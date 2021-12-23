@@ -4,7 +4,7 @@ from GUI.text_box import TextBox
 from GUI.drop_down_menu import DropDownMenu
 import pygame
 from base_pong.HUD import HUD
-from base_pong.utility_classes import GameObject
+from base_pong.drawable_objects import GameObject
 from game_screen import GameScreen
 from base_pong.important_variables import *
 import time
@@ -45,4 +45,3 @@ while True:
     if current_screen == StartScreen and StartScreen.start_button.got_clicked():
         current_screen = GameScreen
         current_screen.set_up()    
-

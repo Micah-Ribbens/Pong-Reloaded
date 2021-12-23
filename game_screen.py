@@ -1,6 +1,6 @@
 import pygame
 from base_pong.engines import CollisionsEngine
-from base_pong.utility_classes import GameObject, HistoryKeeper
+from base_pong.utility_classes import HistoryKeeper
 from base_pong.score_keeper import ScoreKeeper
 from base_pong.players import Player
 from base_pong.ball import Ball
@@ -17,6 +17,8 @@ nameOfGame = "robowars"
 pygame.display.set_caption(f'{nameOfGame}')
 
 # Game Screen as in where the game is actually played not selection screens and the sort
+
+
 class GameScreen(Screen):
     game_mode = None
     pause_is_held_down = False
@@ -24,6 +26,8 @@ class GameScreen(Screen):
     ball = Ball()
     player1 = Player()
     player2 = Player()
+    player1_score = 0
+    player2_score = 0
 
     def set_up():
         GameScreen.game_mode = GameModeSelector.get_pong_type()
@@ -31,7 +35,7 @@ class GameScreen(Screen):
         GameScreen.game_mode.reset(GameScreen.ball, GameScreen.player1,
                                    GameScreen.player2)
         GameScreen.ball.name = "ball"
-        GameScreen.player2.color, GameScreen.player2.outline_color = blue, blue
+        GameScreen.player2.color, GameScreen.player2.outline_color = white, blue
         GameScreen.player1.name = "player1"
         GameScreen.player2.name = "player2"
         GameScreen.player1.up_key = pygame.K_w
@@ -46,25 +50,12 @@ class GameScreen(Screen):
         GameScreen.game_mode.reset(GameScreen.ball, GameScreen.player1,
                                    GameScreen.player2)
 
-    def game_is_paused():
-        pause_clicked = HUD.pause_clicked()
-        # TODO can_pause? Isn't this used to pause and unpause?
-        can_pause = not GameScreen.pause_is_held_down and pause_clicked
-
-        if pause_clicked:
-            GameScreen.pause_is_held_down = True
-
-        else:
-            GameScreen.pause_is_held_down = False
-        if can_pause:
-            GameScreen.game_paused = not GameScreen.game_paused
-        return GameScreen.game_paused
-
     def run():
         GameScreen.game_mode.add_needed_objects(
             GameScreen.ball, GameScreen.player1, GameScreen.player2)
 
-        ScoreKeeper.show_score()
+        ScoreKeeper.show_score(GameScreen.player1_score,
+                               GameScreen.player2_score)
 
         GameScreen.game_mode.draw_game_objects(
             GameScreen.ball, GameScreen.player1, GameScreen.player2)
@@ -76,10 +67,13 @@ class GameScreen(Screen):
         GameScreen.player2.movement()
         CollisionsEngine.paddle_movements(GameScreen.player1)
         CollisionsEngine.paddle_movements(GameScreen.player2)
-        ScoreKeeper.figure_out_scoring(GameScreen.ball)
         GameScreen.game_mode.run(GameScreen.ball, GameScreen.player1,
-                                    GameScreen.player2)
+                                 GameScreen.player2)
 
-        if ScoreKeeper.has_scored(GameScreen.ball):
+        if GameScreen.game_mode.player2_has_scored(GameScreen.ball, GameScreen.player2):
+            GameScreen.player2_score += 1
             GameScreen.reset_after_scoring()
 
+        if GameScreen.game_mode.player1_has_scored(GameScreen.ball, GameScreen.player1):
+            GameScreen.player1_score += 1
+            GameScreen.reset_after_scoring()

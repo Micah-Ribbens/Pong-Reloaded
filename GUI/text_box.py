@@ -1,6 +1,6 @@
 from GUI.clickable_component import ClickableComponent
 from base_pong.utility_functions import percentage_to_number, draw_font
-from base_pong.utility_classes import GameObject
+from base_pong.drawable_objects import GameObject
 from base_pong.important_variables import *
 import pygame
 pygame.init()
@@ -32,8 +32,6 @@ class TextBox(ClickableComponent):
 
         draw_font(self.text, self.font, x_coordinate=self.x_coordinate,
                   y_coordinate=self.y_coordinate, text_color=self.text_color, background_color=self.background_color)
-
-    # TODO fix run in code, so it doesn't do rendering and logic (maybe that isn't so bad?)
 
     def run(self):
         self.render()

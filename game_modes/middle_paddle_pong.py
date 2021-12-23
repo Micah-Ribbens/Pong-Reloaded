@@ -1,5 +1,5 @@
 from base_pong.important_variables import *
-from base_pong.engines import CollisionsFinder, CollisionsEngine
+from base_pong.engines import CollisionsEngine
 from game_modes.game_mode import PongType
 from game_modes.normal_pong import NormalPong
 from base_pong.players import Paddle
@@ -29,7 +29,7 @@ class MiddlePaddlePong(PongType):
         # Ball collisions changes colors if it hits middle_paddle
         # and I won't to change it back to color before hitting it
         prev_ball_color = ball.color
-        CollisionsFinder.ball_collisions(ball, middle_paddle, 1.2)
+        CollisionsEngine.ball_collisions(ball, middle_paddle, 1.2)
         ball.color = prev_ball_color
 
     def run(ball, paddle1, paddle2):

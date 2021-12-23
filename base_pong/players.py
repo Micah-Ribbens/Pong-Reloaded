@@ -1,5 +1,5 @@
 import pygame
-from base_pong.utility_classes import GameObject
+from base_pong.drawable_objects import GameObject
 from base_pong.velocity_calculator import VelocityCalculator
 from base_pong.utility_functions import change_properties
 from base_pong.important_variables import *
@@ -18,7 +18,7 @@ class Paddle(GameObject):
         self.x_coordinate = 0
         self.length = VelocityCalculator.give_measurement(screen_length, 3)
         self.height = VelocityCalculator.give_measurement(screen_height, 30)
-        self.color = red
+        self.color = white
         self.outline_color = red
 
 
@@ -26,11 +26,11 @@ class Player(Paddle):
     up_key = pygame.K_UP
     down_key = pygame.K_DOWN
 
-    # TODO add outline to the player
     def draw(self):
+        self.color = white
         GameObject.draw(self)
-        # pygame.draw.rect(game_window, (self.outline_color), (self.x_coordinate,
-        #             self.y_coordinate, self.length, self.height), 8)
+        pygame.draw.rect(game_window, (self.outline_color), (self.x_coordinate,
+                         self.y_coordinate, self.length, self.height), 8)
 
     def movement(self):
         controlls = pygame.key.get_pressed()
