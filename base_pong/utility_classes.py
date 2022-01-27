@@ -1,65 +1,137 @@
-import pygame
-from base_pong.important_variables import game_window
-from base_pong.velocity_calculator import VelocityCalculator
-from base_pong.important_variables import screen_height, background_color, screen_length, game_window
-from base_pong.utility_functions import percentage_to_number
 from copy import deepcopy
-from math import sqrt, pow
+from math import pow
+
+from base_pong.velocity_calculator import VelocityCalculator
+
+
+class HistoryKeeperObject:
+    object = None
+    time = 0
+    """HistoryKeeper uses the class to store its object"""
+
+    def __init__(self, object_being_stored):
+        """ summary: initializes the HistoryKeeperObject,
+            so its attributes reflects what is passed through the parameters
+
+            params:
+                object: Object; the object that is being stored
+
+            returns: None
+        """
+
+        self.object = object_being_stored
+        self.time = VelocityCalculator.time
+
 
 class HistoryKeeper:
-    memento_list = {}
+    """Stores the values of past objects"""
+
+    last_objects = {}
+    times = []
 
     def reset():
-        HistoryKeeper.memento_list = {}
+        """ summary: resets the HistoryKeeper, so it has no more values of past objects
+            params: None
+            returns: None
+        """
+
+        HistoryKeeper.last_objects = {}
+        HistoryKeeper.times = []
 
     def add(object, name, is_game_object):
+        """ summary: adds the object to the HistoryKeeper; IMPORTANT: make sure to provide a unique name for each unique object!
+
+            params:
+                object: Object; the object that is going to be added to the HistoryKeeper
+                name: String; the unique name (identifier) for the object
+                is_game_object: boolean; the object provided is an instance of GameObject
+
+            returns: None
+        """
+
+        # Have to deepcopy the object if it is a GameObject so it is in a different place in memory
+        # So if the GameObject's values change the HistoryKeeper's one doesn't also change
         if is_game_object:
             object = deepcopy(object)
 
-        HistoryKeeper._add(object, name)
-
-    def _add(object, name):
-        try:
-            HistoryKeeper.memento_list[name].append(object)
-        except KeyError:
-            HistoryKeeper.memento_list[name] = [object]
-
-    def get(name):
-        if HistoryKeeper.memento_list.get(name) is None:
-            return []
-        return HistoryKeeper.memento_list.get(name)
+        HistoryKeeper.last_objects[f"{name}{VelocityCalculator.time}"] = object
+        if not HistoryKeeper.times.__contains__(VelocityCalculator.time):
+            HistoryKeeper.times.append(VelocityCalculator.time)
 
     def get_last(name):
-        mementos = HistoryKeeper.get(name)
-        if len(mementos) == 0:
-            return None
-        if len(mementos) == 1:
-            return mementos[0]
-        return mementos[len(mementos) - 2]
+        """ summary: gets the version of that object from the last cycle
+
+            params:
+                name: String; the unique name (identifier) given for the object in HistoryKeeper.add() that is used to retrieve the previous version of the object
+
+            returns: the version of the object from the last cycle
+        """
+        last_time = None
+        for x in range(len(HistoryKeeper.times)):
+            # Length and last index are off by one, so have to minus one to not get a IndexError
+            time = HistoryKeeper.times[len(HistoryKeeper.times) - 1 - x]
+            # Meaning we found the last time since we are iterating over all cycle times backwards
+            if time != VelocityCalculator.time:
+                last_time = time
+                break
+        return HistoryKeeper.last_objects.get(f"{name}{last_time}")
+
 
 class Fraction:
+    """Has a numerator and a denominator along with utility functions that go along with fractions"""
     numerator = None
     denominator = None
-    
+
     def __init__(self, numerator, denominator):
+        """ summary: initializes the fraction
+            params:
+                numerator: int; the top part of the fraction
+                denominator: int; the bottom part of the fraction
+            returns: None
+
+        """
         self.numerator = numerator
         self.denominator = denominator
 
     def get_reciprocal(self):
+        """ summary: In math reciprocal is denominator/numerator
+            params: None
+            returns: Fraction; a new Fraction where the denominator and numerator switch places
+        """
         return Fraction(self.denominator, self.numerator)
-    
+
     def get_number(self):
+        """ summary: turns the fraction into a number
+            params: None
+            returns: float; the
+        """
         return self.numerator / self.denominator
-    
+
     def get_fraction_to_power(self, power):
+        """ summary: uses the function pow() to get the fraction to the specified power
+
+            params:
+                power: int; the power to which the fraction is raised
+
+            returns: Fraction; a new fraction where the numerator and denominator are raised to the power specified
+        """
         return Fraction(pow(self.numerator, power), pow(self.denominator, power))
-    
+
     # Gets the other part of the fraction to make it one
     # For instance for 3/4 it would do 4 - 3/4 which would be 1/4 and 1/4 + 3/4 = 1
     def get_fraction_to_become_one(self):
+        """ summary: gets the fraction that makes the current fraction + the new fraction equal to one
+            for instance if the current fraction is 3/4 then 1 - 3/4 the new fraction would be 1/4
+
+            params: None
+            returns: Fraction; a new Fraction where the current fraction + the new fraction equals one
+        """
         return Fraction(self.denominator - self.numerator, self.denominator)
-        
 
     def __str__(self):
+        """ summary: formats the Fraction in this form "numerator/denominator"
+            params: None
+            returns: String; "numerator/denominator"- looks like this when printed 1/4 (if numerator was 1 and denominator was 4)
+        """
         return f"{self.numerator}/{self.denominator}"
 

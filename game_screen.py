@@ -1,26 +1,22 @@
-import pygame
-from base_pong.engines import CollisionsEngine
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.score_keeper import ScoreKeeper
 from base_pong.players import Player
 from base_pong.ball import Ball
-from base_pong.HUD import HUD
 from base_pong.important_variables import *
-from base_pong.velocity_calculator import VelocityCalculator
-import time
-from game_modes.portal_pong import PortalPong
 from base_pong.colors import *
-from game_modes.game_mode_selector import GameModeSelector
-from GUI.screen import Screen
+from pong_types.game_mode_selector import GameModeSelector
+from pong_types.pong_type import PongType
+from gui_components.screen import Screen
+from base_pong.pause_button import PauseButton
 
-nameOfGame = "robowars"
-pygame.display.set_caption(f'{nameOfGame}')
+
 
 # Game Screen as in where the game is actually played not selection screens and the sort
 
-
 class GameScreen(Screen):
-    game_mode = None
+    """The screen where the game is played on"""
+
+    pong_type: PongType = None
     pause_is_held_down = False
     game_paused = False
     ball = Ball()
@@ -28,52 +24,82 @@ class GameScreen(Screen):
     player2 = Player()
     player1_score = 0
     player2_score = 0
+    pause_button = PauseButton()
+    components = [player1, player2, ball, pause_button]
 
-    def set_up():
-        GameScreen.game_mode = GameModeSelector.get_pong_type()
-        GameScreen.ball.reset()
-        GameScreen.game_mode.reset(GameScreen.ball, GameScreen.player1,
-                                   GameScreen.player2)
-        GameScreen.ball.name = "ball"
-        GameScreen.player2.color, GameScreen.player2.outline_color = white, blue
-        GameScreen.player1.name = "player1"
-        GameScreen.player2.name = "player2"
-        GameScreen.player1.up_key = pygame.K_w
-        GameScreen.player1.down_key = pygame.K_s
-        GameScreen.player1.right_key = pygame.K_d
-        GameScreen.player1.left_key = pygame.K_a
-        GameScreen.player2.x_coordinate = screen_length - GameScreen.player2.length
+    def set_paddles_movements(self, paddle):
+        """ summary: sets all the ways the ball can move (up and down)
 
-    def reset_after_scoring():
+            params:
+                paddle: Paddle; the paddle will have its movement directions it can move set
+
+            returns: None
+        """
+
+        paddle.can_move_down = False if paddle.bottom >= screen_height else True
+        paddle.can_move_up = False if paddle.y_coordinate <= 0 else True
+
+
+        if paddle.y_coordinate <= 0:
+            paddle.y_coordinate = 0
+
+        if paddle.bottom >= screen_height:
+            paddle.y_coordinate = screen_height - paddle.height
+
+    def setup(self):
+        """ summary: set ups all the properties of this screen and the game objects
+            params: None
+            returns: None
+        """
+
+        game_window.set_screen_visible(self, True)
+        pong_type_class = GameModeSelector.get_pong_type()
+        self.pong_type = pong_type_class(self.player1, self.player2, self.ball)
+        self.ball.reset()
+        self.player1_score = 0
+        self.player2_score = 0
+        self.pong_type.reset()
+        self.ball.name = "ball"
+        self.player2.color, self.player2.outline_color = white, blue
+        self.player1.name = "player1"
+        self.player2.name = "player2"
+        self.player1.up_key = pygame.K_w
+        self.player1.down_key = pygame.K_s
+        self.player1.right_key = pygame.K_d
+        self.player1.left_key = pygame.K_a
+        self.player2.x_coordinate = screen_length - self.player2.length
+
+    def reset_after_scoring(self):
+        """ summary: resets everything after someone has scored
+            params: None
+            returns: None
+        """
+
         HistoryKeeper.reset()
-        GameScreen.ball.reset()
-        GameScreen.game_mode.reset(GameScreen.ball, GameScreen.player1,
-                                   GameScreen.player2)
+        self.ball.reset()
+        self.pong_type.reset()
 
-    def run():
-        GameScreen.game_mode.add_needed_objects(
-            GameScreen.ball, GameScreen.player1, GameScreen.player2)
+    def run(self):
+        """ summary: runs all the code for the game objects and just general game stuff
+            params: None
+            returns: None
+        """
 
-        ScoreKeeper.show_score(GameScreen.player1_score,
-                               GameScreen.player2_score)
+        ScoreKeeper.show_score(self.player1_score,
+                               self.player2_score)
 
-        GameScreen.game_mode.draw_game_objects(
-            GameScreen.ball, GameScreen.player1, GameScreen.player2)
+        self.player1.movement()
+        self.player2.movement()
+        self.set_paddles_movements(self.player1)
+        self.set_paddles_movements(self.player2)
+        self.pong_type.run()
 
-        GameScreen.game_mode.ball_collisions(
-            GameScreen.ball, GameScreen.player1, GameScreen.player2)
+        if self.pong_type.player1_has_scored():
+            self.player1_score += 1
+            self.reset_after_scoring()
 
-        GameScreen.player1.movement()
-        GameScreen.player2.movement()
-        CollisionsEngine.paddle_movements(GameScreen.player1)
-        CollisionsEngine.paddle_movements(GameScreen.player2)
-        GameScreen.game_mode.run(GameScreen.ball, GameScreen.player1,
-                                 GameScreen.player2)
+        if self.pong_type.player2_has_scored():
+            self.player2_score += 1
+            self.reset_after_scoring()
 
-        if GameScreen.game_mode.player2_has_scored(GameScreen.ball, GameScreen.player2):
-            GameScreen.player2_score += 1
-            GameScreen.reset_after_scoring()
-
-        if GameScreen.game_mode.player1_has_scored(GameScreen.ball, GameScreen.player1):
-            GameScreen.player1_score += 1
-            GameScreen.reset_after_scoring()
+        self.pong_type.add_needed_objects()

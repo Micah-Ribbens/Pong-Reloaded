@@ -1,3 +1,4 @@
+# Gives the RGB values for the colors below
 white = (255, 255, 255)
 light_gray = (190, 190, 190)
 gray = (127, 127, 127)
@@ -10,3 +11,4 @@ yellow = (255, 255, 0)
 magenta = (255, 0, 255)
 cyan = (0, 255, 255)
 orange = (255, 100, 0)
+purple = (75, 0, 130)

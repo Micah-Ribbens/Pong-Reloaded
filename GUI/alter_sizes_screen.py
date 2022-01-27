@@ -1,20 +1,23 @@
-from GUI.button import Button
-from GUI.clickable_component import ClickableComponent
-from GUI.grid import Grid
-from base_pong.utility_functions import draw_font, percentage_to_number, percentages_to_numbers
-from GUI.menu_item import MenuItem
+from gui_components.grid import Grid
+from base_pong.utility_functions import percentages_to_numbers, change_attributes
+from gui.menu_item import MenuItem
 from base_pong.players import Player
 from base_pong.ball import Ball
 from base_pong.important_variables import *
 from base_pong.velocity_calculator import VelocityCalculator
-from game_screen import GameScreen
-from base_pong.colors import *
-from base_pong.drawable_objects import Dimensions
+from base_pong.dimensions import Dimensions
 from base_pong.events import Event
-from GUI.sub_screen import SubScreen
-# Paddle Dimension and Ball Dimensions
+from gui_components.sub_screen import SubScreen
 
+
+# Paddle Dimension and Ball Dimensions
+# TODO pick up here once going back to this project; going work on a testing app, so will gonna need to document
+#  some code from later on
 class AlterSizesScreen(SubScreen):
+    """The screen that allows the user to alter the sizes of the game objects"""
+    def render(self):
+        pass
+
     paddle = Player()
     paddle1 = Player()
     paddle2 = Player()
@@ -25,90 +28,105 @@ class AlterSizesScreen(SubScreen):
     ball = Ball()
     menus = None
     name = "Alter Sizes"
+    game_screen = None
 
-    def initiate(length_used_up, height_used_up):
-        AlterSizesScreen.paddle2.x_coordinate = screen_length - \
-            AlterSizesScreen.paddle2.length
+    def __init__(self, length_used_up, height_used_up, game_screen):
+        """ summary: initializes the AlterSizesScreen
+
+            params:
+                length_used_up: int; the length that is used up by the main screen (this is a sub screen)
+                height_used_up: int; the height that is used by the main screen (this is a sub screen)
+                game_screen: int; the screen where the game is run (actual Pong part)
+
+            returns: None
+        """
+        self.paddle2, self.paddle1 = game_screen.player2, game_screen.player1
+        self.paddle2.x_coordinate = screen_length - self.paddle2.length
         paddle_y_coordinate = height_used_up
-        AlterSizesScreen.paddle1.y_coordinate, AlterSizesScreen.paddle2.y_coordinate = paddle_y_coordinate, paddle_y_coordinate
+        self.paddle1.y_coordinate, self.paddle2.y_coordinate = paddle_y_coordinate, paddle_y_coordinate
+        self.game_screen = game_screen
 
-        AlterSizesScreen.ball.reset()
+        self.ball.reset()
 
-        AlterSizesScreen.up_key_event = Event()
-        AlterSizesScreen.down_key_event = Event()
-        AlterSizesScreen.left_key_event = Event()
-        AlterSizesScreen.right_key_event = Event()
+        self.up_key_event = Event()
+        self.down_key_event = Event()
+        self.left_key_event = Event()
+        self.right_key_event = Event()
 
-        AlterSizesScreen.menus = [MenuItem("Paddle Dimensions", [Player().height, Player().length], ["height", "length"], 5),
-                                  MenuItem("Ball Dimensions", [Ball().height, Ball().length], [
-                                           "height", "length"], 5),
-                                  MenuItem("Paddle Power", [
-                                           Player().power], ["power"], .25),
-                                  MenuItem("Ball Speed", [Ball().base_forwards_velocity], ["base_velocity"], int(VelocityCalculator.give_velocity(screen_length, 2)))]
+        self.menus = [MenuItem("Paddle Dimensions", [Player().height, Player().length], ["height", "length"], 5),
+                      MenuItem("Ball Dimensions", [Ball().height, Ball().length], ["height", "length"], 5),
+                      MenuItem("Paddle Power", [Player().power], ["power"], .25),
+                      MenuItem("Ball Speed", [Ball().base_forwards_velocity], ["base_velocity"],
+                               int(VelocityCalculator.give_velocity(screen_length, 2)))]
 
-        x_coordinate, y_coordinate, length, height = percentages_to_numbers(0, 0, 100, 100, screen_length, screen_height)
+        self.components = self.menus
 
-        grid = Grid(Dimensions(x_coordinate, y_coordinate, length, height), 2, None, False)
+        self.components = [self.ball, self.paddle1, self.paddle2]
+        for menu in self.menus:
+            menu.is_runnable = False
+            self.components.append(menu)
+        x_coordinate, y_coordinate, length, height = percentages_to_numbers(
+            0, 0, 100, 100, screen_length, screen_height)
+
+        grid = Grid(Dimensions(x_coordinate, y_coordinate,
+                    length, height), 2, None, False)
 
         max_height = VelocityCalculator.give_measurement(screen_height, 10)
-        grid.turn_into_grid(AlterSizesScreen.menus, None, max_height)
+        grid.turn_into_grid(self.menus, None, max_height)
 
-    def do_menu_item_logic():
-        controlls = pygame.key.get_pressed()
-        AlterSizesScreen.up_key_event.run(controlls[pygame.K_UP])
-        AlterSizesScreen.down_key_event.run(controlls[pygame.K_DOWN])
-        AlterSizesScreen.right_key_event.run(controlls[pygame.K_RIGHT])
-        AlterSizesScreen.left_key_event.run(controlls[pygame.K_LEFT])
+    def do_menu_item_logic(self):
+        """ summary: runs all the menu item logic (each menu item modifies a certain attribute like ball size)
+            params: None
+            returns: None
+        """
+        controls = pygame.key.get_pressed()
 
-        for menu_item in AlterSizesScreen.menus:
+        self.up_key_event.run(controls[pygame.K_UP])
+        self.down_key_event.run(controls[pygame.K_DOWN])
+        self.right_key_event.run(controls[pygame.K_RIGHT])
+        self.left_key_event.run(controls[pygame.K_LEFT])
 
+        for menu_item in self.menus:
             if menu_item.got_clicked():
-                AlterSizesScreen.reset_clicked()
+                self.reset_is_selected()
                 menu_item.is_selected = True
 
-    def run():
-        AlterSizesScreen.do_menu_item_logic()
-        AlterSizesScreen.change_properties()
-        AlterSizesScreen.change_class_attributes()
+            menu_item.run(self.up_key_event, self.down_key_event,
+                          self.left_key_event, self.right_key_event)
 
-        AlterSizesScreen.render()
+    def run(self):
+        """ summary: runs all the necessary logic in order for the alter sizes screen to work
+            params: None
+            returns: None
+        """
+        self.do_menu_item_logic()
+        self.change_attributes()
 
-    def render():
-        AlterSizesScreen.ball.draw()
-        AlterSizesScreen.paddle1.draw()
-        AlterSizesScreen.paddle2.draw()
+    def reset_is_selected(self):
+        """ summary: makes menu items is_selected property set to false
+            params: None
+            returns: None
+        """
 
-        for menu_item in AlterSizesScreen.menus:
-            menu_item.run(AlterSizesScreen.up_key_event, AlterSizesScreen.down_key_event,
-                          AlterSizesScreen.left_key_event, AlterSizesScreen.right_key_event)
-
-    def reset_clicked():
-        for menu_item in AlterSizesScreen.menus:
+        for menu_item in self.menus:
             menu_item.is_selected = False
 
-    def change_properties():
-        for menu in AlterSizesScreen.menus:
-            object_modifying = AlterSizesScreen.paddle if menu.label.__contains__(
-                "Paddle") else AlterSizesScreen.ball
-            object_modifying.__dict__[
-                menu.properties_modifying[0]] = menu.values[0]
+    def change_attributes(self):
+        """ summary: changes game screen's player1 and player2's attributes to reflect what was altered in the alter sizes screen
+            params: None
+            returns: None
+        """
+        # Alters the attributes for the objects that will change the attributes down below
+        for menu in self.menus:
+            object_modifying = self.paddle if menu.label.__contains__("Paddle") else self.ball
+            object_modifying.__dict__[menu.properties_modifying[0]] = menu.values[0]
 
             if menu.properties_modifying.__len__() == 2:
-                object_modifying.__dict__[
-                    menu.properties_modifying[1]] = menu.values[1]
+                object_modifying.__dict__[menu.properties_modifying[1]] = menu.values[1]
 
-        modified_properties = ["length", "height", "power"]
-        AlterSizesScreen.paddle2.change_properties(
-            modified_properties, AlterSizesScreen.paddle)
-        AlterSizesScreen.paddle1.change_properties(
-            modified_properties, AlterSizesScreen.paddle)
-        AlterSizesScreen.paddle2.x_coordinate = screen_length - \
-            AlterSizesScreen.paddle2.length
+        # Changes all the attributes to reflect what was stored in the objects above
+        change_attributes(self.game_screen.player1, self.paddle, ["length", "height", "power"])
+        change_attributes(self.game_screen.player2, self.paddle, ["length", "height", "power"])
+        self.game_screen.player2.x_coordinate = screen_length - self.paddle2.length
+        change_attributes(self.game_screen.ball, self.ball, ["base_velocity", "length", "height"])
 
-    def change_class_attributes():
-        modified_properties = ["length", "height", "power"]
-        GameScreen.player1.change_properties(
-            modified_properties, AlterSizesScreen.paddle)
-        GameScreen.player2.change_properties(
-            modified_properties, AlterSizesScreen.paddle)
-        GameScreen.ball = AlterSizesScreen.ball

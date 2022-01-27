@@ -1,47 +1,53 @@
-from GUI.alter_sizes_screen import AlterSizesScreen
-from GUI.pause_screen import PauseScreen
-from GUI.text_box import TextBox
-from GUI.drop_down_menu import DropDownMenu
-import pygame
-from base_pong.HUD import HUD
-from base_pong.drawable_objects import GameObject
+from gui.main_screen import MainScreen
+from gui.pause_screen import PauseScreen
 from game_screen import GameScreen
 from base_pong.important_variables import *
 import time
 from base_pong.velocity_calculator import VelocityCalculator
-from GUI.start_screen import StartScreen
-from GUI.alter_sizes_screen import AlterSizesScreen
-from GUI.game_modes_screen import GameModesScreen
+from gui.start_screen import StartScreen
 
-current_screen = StartScreen
-current_screen.set_up()
+game_screen = GameScreen()
+start_screen = MainScreen(game_screen)
+pause_screen = PauseScreen()
+
+game_window.add_screen(game_screen)
+game_window.add_screen(start_screen)
+game_window.add_screen(pause_screen)
+game_window.set_screen_visible(game_screen, False)
+game_window.set_screen_visible(pause_screen, False)
+# game_window.set_screen_visible(start_screen, False)
+
+
+def get_screen(current_screen):
+    action_to_screen = {
+        game_screen.pause_button.got_clicked(): pause_screen,
+        pause_screen.continue_game_button.got_clicked(): game_screen,
+        start_screen.start_button.got_clicked(): game_screen,
+        pause_screen.go_to_start_screen_button.got_clicked(): start_screen
+    }
+
+    screen = action_to_screen.get(True)
+    # If none of the actions are True then action_to_screen.get will return None, so the screen stays
+    # As the current_screen
+    return screen if screen is not None else current_screen
+
+current_screen = start_screen
 while True:
+    controls = pygame.key.get_pressed()
     start_time = time.time()
     for event in pygame.event.get():
-        if event.type == pygame.QUIT:
+        if event.type == pygame.QUIT or controls[pygame.K_SPACE]:
             pygame.quit()
-    game_window.fill(background_color)
-    current_screen.run()
 
-    if current_screen == GameScreen:
-        HUD.render_pause_button()
-    
-    if current_screen == GameScreen and HUD.pause_button.got_clicked():
-        current_screen = PauseScreen
-        current_screen.set_up()    
+    game_window.run()
+    screen = get_screen(current_screen)
 
-    
-    if current_screen == PauseScreen and PauseScreen.go_to_start_screen_button.got_clicked():
-        current_screen = StartScreen
-        current_screen.set_up()    
+    if screen != current_screen:
+        current_screen.un_setup()
 
+    if screen != current_screen:
+        screen.setup()
+        game_window.display_screen(screen)
 
-    if current_screen == PauseScreen and PauseScreen.continue_game_button.got_clicked():
-        current_screen = GameScreen
-
-    pygame.display.update()
+    current_screen = screen
     VelocityCalculator.time = time.time() - start_time
-
-    if current_screen == StartScreen and StartScreen.start_button.got_clicked():
-        current_screen = GameScreen
-        current_screen.set_up()    
