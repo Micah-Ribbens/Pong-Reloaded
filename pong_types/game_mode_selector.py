@@ -6,6 +6,7 @@ from pong_types.normal_pong import NormalPong
 from pong_types.portal_pong import PortalPong
 from pong_types.shatter_pong import ShatterPong
 from pong_types.split_pong import SplitPong
+from pong_types.omnidirection_pong import OmnidirectionalPong
 
 
 class GameModeSelector:
@@ -14,14 +15,14 @@ class GameModeSelector:
     # If a game mode isn't selected from the gui, then the game mode will be Random
     game_mode = "Pick Pong Type"
     # If a pong_type isn't selected from the gui, then the game mode will be Normal Pong
-    pong_type = "Gravity Pong"
+    pong_type = "Omnidirectional Pong"
     number_of_players = "2 Player"
 
     all_game_modes = ["Chaos", "Civilized",
                       "Unique Twist", "Random", "Pick Pong Type"]
     all_player_options = ["Single Player", "2 Player"]
     all_pong_types = ["Gravity Pong", "Middle Paddle Pong",
-                      "Normal Pong", "Portal Pong", "Shatter Pong", "Split Pong"]
+                      "Normal Pong", "Portal Pong", "Shatter Pong", "Split Pong", "Omnidirectional Pong"]
 
     def get_pong_type_class(pong_type):
         """ summary: turns the pong type into the class the string represents
@@ -39,7 +40,8 @@ class GameModeSelector:
             "Normal Pong": NormalPong,
             "Portal Pong": PortalPong,
             "Shatter Pong": ShatterPong,
-            "Split Pong": SplitPong
+            "Split Pong": SplitPong,
+            "Omnidirectional Pong": OmnidirectionalPong
         }
         if not pong_type_to_class.__contains__(pong_type):
             raise ValueError("No such pong type exists: ")

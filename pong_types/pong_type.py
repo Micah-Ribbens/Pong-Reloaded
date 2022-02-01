@@ -1,3 +1,4 @@
+from base_pong.important_variables import screen_height
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.score_keeper import ScoreKeeper
 import abc
@@ -63,3 +64,21 @@ class PongType(abc.ABC):
             returns: boolean; if player2 has scored
         """
         return ScoreKeeper.player_has_scored(self.ball, False)
+
+    def set_paddles_movements(self, paddle):
+        """ summary: sets all the ways the player can move (up and down)
+
+            params:
+                paddle: Paddle; the paddle will have its movement directions it can move set
+
+            returns: None
+        """
+
+        paddle.can_move_down = False if paddle.bottom >= screen_height else True
+        paddle.can_move_up = False if paddle.y_coordinate <= 0 else True
+
+        if paddle.y_coordinate <= 0:
+            paddle.y_coordinate = 0
+
+        if paddle.bottom >= screen_height:
+            paddle.y_coordinate = screen_height - paddle.height

@@ -36,7 +36,7 @@ while True:
     controls = pygame.key.get_pressed()
     start_time = time.time()
     for event in pygame.event.get():
-        if event.type == pygame.QUIT or controls[pygame.K_SPACE]:
+        if event.type == pygame.QUIT:
             pygame.quit()
 
     game_window.run()

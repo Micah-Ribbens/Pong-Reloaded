@@ -79,3 +79,93 @@ class CollisionsFinder:
                 is_collision = True
 
         return is_collision
+
+    def  is_height_collision(object1, object2):
+        """ summary: finds out if the object's y_coordinates have collided
+
+            params:
+                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
+                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
+
+            returns: boolean; if the two object's y_coordinates have collided
+        """
+
+        return (object1.bottom >= object2.y_coordinate and
+                object1.y_coordinate <= object2.bottom)
+
+    def get_bottommost_object(object1, object2):
+        """ summary: finds the object whose y_coordinate is the biggest (top of the screen is 0)
+
+              params:
+                 object1: GameObject; one of the objects that is used to see if the two objects provided have collided
+                 object2: GameObject; one of the objects that is used to see if the two objects provided have collided
+
+              returns: GameObject; the object that is on the bottom of the screen
+         """
+        return object1 if object1.y_coordinate > object2.y_coordinate else object2
+
+    def get_topmost_object(object1, object2):
+        """ summary: finds the object whose y_coordinate is the smallest (top of the screen is 0)
+
+             params:
+                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
+                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
+
+             returns: GameObject; the object that is on the top of the screen
+        """
+
+        return object1 if object1.y_coordinate < object2.y_coordinate else object2
+    
+    def is_bottom_collision(object1, object2):
+        """ summary: finds out if the object's collided from the bottom
+            
+            params: 
+                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
+                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
+            
+            returns: boolean; if the object's collided from the bottom
+        """
+        
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            print("NO GOOD")
+            return False
+
+        prev_bottom_object = CollisionsFinder.get_bottommost_object(prev_object1, prev_object2)
+        prev_top_object = CollisionsFinder.get_topmost_object(prev_object1, prev_object2)
+
+        top_object = CollisionsFinder.get_topmost_object(object1, object2)
+        bottom_object = CollisionsFinder.get_bottommost_object(object1, object2)
+
+        return (CollisionsFinder.is_collision(object1, object2)
+                and prev_bottom_object.y_coordinate > prev_top_object.bottom and bottom_object.y_coordinate <= top_object.bottom)
+
+    def is_top_collision(object1, object2):
+        """ summary: finds out if the object's collided from the bottom
+
+            params:
+                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
+                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
+
+            returns: boolean; if the object's collided from the bottom
+        """
+
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            print("NO GOOD")
+            return False
+
+        prev_bottom_object = CollisionsFinder.get_bottommost_object(prev_object1, prev_object2)
+        prev_top_object = CollisionsFinder.get_topmost_object(prev_object1, prev_object2)
+
+        top_object = CollisionsFinder.get_topmost_object(object1, object2)
+        bottom_object = CollisionsFinder.get_bottommost_object(object1, object2)
+
+        return (CollisionsFinder.is_collision(object1, object2)
+                and prev_top_object.bottom < prev_bottom_object.y_coordinate and top_object.bottom >= bottom_object.y_coordinate)
+        
+        

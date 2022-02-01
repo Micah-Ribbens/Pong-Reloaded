@@ -10,9 +10,7 @@ from gui_components.screen import Screen
 from base_pong.pause_button import PauseButton
 
 
-
 # Game Screen as in where the game is actually played not selection screens and the sort
-
 class GameScreen(Screen):
     """The screen where the game is played on"""
 
@@ -26,25 +24,6 @@ class GameScreen(Screen):
     player2_score = 0
     pause_button = PauseButton()
     components = [player1, player2, ball, pause_button]
-
-    def set_paddles_movements(self, paddle):
-        """ summary: sets all the ways the ball can move (up and down)
-
-            params:
-                paddle: Paddle; the paddle will have its movement directions it can move set
-
-            returns: None
-        """
-
-        paddle.can_move_down = False if paddle.bottom >= screen_height else True
-        paddle.can_move_up = False if paddle.y_coordinate <= 0 else True
-
-
-        if paddle.y_coordinate <= 0:
-            paddle.y_coordinate = 0
-
-        if paddle.bottom >= screen_height:
-            paddle.y_coordinate = screen_height - paddle.height
 
     def setup(self):
         """ summary: set ups all the properties of this screen and the game objects
@@ -60,7 +39,8 @@ class GameScreen(Screen):
         self.player2_score = 0
         self.pong_type.reset()
         self.ball.name = "ball"
-        self.player2.color, self.player2.outline_color = white, blue
+        self.player2.color = blue
+        self.player1.color = red
         self.player1.name = "player1"
         self.player2.name = "player2"
         self.player1.up_key = pygame.K_w
@@ -90,8 +70,8 @@ class GameScreen(Screen):
 
         self.player1.movement()
         self.player2.movement()
-        self.set_paddles_movements(self.player1)
-        self.set_paddles_movements(self.player2)
+        self.pong_type.set_paddles_movements(self.player1)
+        self.pong_type.set_paddles_movements(self.player2)
         self.pong_type.run()
 
         if self.pong_type.player1_has_scored():

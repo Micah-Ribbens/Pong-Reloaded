@@ -43,8 +43,8 @@ class SplitPong(PongType):
             returns: None
         """
 
-        ball.length += (self.base_ball_length * .2)
-        ball.height += (self.base_ball_length * .2)
+        ball.length += (self.base_ball_length * 1)
+        ball.height += (self.base_ball_length * 1)
 
     def ball_is_ready_to_split(self, ball):
         """ summary: finds out if the ball's size is double the size of its base length
@@ -68,7 +68,8 @@ class SplitPong(PongType):
             returns: None
         """
 
-        ball.reset()
+        ball.length = self.base_ball_length
+        ball.height = self.base_ball_length
         new_ball: Ball = deepcopy(ball)
         new_ball.color = white
         new_ball.is_moving_down = not ball.is_moving_down
@@ -99,6 +100,7 @@ class SplitPong(PongType):
                 self.increase_ball_size(ball)
 
             if self.ball_is_ready_to_split(ball):
+                print("SPLIT ", id(ball))
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
 
         for new_ball in new_balls:

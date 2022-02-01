@@ -24,8 +24,7 @@ class Paddle(GameObject):
         self.y_coordinate = 0
         self.x_coordinate = 0
         self.length = VelocityCalculator.give_measurement(screen_length, 3)
-        # TODO change back to 30
-        self.height = VelocityCalculator.give_measurement(screen_height, 100)
+        self.height = VelocityCalculator.give_measurement(screen_height, 30)
         self.color = white
         self.outline_color = red
 
@@ -54,6 +53,7 @@ class Player(Paddle):
         """
 
         controls = pygame.key.get_pressed()
+
         if controls[self.up_key] and self.can_move_up:
             self.y_coordinate -= VelocityCalculator.calc_distance(
                 self.velocity)

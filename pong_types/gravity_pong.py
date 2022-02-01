@@ -33,7 +33,6 @@ class GravityPong(PongType):
         self.normal_pong = NormalPong(player1, player2, ball)
         self.physics_equation = PhysicsEquation()
         self.physics_equation.set_all_variables(250, 1, 250, screen_height - self.ball.height)
-        self.base_physics_equation = deepcopy(self.physics_equation)
         self.ball.y_coordinate = screen_height - self.ball.height
         self.velocity_increase = self.get_velocity_increase(5, 1, 0)
 
@@ -127,4 +126,4 @@ class GravityPong(PongType):
         """
         self.time = 0
         self.ball.y_coordinate = screen_height - self.ball.height
-        self.physics_equation = self.base_physics_equation
+        self.physics_equation.set_all_variables(250, 1, 250, screen_height - self.ball.height)

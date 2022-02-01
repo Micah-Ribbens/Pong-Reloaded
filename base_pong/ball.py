@@ -30,7 +30,7 @@ class Ball(Ellipse):
     # Everytime there is a tip hit then the forwards_velocity will be multiplies by this fraction
     # If the fractions was 1/2 for instance then everytime there is a tip hit then the forwards_velocity would halve
     # That other half would be added to the upwards velocity and if it is a middle hit the tip hits would be "reversed"
-    forwards_velocity_multiplier: Fraction = Fraction(5, 6)
+    forwards_velocity_multiplier: Fraction = Fraction(3, 4)
 
     def __init__(self):
         """ summary: initializes the object by setting the length and name to a value
