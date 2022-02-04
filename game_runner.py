@@ -1,9 +1,11 @@
+from base_pong.utility_classes import HistoryKeeper
 from gui.main_screen import MainScreen
 from gui.pause_screen import PauseScreen
 from game_screen import GameScreen
 from base_pong.important_variables import *
 import time
 from base_pong.velocity_calculator import VelocityCalculator
+import cProfile, pstats
 from gui.start_screen import StartScreen
 
 game_screen = GameScreen()
@@ -33,7 +35,9 @@ def get_screen(current_screen):
 
 current_screen = start_screen
 while True:
-    controls = pygame.key.get_pressed()
+    start_time = time.time()
+    profiler = cProfile.Profile()
+    profiler.enable()
     start_time = time.time()
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -51,3 +55,12 @@ while True:
 
     current_screen = screen
     VelocityCalculator.time = time.time() - start_time
+    HistoryKeeper.last_time = HistoryKeeper.get_last_time()
+    profiler.disable()
+    if time.time() - start_time >= .1:
+        stats = pstats.Stats(profiler).sort_stats('cumtime')
+        stats.print_stats()
+        print("DUMP", time.time() - start_time)
+
+
+

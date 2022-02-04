@@ -18,6 +18,8 @@ class OmnidirectionalPong(NormalPong):
     last_ball = None
     debug = False
 
+    player_who_hit_ball_key = "player who hit ball"
+
     def __init__(self, player1, player2, ball):
         """ summary: Initializes the PongType with the needed objects to run its methods
 
@@ -33,6 +35,8 @@ class OmnidirectionalPong(NormalPong):
         self.last_ball = self.ball
         self.player1.can_move_left, self.player2.can_move_left = False, False
         self.player1.can_move_right, self.player2.can_move_right = False, False
+        self.player1.is_moving_left, self.player2.is_moving_left = False, False
+        self.player1.is_moving_right, self.player2.is_moving_right = False, False
 
     def set_paddles_movements(self, player):
         """ summary: sets all the ways the player can move (up and down)
@@ -115,13 +119,18 @@ class OmnidirectionalPong(NormalPong):
 
             returns: None
         """
+        if CollisionsFinder.is_collision(self.ball, player):
+            HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
+
         if CollisionsFinder.is_left_collision(self.ball, player) and not self.ball_is_sandwiched():
-            self.ball.x_coordinate = player.right_edge + VelocityCalculator.calc_distance(player.velocity * 4)
+            self.ball.x_coordinate = player.right_edge + self.ball.length * .2
             self.ball.is_moving_right = True
+            HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
 
         if CollisionsFinder.is_right_collision(self.ball, player) and not self.ball_is_sandwiched():
-            self.ball.x_coordinate = player.x_coordinate - self.ball.length - VelocityCalculator.calc_distance(player.velocity * 4)
+            self.ball.x_coordinate = player.x_coordinate - self.ball.length * 1.2
             self.ball.is_moving_right = False
+            HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
 
         if self.ball.bottom >= screen_height:
             self.ball.is_moving_down = False
@@ -134,9 +143,17 @@ class OmnidirectionalPong(NormalPong):
 
         if player.can_move_left and controls[left_key]:
             player.x_coordinate -= VelocityCalculator.calc_distance(player.velocity)
+            player.is_moving_left = True
 
-        if player.can_move_right and controls[right_key]:
+        else:
+            player.is_moving_left = False
+
+        if player.can_move_right and controls[right_key] and not controls[left_key]:
             player.x_coordinate += VelocityCalculator.calc_distance(player.velocity)
+            player.is_moving_right = True
+
+        else:
+            player.is_moving_right = False
 
     def run_player_boundaries(self, player):
         """ summary: sets the players can move left and right based on if the player is within the screens bounds
@@ -184,31 +201,22 @@ class OmnidirectionalPong(NormalPong):
             self.player1.can_move_up, self.player2.can_move_up = True, True
             self.player1.can_move_down, self.player2.can_move_down = True, True
 
-
     def ball_is_sandwiched(self):
         """ summary: finds out if the ball is a within a certain distance between the two players and is within their height (sandwiched)
             params: None
             returns: boolean; if the ball is sandwiched
         """
-        ball_is_sandwiched = False
         leftmost_player = self.get_leftmost_player()
         rightmost_player = self.get_rightmost_player()
+
         distance_between_players = rightmost_player.x_coordinate - leftmost_player.right_edge
 
-        ball_is_between_players = self.ball_is_between_players()
+        distance_needed = self.ball.length
 
-        needed_distance = self.last_ball.length + VelocityCalculator.give_measurement(screen_length, 2)
+        ball_is_between_players = (self.last_ball.x_coordinate >= leftmost_player.x_coordinate
+                                           and self.last_ball.right_edge <= rightmost_player.right_edge)
 
-        # Test Case 1; normal case
-        if distance_between_players <= needed_distance and ball_is_between_players:
-            ball_is_sandwiched = True
-
-        # Test Case 2; abnormal- ball going through a player
-        if self.ball_went_through_a_player() and ball_is_between_players:
-            ball_is_sandwiched = True
-
-        return ball_is_sandwiched
-
+        return distance_between_players <= distance_needed and self.ball_is_between_players() and ball_is_between_players
 
     def ball_went_through_a_player(self):
         """ summary: finds out if the ball went through a player because its movement in one cycle made it phase through/into a player
@@ -226,7 +234,6 @@ class OmnidirectionalPong(NormalPong):
         last_cycle_ball = HistoryKeeper.get_last(self.ball.name)
 
         if last_cycle_ball is None:
-            print("NO LAST CYCLE BALL")
             return False
 
         if last_cycle_ball.x_coordinate > leftmost_player.right_edge and self.last_ball.x_coordinate <= leftmost_player.right_edge:
@@ -238,21 +245,19 @@ class OmnidirectionalPong(NormalPong):
         return ball_went_through_a_player
 
     def ball_is_between_players(self):
-        """ summary: finds out if the players are at the same height and the ball's x and y coordinates are between the players
+        """ summary: finds out if the players are at the same height and the ball's y coordinates are between the players
             params: None
             returns: boolean; the ball is between the players
         """
 
         leftmost_player = self.get_leftmost_player()
         rightmost_player = self.get_rightmost_player()
-        ball_x_coordinate_is_between_players = (self.last_ball.x_coordinate >= leftmost_player.right_edge
-                                                and self.last_ball.right_edge <= rightmost_player.x_coordinate)
 
         players_are_at_same_height = CollisionsFinder.is_height_collision(leftmost_player, rightmost_player)
         ball_y_coordinate_is_between_players = (CollisionsFinder.is_height_collision(self.last_ball, rightmost_player)
                                                 and CollisionsFinder.is_height_collision(self.last_ball, leftmost_player))
 
-        return players_are_at_same_height and ball_y_coordinate_is_between_players and ball_x_coordinate_is_between_players
+        return players_are_at_same_height and ball_y_coordinate_is_between_players
 
     def get_leftmost_player(self):
         """ summary: finds the player that is the most left on the screen and returns it

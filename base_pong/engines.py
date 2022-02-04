@@ -1,3 +1,4 @@
+from base_pong.ball import Ball
 from base_pong.drawable_objects import GameObject
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.important_variables import (
@@ -59,28 +60,24 @@ class CollisionsFinder:
 
             returns: boolean; if the two objects provided have collided        
         """
-        
         object1_x_coordinates = object1.get_x_coordinates()
         object2_x_coordinates = object2.get_x_coordinates()
 
         is_collision = False
         for x_coordinate in object1_x_coordinates:
-            # The objects couldn't have collided at that point if object2 doesn't have object1's x_coordinate
-            if not object2_x_coordinates.__contains__(x_coordinate):
-                continue
-
-            object1_y_coordinates = object1.get_y_coordinates_from_x_coordinate(
-                x_coordinate)
-            object2_y_coordinates = object2.get_y_coordinates_from_x_coordinate(
-                x_coordinate)
+            # CASE 1: One of the objects doesn't go through the other in one cycle
+            is_y_coordinate_collision = (object1.get_y_coordinate_max(x_coordinate) >= object2.get_y_coordinate_min(x_coordinate)
+                                         and object1.get_y_coordinate_min(x_coordinate) <= object2.get_y_coordinate_max(x_coordinate))
 
             # If the two object's share an x_coordinate and a y_coordinate then they must have collided
-            if lists_share_an_item(object1_y_coordinates, object2_y_coordinates):
+            if is_y_coordinate_collision and object2_x_coordinates.__contains__(x_coordinate):
                 is_collision = True
+                break
 
         return is_collision
 
-    def  is_height_collision(object1, object2):
+
+    def is_height_collision(object1, object2):
         """ summary: finds out if the object's y_coordinates have collided
 
             params:

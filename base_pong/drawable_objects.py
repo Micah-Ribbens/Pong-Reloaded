@@ -53,14 +53,28 @@ class GameObject(Component):
 
         return self.get_coordinates(self.x_coordinate, self.right_edge)
     
-    def get_y_coordinates(self):
-        """ summary: uses get_coordinates() and passes the y_coordinate as the min and bottom as the max for parameters
-            params: None
-            returns: all of an object's y_coordinates (y_coordinate - bottom)
+    def get_y_coordinate_min(self, x_coordinate):
+        """ summary: None
+
+            params:
+                x_coordinate: double; the x_coordinate that is being used to get the minimum y_coordinate
+
+            returns: returns the minimum y_coordinate at the x_coordinate
         """
 
-        return self.get_coordinates(self.y_coordinate, self.bottom)
-    
+        return self.y_coordinate
+
+    def get_y_coordinate_max(self, x_coordinate):
+        """ summary: None
+
+            params:
+                x_coordinate: double; the x_coordinate that is being used to get the minimum y_coordinate
+
+            returns: returns the maximum y_coordinate at the x_coordinate
+        """
+
+        return self.bottom
+
     def get_coordinates(self, min, max):
         """summary: keeps the type of min and max (int, float, etc.) and the numbers in between min and max are are int
 
@@ -79,18 +93,6 @@ class GameObject(Component):
             coordinates.append(x + min)
 
         return coordinates
-
-    def get_y_coordinates_from_x_coordinate(self, x_coordinate):
-        """ summary: non-rectangular objects override this method; uses the x_coordinate to find the y_coordinates at that point
-            
-            params: 
-                x_coordinate: int/float; the number that is used to find the y_coordinates
-    
-            returns: list of int; the y_coordinates that the object has at that x_coordinate
-        """
-
-        # Most GameObjects are going to be rectangular, but the elliptical ones override this method
-        return self.get_y_coordinates()
 
     def __init__(self, x_coordinate=0, y_coordinate=0, height=0, length=0, color=(0, 0, 0)):
         """summary: Initializes the object with the numbers (int) and color (RGB tuple) provided
@@ -181,14 +183,13 @@ class Ellipse(GameObject):
 
         return [x_center, y_center, a, b]
 
-    def get_y_coordinates_from_x_coordinate(self, x_coordinate):
-        """ summary: overrides the method from GameObject; finds all the y_coordinates at that given x_coordinate 
-            it does this by finding the y_min and y_max by using the ellipse equation
+    def get_y_coordinate_min_and_max(self, x_coordinate):
+        """ summary: overrides the method from GameObject; finds all the min and max y_coordinate at that x_coordinate
 
             params:
-                x_coordinate: int; the x_coordinate that is used to find all the y_coordinates
+                x_coordinate: double; the x_coordinate that is used to find the min and max y_coordinate
             
-            returns: list of int; the y_coordinates at the x_coordinate provided
+            returns: list of double; [y_coordinate min, y_coordinate max]
         """
 
         # This is the equation for an ellipse (x - h)^2 / a^2 + (y - k)^2 / b^2 = 1
@@ -205,7 +206,28 @@ class Ellipse(GameObject):
         right_side *= pow(b, 2)
 
         # Since a sqrt can either be positive or negative you have to do +-
-        y_min = int(sqrt(right_side) + k)
-        y_max = int(-sqrt(right_side) + k)
+        y_min = sqrt(right_side) + k
+        y_max = -sqrt(right_side) + k
 
-        return self.get_coordinates(y_min, y_max)
+        return [y_min, y_max]
+
+    def get_y_coordinate_min(self, x_coordinate):
+        """ summary: overrides GameObject.get_y_coordinate_max(); calls get_y_coordinate_min_and_max() to the y_coordinate max
+
+            params:
+                x_coordinate: double; the x_coordinate that is used to find the min and max y_coordinate
+
+            returns: double; the max y_coordinate at the x_coordinate
+        """
+        return self.get_y_coordinate_min_and_max(x_coordinate)[0]
+
+    def get_y_coordinate_max(self, x_coordinate):
+        """ summary: overrides GameObject.get_y_coordinate_max(); calls get_y_coordinate_min_and_max() to the y_coordinate min
+
+            params:
+                x_coordinate: double; the x_coordinate that is used to find the min and max y_coordinate
+
+            returns: double; the min y_coordinate at the x_coordinate
+        """
+        return self.get_y_coordinate_min_and_max(x_coordinate)[1]
+

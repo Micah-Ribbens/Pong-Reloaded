@@ -116,6 +116,7 @@ def lists_share_an_item(list1, list2):
     for item in list1:
         if list2.__contains__(item):
             is_true = True
+            break
 
     return is_true
 
