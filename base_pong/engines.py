@@ -7,7 +7,7 @@ from base_pong.important_variables import (
 )
 from base_pong.utility_functions import lists_share_an_item
 
-
+# TODO make collisions better
 class CollisionsFinder:
     """Gives a series of methods to find if two (or more objects) have collided"""
     def is_right_collision(object1, object2):

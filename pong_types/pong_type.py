@@ -1,4 +1,6 @@
+from base_pong.equations import Point, LineSegmentEquation
 from base_pong.important_variables import screen_height
+from base_pong.path import Path, PathLine
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.score_keeper import ScoreKeeper
 import abc
@@ -86,20 +88,22 @@ class PongType(abc.ABC):
         if paddle.bottom >= screen_height:
             paddle.y_coordinate = screen_height - paddle.height
 
-    def get_ball_coordinates(self, x_coordinate):
+    def get_path(self, x_coordinate):
         """ summary: finds the ball's y_coordinate and bottom at the next time it hits the x_coordinate
             IMPORTANT: this function should be called when the ball is going the desired horizontal direction
 
             params:
-                x_coordinate: int; the number that is used to evaluate the ball's y_coordinate and bottom
+                x_coordinate: int; the number that is used to evaluate the ball's path
 
-            returns: List of int; [ball's y_coordinate, ball's bottom]
+            returns: Path; the path of the ball from its current x_coordinate to the end x_coordinate
         """
 
+        path = Path([])
         time_to_travel_distance = abs(x_coordinate - self.ball.x_coordinate) / self.ball.forwards_velocity
 
         ball_y_coordinate = self.ball.y_coordinate
         ball_is_moving_down = self.ball.is_moving_down
+        ball_x_coordinate = self.ball.x_coordinate
         displacement = 0
 
         while time_to_travel_distance > 0:
@@ -116,16 +120,24 @@ class PongType(abc.ABC):
             if time_to_travel_distance - time < 0:
                 distance = self.ball.upwards_velocity * time_to_travel_distance
                 displacement = distance if ball_is_moving_down else -distance
-                ball_y_coordinate += displacement
-                time_to_travel_distance = 0
+                time = time_to_travel_distance
 
-            else:
-                time_to_travel_distance -= time
-                ball_y_coordinate += displacement
+            end_ball_y_coordinate = ball_y_coordinate + displacement
+            end_ball_x_coordinate = ball_x_coordinate + time * self.ball.forwards_velocity
+            y_coordinate_line = LineSegmentEquation(Point(ball_x_coordinate, ball_y_coordinate),
+                                                    Point(end_ball_x_coordinate, end_ball_y_coordinate))
 
+            bottom_line = (LineSegmentEquation(Point(ball_x_coordinate, ball_bottom),
+                                               Point(end_ball_x_coordinate, end_ball_y_coordinate + self.ball.height)))
+
+            path.add(PathLine(y_coordinate_line, bottom_line))
             ball_is_moving_down = not ball_is_moving_down
+            ball_y_coordinate = end_ball_y_coordinate
+            ball_x_coordinate = end_ball_x_coordinate
 
-        return [ball_y_coordinate, ball_y_coordinate + self.ball.height]
+            time_to_travel_distance -= time
+
+        return path
 
 
 

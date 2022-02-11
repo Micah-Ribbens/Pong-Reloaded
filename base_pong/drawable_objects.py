@@ -1,7 +1,8 @@
+from math import sqrt
+
 import pygame
 from base_pong.important_variables import game_window
 from base_pong.utility_functions import percentage_to_number
-from math import sqrt, pow
 
 from gui_components.component import Component
 
@@ -173,9 +174,8 @@ class Ellipse(GameObject):
             returns: list of int; the variables in the list in this order: [h, k, a, b]
         """
 
-        # x_center is the same as h and y_center is the same as k
-        # x_center and y_center is a bit more descriptive here though
         # The numbers are based upon this ellipse equation: (x - h)^2 / a^2 + (y - k)^2 / b^2 = 1
+        # x_center is the same as h and y_center is the same as k
         x_center = self.x_coordinate + self.length / 2
         y_center = self.y_coordinate + self.height / 2
         a = self.x_midpoint - self.x_coordinate

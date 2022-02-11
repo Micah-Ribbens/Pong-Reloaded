@@ -1,11 +1,9 @@
-from copy import deepcopy
-
 from base_pong.velocity_calculator import VelocityCalculator
 from base_pong.important_variables import *
 from base_pong.engines import CollisionsFinder
 from pong_types.pong_type import PongType
 from pong_types.normal_pong import NormalPong
-from pong_types.math import *
+from base_pong.quadratic_equations import *
 
 
 class GravityPong(PongType):

@@ -19,7 +19,7 @@ class GameScreen(Screen):
     game_paused = False
     ball = Ball()
     player1 = Player()
-    player2 = ComputerOponent(10, ball)
+    player2 = ComputerOponent(4, ball)
     player1_score = 0
     player2_score = 0
     pause_button = PauseButton()
@@ -73,10 +73,12 @@ class GameScreen(Screen):
         if self.pong_type.player1_has_scored():
             self.player1_score += 1
             self.reset_after_scoring()
+            self.ball.is_moving_right = False
 
         if self.pong_type.player2_has_scored():
             self.player2_score += 1
             self.reset_after_scoring()
+            self.ball.is_moving_right = True
 
         self.pong_type.add_needed_objects()
         self.player2.run()

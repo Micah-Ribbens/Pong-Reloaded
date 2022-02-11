@@ -1,6 +1,7 @@
 import unittest
 
-from pong_types.math import QuadraticEquation, Point, PhysicsEquation
+from base_pong.quadratic_equations import QuadraticEquation, PhysicsEquation
+from base_pong.equations import Point
 
 
 class GravityPongTests(unittest.TestCase):

@@ -3,6 +3,7 @@ from random import randint
 import pygame
 from base_pong.drawable_objects import GameObject
 from base_pong.engines import CollisionsFinder
+from base_pong.path import Path
 from base_pong.score_keeper import ScoreKeeper
 from base_pong.utility_classes import Fraction, HistoryKeeper
 from base_pong.velocity_calculator import VelocityCalculator
@@ -42,7 +43,7 @@ class Paddle(GameObject):
         return GameObject(self.x_coordinate, self.bottom - tip_height, tip_height, self.length)
 
     def render(self):
-        paddle_image = pygame.transform.scale(pygame.image.load("paddle.png"), (int(self.length), int(self.height)))
+        paddle_image = pygame.transform.scale(pygame.image.load("images/paddle.png"), (int(self.length), int(self.height)))
         game_window.get_window().blit(paddle_image, (self.x_coordinate, self.y_coordinate))
 
 class Player(Paddle):
@@ -74,7 +75,7 @@ class ComputerOponent(Paddle):
     is_going_to_hit_ball = True
     ball = None
     number_of_hits = 0
-    pong_type = None
+    pong_type: PongType = None
 
     # The function that it should run everytime run is called
     action = None
@@ -83,8 +84,7 @@ class ComputerOponent(Paddle):
     is_moving_down = False
     is_moving = False
     # TODO explain better
-    get_coordinates_was_called = False  # Stores whether get_coordinates() was called a good amount
-
+    get_path_was_called = False  # Stores whether get_coordinates() was called a good amount
 
     def __init__(self, difficulty_level, ball):
         """ summary: initializes the object
@@ -147,7 +147,6 @@ class ComputerOponent(Paddle):
             self.y_coordinate_should_be_at = ball_y_coordinate
 
         self.is_moving_down = self.bottom < self.y_coordinate_should_be_at
-        self.is_moving = True
 
     def move_away_from_ball(self, ball_y_coordinate, ball_bottom):
         """ summary: changes the property that tells the computer opponent where to move so it misses the ball
@@ -166,7 +165,6 @@ class ComputerOponent(Paddle):
             self.y_coordinate_should_be_at = ball_bottom + buffer
 
         self.is_moving_down = self.y_coordinate < self.y_coordinate_should_be_at
-        self.is_moving = True
 
     def default_run(self):
         """ summary: runs the logic for figuring out if the player should hit the ball and the players movement; default code if action isn't changed
@@ -175,19 +173,34 @@ class ComputerOponent(Paddle):
         """
         prev_ball = HistoryKeeper.get_last(self.ball.name)
         prev_ball_is_moving_left = False if prev_ball is None else not prev_ball.is_moving_right
-        should_get_ball_coordinates = prev_ball_is_moving_left and self.ball.is_moving_right and not self.get_coordinates_was_called
+        should_get_ball_coordinates = prev_ball_is_moving_left and self.ball.is_moving_right and not self.get_path_was_called
 
         if self.is_going_to_hit_ball and should_get_ball_coordinates:
-            ball_y_coordinate, ball_bottom = self.pong_type.get_ball_coordinates(self.x_coordinate - self.ball.length)
+            ball_path = self.pong_type.get_path(self.x_coordinate - self.ball.length)
+            ball_y_coordinate, ball_bottom = self.get_ball_end_coordinates(ball_path)
             self.move_towards_ball(ball_y_coordinate, ball_bottom)
-            self.get_coordinates_was_called = True
+            self.get_path_was_called = True
 
         elif not self.is_going_to_hit_ball and should_get_ball_coordinates:
-            ball_y_coordinate, ball_bottom = self.pong_type.get_ball_coordinates(self.x_coordinate - self.ball.length)
+            ball_path = self.pong_type.get_path(self.x_coordinate - self.ball.length)
+            ball_y_coordinate, ball_bottom = self.get_ball_end_coordinates(ball_path)
             self.move_away_from_ball(ball_y_coordinate, ball_bottom)
-            self.get_coordinates_was_called = True
+            self.get_path_was_called = True
+
 
         self.run_hitting_balls_logic()
+
+    def get_ball_end_coordinates(self, ball_path: Path):
+        """ summary: gets the balls end coordinates from the data inside ball_path
+
+            params:
+                ball_path: Path; the ball's path
+
+            returns: List of Double; [ball_y_coordinate, ball_bottom]
+        """
+
+        ball_end_points = ball_path.get_end_points()
+        return [ball_end_points[0].y_coordinate, ball_end_points[1].y_coordinate]
 
     def run_hitting_balls_logic(self):
         """ summary: runs the logic for figuring out if the computer opponent should hit the next ball
@@ -196,14 +209,24 @@ class ComputerOponent(Paddle):
         """
         hit_ball_this_cycle = CollisionsFinder.is_collision(self.ball, self)
 
+        time_to_get_to_desired_y_coordinate = abs(self.y_coordinate - self.y_coordinate_should_be_at) / self.velocity
+
+        ball_distance_from_paddle = self.x_coordinate - self.ball.right_edge
+        time_for_ball_to_come_to_paddle = ball_distance_from_paddle / self.ball.forwards_velocity
+
+        buffer = .4
+        # The buffer is to prevent the paddle not having enough time to reach the ball
+        if time_to_get_to_desired_y_coordinate >= time_for_ball_to_come_to_paddle - buffer:
+            self.is_moving = True
+
         if hit_ball_this_cycle:
             self.number_of_hits += 1
-            self.get_coordinates_was_called = False
+            self.get_path_was_called = False
 
-        if self.is_moving_down and self.y_coordinate >= self.y_coordinate_should_be_at:
+        if self.is_moving_down and self.y_coordinate >= self.y_coordinate_should_be_at and self.is_moving:
             self.is_moving = False
 
-        elif self.y_coordinate <= self.y_coordinate_should_be_at and not self.is_moving_down:
+        elif self.y_coordinate <= self.y_coordinate_should_be_at and not self.is_moving_down and self.is_moving:
             self.is_moving = False
 
         if self.is_moving:
@@ -241,10 +264,10 @@ class ComputerOponent(Paddle):
 
         self.number_of_hits = 0
         self.is_going_to_hit_ball = True
-        self.get_coordinates_was_called = False
+        self.get_path_was_called = False
 
     def render(self):
-        paddle_image = pygame.transform.scale(pygame.image.load("paddle.png"), (int(self.length), int(self.height)))
+        paddle_image = pygame.transform.scale(pygame.image.load("images/paddle.png"), (int(self.length), int(self.height)))
         game_window.get_window().blit(paddle_image, (self.x_coordinate, self.y_coordinate))
 
 

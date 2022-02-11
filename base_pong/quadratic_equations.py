@@ -1,21 +1,5 @@
 from base_pong.utility_functions import get_kwarg_item
-class Point:
-    x_coordinate = 0
-    y_coordinate = 0
 
-    """Stores the x and y coordinates of point"""
-
-    def __init__(self, x_coordinate, y_coordinate):
-        """ summary: initializes the object
-
-            params:
-                x_coordinate: double; the value of the point's x coordinate
-                y_coordinate: double; the value of the point's y coordinate
-
-            returns: None
-        """
-
-        self.x_coordinate, self.y_coordinate = x_coordinate, y_coordinate
 
 
 class QuadraticEquation:
