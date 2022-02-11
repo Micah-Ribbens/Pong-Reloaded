@@ -65,17 +65,18 @@ class CollisionsFinder:
 
         is_collision = False
         for x_coordinate in object1_x_coordinates:
-            # CASE 1: One of the objects doesn't go through the other in one cycle
+            if not object2_x_coordinates.__contains__(x_coordinate):
+                continue
+
             is_y_coordinate_collision = (object1.get_y_coordinate_max(x_coordinate) >= object2.get_y_coordinate_min(x_coordinate)
                                          and object1.get_y_coordinate_min(x_coordinate) <= object2.get_y_coordinate_max(x_coordinate))
 
             # If the two object's share an x_coordinate and a y_coordinate then they must have collided
-            if is_y_coordinate_collision and object2_x_coordinates.__contains__(x_coordinate):
+            if is_y_coordinate_collision:
                 is_collision = True
                 break
 
         return is_collision
-
 
     def is_height_collision(object1, object2):
         """ summary: finds out if the object's y_coordinates have collided
@@ -127,7 +128,7 @@ class CollisionsFinder:
         prev_object2 = HistoryKeeper.get_last(object2.name)
 
         if prev_object1 is None or prev_object2 is None:
-            print("NO GOOD")
+            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
         prev_bottom_object = CollisionsFinder.get_bottommost_object(prev_object1, prev_object2)
@@ -153,7 +154,7 @@ class CollisionsFinder:
         prev_object2 = HistoryKeeper.get_last(object2.name)
 
         if prev_object1 is None or prev_object2 is None:
-            print("NO GOOD")
+            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
         prev_bottom_object = CollisionsFinder.get_bottommost_object(prev_object1, prev_object2)

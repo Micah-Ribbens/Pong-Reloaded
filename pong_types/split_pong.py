@@ -1,4 +1,5 @@
 from base_pong.events import Event
+from base_pong.players import ComputerOponent
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.engines import CollisionsFinder
 from base_pong.ball import Ball
@@ -6,7 +7,6 @@ from base_pong.velocity_calculator import VelocityCalculator
 from pong_types.pong_type import PongType
 from pong_types.normal_pong import NormalPong
 from base_pong.score_keeper import ScoreKeeper
-from base_pong.important_variables import *
 from base_pong.colors import red, white
 from copy import deepcopy
 
@@ -33,7 +33,29 @@ class SplitPong(PongType):
         
         self.balls.append(ball)
         ball.color = red
-        
+
+        if type(player2) == ComputerOponent:
+            player2.set_action(self.run_computer_opponent)
+
+    def run_computer_opponent(self):
+        closest_ball = self.ball
+
+        for ball in self.balls:
+            if ball.right_edge > closest_ball.right_edge:
+                closest_ball = ball
+
+        computer_opponent: ComputerOponent = self.player2
+
+        computer_opponent.run_hitting_balls_logic()
+
+        if computer_opponent.is_going_to_hit_ball:
+            computer_opponent.move_towards_ball(closest_ball)
+
+        else:
+            computer_opponent.move_away_from_ball(closest_ball)
+
+
+
     def increase_ball_size(self, ball):
         """ summary: increases the ball's size
 
@@ -89,7 +111,6 @@ class SplitPong(PongType):
 
         new_balls = []
         for ball in self.balls:
-            self.normal_pong._ball_collisions(ball, self.player1, self.player2)
             ball_has_collided_with_paddle1 = CollisionsFinder.is_collision(
                 ball, self.player1)
 
@@ -100,8 +121,8 @@ class SplitPong(PongType):
                 self.increase_ball_size(ball)
 
             if self.ball_is_ready_to_split(ball):
-                print("SPLIT ", id(ball))
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
+            self.normal_pong._ball_collisions(ball, self.player1, self.player2)
 
         for new_ball in new_balls:
             self.balls.append(new_ball)
@@ -152,7 +173,7 @@ class SplitPong(PongType):
             params: None
             returns: boolean; if player2 has scored
         """
-        return self.player_has_scored(self.player1)
+        return self.player_has_scored(False)
     
     def player2_has_scored(self):
         """ summary: finds out if a ball has gone beyond the screens right boundary
@@ -160,7 +181,7 @@ class SplitPong(PongType):
             returns: boolean; if player2 has scored
         """
 
-        return self.player_has_scored(self.player2)
+        return self.player_has_scored(True)
     
     def player_has_scored(self, player_is_leftside):
         """ summary: iterates over every ball in balls and calls ScoreKeeper.player_has_scored()
@@ -172,9 +193,11 @@ class SplitPong(PongType):
         """
 
         has_scored = False
+
         for ball in self.balls:
             if ScoreKeeper.player_has_scored(ball, player_is_leftside):
                 has_scored = True
+
         return has_scored
     
     def add_needed_objects(self):

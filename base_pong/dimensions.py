@@ -4,8 +4,8 @@ class Dimensions:
 
     x_coordinate = 0
     y_coordinate = 0
-    height = 0
     length = 0
+    height = 0
 
     def __init__(self, x_coordinate, y_coordinate, length, height):
         """ summary: Initializes all the attributes of the class with the numbers provided

@@ -1,6 +1,6 @@
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.score_keeper import ScoreKeeper
-from base_pong.players import Player
+from base_pong.players import Player, ComputerOponent
 from base_pong.ball import Ball
 from base_pong.important_variables import *
 from base_pong.colors import *
@@ -19,7 +19,7 @@ class GameScreen(Screen):
     game_paused = False
     ball = Ball()
     player1 = Player()
-    player2 = Player()
+    player2 = ComputerOponent(10, ball)
     player1_score = 0
     player2_score = 0
     pause_button = PauseButton()
@@ -33,6 +33,7 @@ class GameScreen(Screen):
 
         game_window.set_screen_visible(self, True)
         pong_type_class = GameModeSelector.get_pong_type()
+        is_single_player = True
         self.pong_type = pong_type_class(self.player1, self.player2, self.ball)
         self.ball.reset()
         self.player1_score = 0
@@ -48,16 +49,13 @@ class GameScreen(Screen):
         self.player1.right_key = pygame.K_d
         self.player1.left_key = pygame.K_a
         self.player2.x_coordinate = screen_length - self.player2.length
-
-    def reset_after_scoring(self):
-        """ summary: resets everything after someone has scored
-            params: None
-            returns: None
-        """
-
+        self.player2.set_pong_type(self.pong_type)
         HistoryKeeper.reset()
         self.ball.reset()
         self.pong_type.reset()
+
+        if type(self.player2) == ComputerOponent:
+            self.player2.reset()
 
     def run(self):
         """ summary: runs all the code for the game objects and just general game stuff
@@ -68,8 +66,6 @@ class GameScreen(Screen):
         ScoreKeeper.show_score(self.player1_score,
                                self.player2_score)
 
-        self.player1.movement()
-        self.player2.movement()
         self.pong_type.set_paddles_movements(self.player1)
         self.pong_type.set_paddles_movements(self.player2)
         self.pong_type.run()
@@ -83,3 +79,14 @@ class GameScreen(Screen):
             self.reset_after_scoring()
 
         self.pong_type.add_needed_objects()
+        self.player2.run()
+
+    def reset_after_scoring(self):
+        """ summary: resets everything after someone has scored
+            params: None
+            returns: None
+        """
+
+        HistoryKeeper.reset()
+        self.ball.reset()
+        self.pong_type.reset()

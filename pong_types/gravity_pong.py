@@ -34,7 +34,7 @@ class GravityPong(PongType):
         self.physics_equation = PhysicsEquation()
         self.physics_equation.set_all_variables(250, 1, 250, screen_height - self.ball.height)
         self.ball.y_coordinate = screen_height - self.ball.height
-        self.velocity_increase = self.get_velocity_increase(5, 1, 0)
+        self.velocity_increase = self.get_velocity_increase(7, 1, 0)
 
     def get_velocity_increase(self, amount_of_hits_to_double, time, vertex):
         """ summary: finds the velocity increase by using the equation d = vit + 1/2 * at^2 where d is displacement, vi is initial velocity,

@@ -24,10 +24,15 @@ class NormalPong(PongType):
             returns: None
         """
 
+        # TODO explain distance_change logic better
         if ball.bottom >= screen_height:
+            distance_change = ball.bottom - screen_height
             ball.is_moving_down = False
+            ball.y_coordinate = screen_height - distance_change - ball.height
 
         if ball.y_coordinate <= 0:
+            distance_change = -ball.y_coordinate
+            ball.y_coordinate = ball.y_coordinate + distance_change
             ball.is_moving_down = True
 
         if CollisionsFinder.is_collision(player1, ball):

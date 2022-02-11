@@ -8,13 +8,13 @@ from base_pong.engines import CollisionsFinder
 from pong_types.pong_type import PongType
 from pong_types.normal_pong import NormalPong
 from base_pong.important_variables import *
-from base_pong.drawable_objects import Ellipse
+from base_pong.drawable_objects import Ellipse, GameObject
 from base_pong.colors import *
 from base_pong.events import Event, TimedEvent
 from pong_types.utility_functions import get_random_item
 
 
-class PortalOpening(Ellipse):
+class PortalOpening(GameObject):
     """An opening that allows objects to teleport through it"""
 
     attributes = ["x_coordinate", "y_coordinate"]
@@ -59,6 +59,7 @@ class PortalOpening(Ellipse):
 
         self.color = color
         self.is_enabled = True
+
 
 class Portal:
     """Composed of two portal openings that allows objects to teleport through them"""
@@ -113,11 +114,16 @@ class Portal:
 
         # Stores value of is_enabled, which other things in this function modify
         is_enabled = self.is_enabled
-        portal_opening1_collision = CollisionsFinder.is_collision(
-            ball, self.portal_opening1)
+        portal_opening1_collision = CollisionsFinder.is_collision(ball, self.portal_opening1)
 
-        portal_opening2_collision = CollisionsFinder.is_collision(
-            ball, self.portal_opening2)
+        portal_opening2_collision = CollisionsFinder.is_collision(ball, self.portal_opening2)
+
+        p1_x = self.portal_opening1.get_x_coordinates()
+        p2_x = self.portal_opening2.get_x_coordinates()
+        is_x_coll = False
+        for x_coordinate in ball.get_x_coordinates():
+            if p1_x.__contains__(x_coordinate) or p2_x.__contains__(x_coordinate):
+                is_x_coll = True
 
         is_portal_collision = portal_opening1_collision or portal_opening2_collision
 
@@ -142,15 +148,11 @@ class Portal:
             self.enable()
             self.portal_disabled_event.reset()
 
-        if not CollisionsFinder.object_collision(self.portal_opening1, ball) and self.portal_opening1.was_teleported:
-            # print("CAN HIT1")
+        if not CollisionsFinder.is_collision(self.portal_opening1, ball) and self.portal_opening1.was_teleported:
             self.portal_opening1.was_teleported = False
 
-        if not CollisionsFinder.object_collision(self.portal_opening2, ball) and self.portal_opening2.was_teleported:
-            # print("CAN HIT2")
+        if not CollisionsFinder.is_collision(self.portal_opening2, ball) and self.portal_opening2.was_teleported:
             self.portal_opening2.was_teleported = False
-        # self.portal_opening1.was_teleported = False if not portal_opening1_collision else self.portal_opening1.was_teleported
-        # self.portal_opening2.was_teleported = False if not portal_opening2_collision else self.portal_opening2.was_teleported
 
     def render(self):
         """ summary: renders the portal

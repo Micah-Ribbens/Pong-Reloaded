@@ -144,3 +144,22 @@ def get_kwarg_item(kwargs, key, default_value):
     """
 
     return kwargs.get(key) if kwargs.__contains__(key) else default_value
+
+
+def mod(number, divider):
+    """ summary: uses 'number % divider' but keeps the sign (+ or -) of both the number and divider for the result
+
+        params:
+            number: double; n in the equation 'n % d'
+            divider: double; d in the equation 'n % d'
+
+        returns: double; 'number % divider' while keeping the sign
+    """
+
+    result = abs(number) % abs(divider)
+
+    # If one of the numbers and not both are negative the result should be negative
+    if number * divider < 0:
+        result = -result
+
+    return result

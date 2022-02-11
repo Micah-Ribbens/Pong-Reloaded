@@ -85,14 +85,14 @@ class GameObject(Component):
             returns: list of int; the coordinates from min-max (including min and max)
         """
 
-        coordinates = [min, max]
+        coordinates = [min]
         # Have to turn min and max into an int to use the "for x in range() loop"
         min = int(min) + 1
-        max = int(max) - 1
-        for x in range(max - min - 2):
+        coordinates_between_max_and_min = int(max) + 1 - min
+        for x in range(coordinates_between_max_and_min):
             coordinates.append(x + min)
 
-        return coordinates
+        return coordinates + [max]
 
     def __init__(self, x_coordinate=0, y_coordinate=0, height=0, length=0, color=(0, 0, 0)):
         """summary: Initializes the object with the numbers (int) and color (RGB tuple) provided
@@ -178,8 +178,8 @@ class Ellipse(GameObject):
         # The numbers are based upon this ellipse equation: (x - h)^2 / a^2 + (y - k)^2 / b^2 = 1
         x_center = self.x_coordinate + self.length / 2
         y_center = self.y_coordinate + self.height / 2
-        a = x_center - self.x_coordinate
-        b = y_center - self.y_coordinate
+        a = self.x_midpoint - self.x_coordinate
+        b = self.y_midpoint - self.y_coordinate
 
         return [x_center, y_center, a, b]
 
