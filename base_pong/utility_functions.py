@@ -1,3 +1,5 @@
+import pygame
+
 from base_pong.important_variables import game_window, screen_length, screen_height, background_color
 
 
@@ -163,3 +165,8 @@ def mod(number, divider):
         result = -result
 
     return result
+
+def key_is_hit(key):
+    """returns: boolean; if the key has gotten pressed"""
+
+    return pygame.key.get_pressed()[key]

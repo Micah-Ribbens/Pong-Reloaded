@@ -1,3 +1,6 @@
+import pygame.display
+
+from base_pong.path import *
 from base_pong.utility_classes import HistoryKeeper
 from gui.main_screen import MainScreen
 from gui.pause_screen import PauseScreen
@@ -32,6 +35,7 @@ def get_screen(current_screen):
     return screen if screen is not None else current_screen
 
 current_screen = start_screen
+
 while True:
     start_time = time.time()
     for event in pygame.event.get():
@@ -51,6 +55,7 @@ while True:
     current_screen = screen
     VelocityCalculator.time = time.time() - start_time
     HistoryKeeper.last_time = HistoryKeeper.get_last_time()
+    function_runner.run()
 
 
 

@@ -1,11 +1,9 @@
-from base_pong.equations import Point, LineSegmentEquation
+from base_pong.equations import Point, LineSegment
 from base_pong.important_variables import screen_height
 from base_pong.path import Path, PathLine
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.score_keeper import ScoreKeeper
 import abc
-
-# TODO replace all places with Pong2
 from base_pong.utility_functions import mod
 
 
@@ -124,14 +122,12 @@ class PongType(abc.ABC):
 
             end_ball_y_coordinate = ball_y_coordinate + displacement
             end_ball_x_coordinate = ball_x_coordinate + time * self.ball.forwards_velocity
-            y_coordinate_line = LineSegmentEquation(Point(ball_x_coordinate, ball_y_coordinate),
+            y_coordinate_line = LineSegment(Point(ball_x_coordinate, ball_y_coordinate),
                                                     Point(end_ball_x_coordinate, end_ball_y_coordinate))
 
-            bottom_line = (LineSegmentEquation(Point(ball_x_coordinate, ball_bottom),
-                                               Point(end_ball_x_coordinate, end_ball_y_coordinate + self.ball.height)))
-
-            path.add(PathLine(y_coordinate_line, bottom_line))
+            path.add(PathLine(y_coordinate_line, self.ball.height))
             ball_is_moving_down = not ball_is_moving_down
+            
             ball_y_coordinate = end_ball_y_coordinate
             ball_x_coordinate = end_ball_x_coordinate
 

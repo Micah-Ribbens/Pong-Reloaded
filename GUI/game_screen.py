@@ -1,6 +1,6 @@
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.score_keeper import ScoreKeeper
-from base_pong.players import Player, ComputerOponent
+from base_pong.players import Player, AI
 from base_pong.ball import Ball
 from base_pong.important_variables import *
 from base_pong.colors import *
@@ -19,7 +19,7 @@ class GameScreen(Screen):
     game_paused = False
     ball = Ball()
     player1 = Player()
-    player2 = ComputerOponent(4, ball)
+    player2 = AI(100000, ball)
     player1_score = 0
     player2_score = 0
     pause_button = PauseButton()
@@ -54,7 +54,7 @@ class GameScreen(Screen):
         self.ball.reset()
         self.pong_type.reset()
 
-        if type(self.player2) == ComputerOponent:
+        if type(self.player2) == AI:
             self.player2.reset()
 
     def run(self):

@@ -3,7 +3,7 @@ from random import randint
 import pygame
 from base_pong.drawable_objects import GameObject
 from base_pong.engines import CollisionsFinder
-from base_pong.path import Path
+from base_pong.path import Path, VelocityPath
 from base_pong.score_keeper import ScoreKeeper
 from base_pong.utility_classes import Fraction, HistoryKeeper
 from base_pong.velocity_calculator import VelocityCalculator
@@ -46,6 +46,7 @@ class Paddle(GameObject):
         paddle_image = pygame.transform.scale(pygame.image.load("images/paddle.png"), (int(self.length), int(self.height)))
         game_window.get_window().blit(paddle_image, (self.x_coordinate, self.y_coordinate))
 
+
 class Player(Paddle):
     """Extends Paddle and provides movement options and a way to change the classes properties"""
 
@@ -68,7 +69,8 @@ class Player(Paddle):
             self.y_coordinate += VelocityCalculator.calc_distance(
                 self.velocity)
 
-class ComputerOponent(Paddle):
+
+class AI(Paddle):
     """A player that isn't an actual person- it will be used for a single player option"""
 
     difficulty_level = 0
@@ -83,8 +85,10 @@ class ComputerOponent(Paddle):
     y_coordinate_should_be_at = 0  # The y_coordinate the computer opponent should move to
     is_moving_down = False
     is_moving = False
-    # TODO explain better
-    get_path_was_called = False  # Stores whether get_coordinates() was called a good amount
+    get_path_was_called = False
+    path: VelocityPath = None
+    path_is_leftwards = False
+    forwards_velocity = VelocityCalculator.give_velocity(400, screen_length)
 
     def __init__(self, difficulty_level, ball):
         """ summary: initializes the object
@@ -187,7 +191,6 @@ class ComputerOponent(Paddle):
             self.move_away_from_ball(ball_y_coordinate, ball_bottom)
             self.get_path_was_called = True
 
-
         self.run_hitting_balls_logic()
 
     def get_ball_end_coordinates(self, ball_path: Path):
@@ -241,7 +244,6 @@ class ComputerOponent(Paddle):
 
     def run(self):
         self.action()
-        self.render()
 
     def is_random_chance(self, probability: Fraction):
         """ summary: uses the probability for the random chance (for instance if the probability is 7/10 then 7 out of 10
@@ -265,9 +267,20 @@ class ComputerOponent(Paddle):
         self.number_of_hits = 0
         self.is_going_to_hit_ball = True
         self.get_path_was_called = False
+        self.is_moving = False
 
     def render(self):
         paddle_image = pygame.transform.scale(pygame.image.load("images/paddle.png"), (int(self.length), int(self.height)))
         game_window.get_window().blit(paddle_image, (self.x_coordinate, self.y_coordinate))
 
+    def add_path(self, path):
+        """Makes the AI follow the specified path until it hits the path's end"""
+
+        self.path = path
+        self.path_is_leftwards = path.get_end_points()[0].x_coordinate < self.x_coordinate
+
+    def remove_path(self):
+        """Makes the AI stop following a path"""
+
+        self.path = None
 

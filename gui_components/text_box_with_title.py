@@ -1,7 +1,6 @@
 from base_pong.colors import white
 from base_pong.drawable_objects import GameObject
 from base_pong.important_variables import background_color, screen_length
-from base_pong.function import Parameter
 from gui_components.clickable_component import ClickableComponent
 from gui_components.component import Component
 from gui_components.text_box import TextBox

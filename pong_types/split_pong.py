@@ -1,5 +1,5 @@
 from base_pong.events import Event
-from base_pong.players import ComputerOponent
+from base_pong.players import AI
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.engines import CollisionsFinder
 from base_pong.ball import Ball
@@ -34,7 +34,7 @@ class SplitPong(PongType):
         self.balls.append(ball)
         ball.color = red
 
-        if type(player2) == ComputerOponent:
+        if type(player2) == AI:
             player2.set_action(self.run_computer_opponent)
 
     def run_computer_opponent(self):
@@ -44,7 +44,7 @@ class SplitPong(PongType):
             if ball.right_edge > closest_ball.right_edge:
                 closest_ball = ball
 
-        computer_opponent: ComputerOponent = self.player2
+        computer_opponent: AI = self.player2
 
         computer_opponent.run_hitting_balls_logic()
 

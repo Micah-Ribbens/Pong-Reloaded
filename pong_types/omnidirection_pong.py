@@ -8,9 +8,18 @@ from base_pong.velocity_calculator import VelocityCalculator
 from pong_types.normal_pong import NormalPong
 from pong_types.pong_type import PongType
 
-# TODO add ball sandwiching and make it so the player can't move beyond the screen boundaries
+# TODO fix code so you don't have to assume player2 is the ai
 class OmnidirectionalPong(NormalPong):
     """Pong where the player can move 4 directions"""''
+    # States for the AI
+    class States:
+        GOING_TOWARDS_GOAL = 1
+        GOING_TOWARDS_BALL = 2
+        INIT = 3
+        GOING_TOWARDS_CENTER = 4
+        WAITING = 5
+
+    current_state = States.INIT
 
     ball_sandwiched_event = Event()
 
@@ -37,6 +46,7 @@ class OmnidirectionalPong(NormalPong):
         self.player1.can_move_right, self.player2.can_move_right = False, False
         self.player1.is_moving_left, self.player2.is_moving_left = False, False
         self.player1.is_moving_right, self.player2.is_moving_right = False, False
+        self.player2.action = self.run_ai
 
     def set_paddles_movements(self, player):
         """ summary: sets all the ways the player can move (up and down)
@@ -218,32 +228,6 @@ class OmnidirectionalPong(NormalPong):
 
         return distance_between_players <= distance_needed and self.ball_is_between_players() and ball_is_between_players
 
-    def ball_went_through_a_player(self):
-        """ summary: finds out if the ball went through a player because its movement in one cycle made it phase through/into a player
-            NOTE: this function is only concerned about the x_coordinates and doesn't take into consideration y_coordinates
-
-            params: None
-            returns: boolean; if the ball went through the player
-        """
-
-        ball_went_through_a_player = False
-
-        leftmost_player = self.get_leftmost_player()
-        rightmost_player = self.get_rightmost_player()
-
-        last_cycle_ball = HistoryKeeper.get_last(self.ball.name)
-
-        if last_cycle_ball is None:
-            return False
-
-        if last_cycle_ball.x_coordinate > leftmost_player.right_edge and self.last_ball.x_coordinate <= leftmost_player.right_edge:
-            ball_went_through_a_player = True
-
-        if last_cycle_ball.right_edge < rightmost_player.x_coordinate and self.last_ball.right_edge >= rightmost_player.x_coordinate:
-            ball_went_through_a_player = True
-
-        return ball_went_through_a_player
-
     def ball_is_between_players(self):
         """ summary: finds out if the players are at the same height and the ball's y coordinates are between the players
             params: None
@@ -272,5 +256,86 @@ class OmnidirectionalPong(NormalPong):
             returns: Player; the rightmost player
         """
         return self.player1 if self.player1.x_coordinate > self.player2.x_coordinate else self.player2
+
+    # From here down is the code for AI
+    def run_ai(self):
+        state_to_function = {
+            self.States.GOING_TOWARDS_GOAL: self.go_towards_goal,
+            self.States.GOING_TOWARDS_BALL: self.go_towards_ball,
+            self.States.GOING_TOWARDS_CENTER: self.go_towards_center
+        }
+        function = state_to_function.get(self.current_state)
+
+        if function is not None:
+            function()
+
+        if self.ball_is_sandwiched():
+            self.current_state = self.States.WAITING
+
+        if self.current_state == self.States.WAITING and not self.ball_is_sandwiched():
+            self.current_state = self.States.GOING_TOWARDS_BALL
+
+    def go_towards_goal(self):
+        """Moves the AI towards the ball and should only be called if moving directly to the ball
+        means going towards the goal and the ball is being hit by the AI"""
+
+        if self.ball.y_coordinate < self.player2.y_coordinate:
+            self.player2.y_coordinate -= VelocityCalculator.calc_distance(self.player2.velocity)
+
+        elif self.ball.y_coordinate > self.player2.bottom:
+            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+
+        self.player2.x_coordinate -= VelocityCalculator.calc_distance(self.player2.velocity)
+
+    def go_towards_ball(self):
+        distance = VelocityCalculator.calc_distance(self.player2.velocity)
+        # displacement = distance if self.player2.x_coordinate <
+        if self.ball.y_coordinate > self.player2.y_coordinate:
+            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+
+        else:
+            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+
+    def intercept_opponent(self):
+        self.player2.x_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+
+        if self.ball.y_coordinate > self.player2.y_coordinate:
+            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+
+        else:
+            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+
+        distance_to_cover = self.ball.right_edge - self.player2.x_coordinate
+        velocities_difference = self.player2.velocity - self.player1.velocity
+
+        # Prevents a dividing by 0 error
+        if velocities_difference == 0:
+            return
+
+        # NOTE: Code under this point won't be executed if velocities_difference == 0
+        time_to_reach_opponent = distance_to_cover / velocities_difference
+
+        if time_to_reach_opponent * self.player2.velocity >= screen_height:
+            self.current_state = self.States.GOING_TOWARDS_CENTER
+
+    def go_towards_center(self):
+        center = screen_length / 2
+
+        is_at_center = self.player2.x_coordinate >= center and self.player2 <= center + screen_length * .05
+
+        # So it is close to the center, but doesn't have to be right on
+        if not is_at_center and self.player2.x_coordinate >= center:
+            self.player2.x_coordinate -= VelocityCalculator.calc_distance(self.player2.velocity)
+
+        elif not is_at_center:
+            self.player2.x_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+
+        if self.last_ball.x_coordinate == center:
+            self.current_state = self.States.GOING_TOWARDS_BALL
+
+
+
+
+
 
 

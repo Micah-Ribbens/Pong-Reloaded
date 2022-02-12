@@ -11,8 +11,6 @@ import pygame
 class NormalPong(PongType):
     """The normal version of pong"""
 
-    is_tip_hit = True
-
     def _ball_collisions(self, ball, player1, player2):
         """ summary: does the collisions of the ball off the players and screen bounds
 
@@ -58,25 +56,6 @@ class NormalPong(PongType):
 
             returns: None
         """
-
-        top_tip_of_paddle = GameObject(paddle.x_coordinate, paddle.y_coordinate, paddle.height * .1, paddle.length)
-        bottom_tip_of_paddle = GameObject(paddle.x_coordinate, paddle.y_coordinate, paddle.height * .1, paddle.length)
-        used_up_height = top_tip_of_paddle.height + bottom_tip_of_paddle.height
-
-        middle_part_of_paddle = GameObject(paddle.x_coordinate, top_tip_of_paddle.bottom, paddle.height - used_up_height, paddle.length)
-
-        if ball.bottom >= middle_part_of_paddle.y_coordinate and ball.y_coordinate <=  middle_part_of_paddle.bottom:
-            ball.middle_hit(paddle.power / 10)
-        
-        elif ball.y_coordinate >= top_tip_of_paddle.y_coordinate and top_tip_of_paddle.bottom <= top_tip_of_paddle.bottom:
-            ball.tip_hit(paddle.power / 10)
-            ball.is_moving_down = False
-        
-        # If the ball didn't hit the middle or top it must have hit the bottom
-        else:
-            ball.tip_hit(paddle.power / 10)
-            ball.is_moving_down = True
-
         if CollisionsFinder.is_left_collision(ball, paddle):
             ball.x_coordinate = paddle.right_edge
             ball.is_moving_right = True
@@ -84,6 +63,19 @@ class NormalPong(PongType):
         if CollisionsFinder.is_right_collision(ball, paddle):
             ball.x_coordinate = paddle.x_coordinate - ball.length
             ball.is_moving_right = False
+
+        is_collision = CollisionsFinder.is_collision(ball, paddle)
+
+        if CollisionsFinder.is_bottom_collision(ball, paddle):
+            ball.tip_hit(paddle.power / 10)
+            ball.is_moving_down = True
+
+        elif CollisionsFinder.is_top_collision(ball, paddle):
+            ball.tip_hit(paddle.power / 10)
+            ball.is_moving_down = False
+
+        elif is_collision:
+            ball.middle_hit(paddle.power / 10)
 
     def ball_movement(self):
         """ summary: does the horizontal and vertical movement of the ball by calling _ball_movement()

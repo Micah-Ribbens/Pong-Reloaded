@@ -91,35 +91,3 @@ class ShatterPong(PongType):
         self.player2.height = VelocityCalculator.give_measurement(50, screen_height)
         self.normal_pong.reset()
 
-    def draw_game_objects(self):
-        """ summary: draws all the game object (players and ball) onto the screen
-            params: None
-            returns: None
-        """
-
-        self.draw_paddle(self.player1)
-        self.draw_paddle(self.player2)
-        self.ball.render()
-
-    def draw_paddle(self, paddle):
-        """ summary: draws the paddle, so it has a part that is white in the middle
-
-            params:
-                paddle: Paddle; the paddle that should be drawn
-
-            returns: None
-        """
-
-        # Have to do this code because the regular paddle drawing draws an outline around it, which looks
-        # Bad with the paddle shattering
-        paddle.color = paddle.outline_color
-        GameObject.render(paddle)
-
-        middle_segment = Segment(
-            color=white,
-            percent_down=50,
-            percent_right=0,
-            percent_length=100,
-            percent_height=5
-        )
-        paddle.draw_in_segments([middle_segment])

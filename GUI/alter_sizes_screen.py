@@ -1,3 +1,5 @@
+import pygame
+
 from gui_components.grid import Grid
 from base_pong.utility_functions import percentages_to_numbers, change_attributes
 from gui.menu_item import MenuItem
@@ -8,13 +10,12 @@ from base_pong.velocity_calculator import VelocityCalculator
 from base_pong.dimensions import Dimensions
 from base_pong.events import Event
 from gui_components.sub_screen import SubScreen
+from base_pong.utility_functions import key_is_hit
 
 
 # Paddle Dimension and Ball Dimensions
-# TODO pick up here once going back to this project; going work on a testing app, so will gonna need to document
-#  some code from later on
 class AlterSizesScreen(SubScreen):
-    """The screen that allows the user to alter the sizes of the game objects"""
+    """The screen that allows the user to alter the sizes of the paddle and ball"""
     def render(self):
         pass
 
@@ -48,10 +49,15 @@ class AlterSizesScreen(SubScreen):
 
         self.ball.reset()
 
-        self.up_key_event = Event()
         self.down_key_event = Event()
         self.left_key_event = Event()
         self.right_key_event = Event()
+        self.up_key_event = Event()
+
+        function_runner.add_event(self.up_key_event, lambda: key_is_hit(pygame.K_UP))
+        function_runner.add_event(self.down_key_event, lambda: key_is_hit(pygame.K_DOWN))
+        function_runner.add_event(self.right_key_event, lambda: key_is_hit(pygame.K_RIGHT))
+        function_runner.add_event(self.left_key_event, lambda: key_is_hit(pygame.K_LEFT))
 
         self.menus = [MenuItem("Paddle Dimensions", [Player().height, Player().length], ["height", "length"], 5),
                       MenuItem("Ball Dimensions", [Ball().height, Ball().length], ["height", "length"], 5),
@@ -81,10 +87,7 @@ class AlterSizesScreen(SubScreen):
         """
         controls = pygame.key.get_pressed()
 
-        self.up_key_event.run(controls[pygame.K_UP])
-        self.down_key_event.run(controls[pygame.K_DOWN])
-        self.right_key_event.run(controls[pygame.K_RIGHT])
-        self.left_key_event.run(controls[pygame.K_LEFT])
+
 
         for menu_item in self.menus:
             if menu_item.got_clicked():

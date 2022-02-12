@@ -21,14 +21,18 @@ class Point:
 
         self.x_coordinate, self.y_coordinate = x_coordinate, y_coordinate
 
+    def __str__(self):
+        return f"({self.x_coordinate}, {self.y_coordinate})"
 
-class LineSegmentEquation:
+
+class LineSegment:
     """Uses the equation y = mx + b where m is slope and b is y_intercept"""
 
     slope = 0
     y_intercept = 0
     start_point = 0
     end_point = 0
+    color = purple
 
     def __init__(self, start_point: Point, end_point: Point):
         """ summary: initializes the object
@@ -48,11 +52,9 @@ class LineSegmentEquation:
     def render(self):
         """Renders the object"""
 
-        pygame.draw_py.draw_line(game_window.get_window(), purple,
+        pygame.draw_py.draw_line(game_window.get_window(), self.color,
                                  (int(self.start_point.x_coordinate), int(self.start_point.y_coordinate)),
-                                 (int(self.end_point.x_coordinate), int(self.end_point.y_coordinate)))
-
-        print(f"START ({self.start_point.x_coordinate}, {self.start_point.y_coordinate}) END ({self.end_point.x_coordinate}, {self.end_point.y_coordinate})")
+                                 (int(self.end_point.x_coordinate), int(self.end_point.y_coordinate)), 9)
 
     def get_y_coordinate(self, x_coordinate):
         """ summary: finds the y_coordinate using the equation y = mx + b
@@ -64,3 +66,6 @@ class LineSegmentEquation:
         """
 
         return self.slope * x_coordinate + self.y_intercept
+
+    def __str__(self):
+        return f"{self.start_point} -> {self.end_point}"
