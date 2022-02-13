@@ -54,6 +54,8 @@ class GameScreen(Screen):
         self.ball.reset()
         self.pong_type.reset()
 
+        self.ball.x_coordinate = self.player2.x_coordinate - self.ball.length
+        self.ball.y_coordinate = self.player2.y_midpoint
         if type(self.player2) == AI:
             self.player2.reset()
 
@@ -66,8 +68,6 @@ class GameScreen(Screen):
         ScoreKeeper.show_score(self.player1_score,
                                self.player2_score)
 
-        self.pong_type.set_paddles_movements(self.player1)
-        self.pong_type.set_paddles_movements(self.player2)
         self.pong_type.run()
 
         if self.pong_type.player1_has_scored():
@@ -92,3 +92,5 @@ class GameScreen(Screen):
         HistoryKeeper.reset()
         self.ball.reset()
         self.pong_type.reset()
+
+

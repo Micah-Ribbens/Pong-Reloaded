@@ -31,8 +31,9 @@ class Path:
     """Stores the path of an object"""
 
     path_lines = []
+    last_point = None
 
-    def __init__(self, path_lines):
+    def __init__(self, start_point):
         """ summary: initializes the object
 
             params:
@@ -41,12 +42,15 @@ class Path:
             returns: None
         """
 
-        self.path_lines = path_lines
+        self.last_point = start_point
+        self.path_lines = []
 
-    def add(self, path_line):
+    def add_point(self, point, height):
         """Adds the path_line to the attribute 'path_lines'"""
 
+        path_line = PathLine(LineSegment(self.last_point, point), height)
         self.path_lines.append(path_line)
+        self.last_point = point
 
     def render(self):
         """Renders all the path lines"""
@@ -56,11 +60,10 @@ class Path:
             y_coordinate_line = self.path_lines[x].y_coordinate_line
             bottom_line = self.path_lines[x].bottom_line
 
-            y_coordinate_line.color = distinct_colors[x]
-            bottom_line.color = distinct_colors[x]
+            y_coordinate_line.color = distinct_colors[x % 22]
+            bottom_line.color = distinct_colors[x % 22]
             y_coordinate_line.render()
             bottom_line.render()
-
 
     def get_start_points(self):
         """returns: List of Point; [y_coordinate start point, bottom start point] for the first y_coordinate_line and bottom_line
@@ -85,11 +88,18 @@ class Path:
             start_point = path_line.y_coordinate_line.start_point
             end_point = path_line.y_coordinate_line.end_point
 
-            if x_coordinate <= start_point.x_coordinate and x_coordinate >= end_point.x_coordinate:
-                print(path_line.y_coordinate_line)
+            # TODO fix so it works for both a leftwards and a rightwards path
+            if x_coordinate >= start_point.x_coordinate and x_coordinate <= end_point.x_coordinate:
                 return path_line.y_coordinate_line.get_y_coordinate(x_coordinate)
 
         return -1
+
+    def __str__(self):
+        string = ""
+        for x in range(len(self.path_lines)):
+            string += f"{self.path_lines[x].y_coordinate_line}\n"
+
+        return string
 
 class VelocityPath(Path):
     """A path that takes into account velocity"""
@@ -101,36 +111,38 @@ class VelocityPath(Path):
 
     times = []  # Stores the times that the get_coordinates() function was called
     total_time = 0
+    last_point = None
 
-    def __init__(self, start_point, other_points, velocity, height):
+    def __init__(self, start_point, other_points, velocity):
         """Initializes the object"""
 
         self.velocity = velocity
+        self.path_lines = []
 
-        last_point = start_point
+        self.last_point = start_point
 
         for point in other_points:
-            path_line = PathLine(LineSegment(last_point, point), height)
-            self.add(path_line)
-            last_point = point
+            self.add_point(point)
 
-    def add(self, path_line: PathLine):
+    def add_point(self, point):
+        """Does some calculations to find the time from the start of the last point to the end of the parameter 'point'
+        and then calls add_time_point() to add the point"""
+        path_line = PathLine(LineSegment(self.last_point, point), 30)
         super().add(path_line)
 
-        line = path_line.y_coordinate_line
-        x_distance = line.start_point.x_coordinate - line.end_point.x_coordinate
-        y_distance = line.start_point.y_coordinate - line.end_point.y_coordinate
+        x_distance = self.last_point.x_coordinate - point.x_coordinate
+        y_distance = self.last_point.y_coordinate - point.y_coordinate
 
-        # Using formula sqrt of (x1 - x2)^2 + (y1 - y2)^2
-        distance = sqrt(pow(x_distance, 2) + pow(y_distance, 2))
+        end_time = max(x_distance / self.velocity, y_distance / self.velocity) + self.last_end_time
+        self.add_time_point(point, end_time)
 
-        end_time = self.last_end_time + (distance / self.velocity)
+    def add_time_point(self, point, end_time):
+        """Adds the point to the path using the end_time as the x_coordinate for the x and y coordinate lines"""
+        x_coordinate_line = LineSegment(Point(self.last_end_time, self.last_point.x_coordinate),
+                                        Point(end_time, point.x_coordinate))
 
-        x_coordinate_line = LineSegment(Point(self.last_end_time, line.start_point.x_coordinate),
-                                        Point(end_time, line.end_point.x_coordinate))
-
-        y_coordinate_line = LineSegment(Point(self.last_end_time, line.start_point.y_coordinate),
-                                        Point(end_time, line.end_point.y_coordinate))
+        y_coordinate_line = LineSegment(Point(self.last_end_time, self.last_point.y_coordinate),
+                                        Point(end_time, point.y_coordinate))
 
         self.x_coordinate_lines.append(x_coordinate_line)
         self.y_coordinate_lines.append(y_coordinate_line)
@@ -143,14 +155,24 @@ class VelocityPath(Path):
             self.times.append(VelocityCalculator.time)
             self.total_time += VelocityCalculator.time
 
-        for x in range(len(self.path_lines)):
+        for x in range(len(self.y_coordinate_lines)):
             y_coordinate_line: LineSegment = self.y_coordinate_lines[x]
             x_coordinate_line: LineSegment = self.x_coordinate_lines[x]
             start_point = y_coordinate_line.start_point
             end_point = y_coordinate_line.end_point
 
+            print(start_point.x_coordinate, end_point.x_coordinate)
             if self.total_time >= start_point.x_coordinate and self.total_time <= end_point.x_coordinate:
                 return [x_coordinate_line.get_y_coordinate(self.total_time), y_coordinate_line.get_y_coordinate(self.total_time)]
 
         return [0, 0] # Invalid input
 
+    def __str__(self):
+        string = ""
+        for x in range(len(self.y_coordinate_lines)):
+            y_coordinate_line = self.y_coordinate_lines[x]
+            x_coordinate_line = self.x_coordinate_lines[x]
+
+            string += f"x {x_coordinate_line}, y {y_coordinate_line}\n"
+
+        return string

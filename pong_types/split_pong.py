@@ -141,6 +141,7 @@ class SplitPong(PongType):
             self.normal_pong._ball_movement(ball)
 
         self.ball_collisions()
+        self.normal_pong.run_player_movement()
 
     def reset(self):
         """ summary: resets everything necessary after each time someone scores

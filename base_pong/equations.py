@@ -67,5 +67,21 @@ class LineSegment:
 
         return self.slope * x_coordinate + self.y_intercept
 
+    def get_x_coordinate(self, y_coordinate):
+        """ summary: finds the x coordinate using the equation x = (y - b) / m
+
+            params:
+                y_coordinate: the y coordinate which will be used to find the x coordinate
+
+            returns: double; the x coordinate
+        """
+
+        return (y_coordinate - self.y_intercept) / self.slope
+
+    def slope_is_positive(self):
+        """returns: boolean; if the slope is >= 0"""
+
+        return self.slope >= 0
+
     def __str__(self):
         return f"{self.start_point} -> {self.end_point}"

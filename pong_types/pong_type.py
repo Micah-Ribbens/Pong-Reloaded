@@ -86,7 +86,8 @@ class PongType(abc.ABC):
         if paddle.bottom >= screen_height:
             paddle.y_coordinate = screen_height - paddle.height
 
-    def get_path(self, x_coordinate):
+    # TODO make it so get_ball_path() and get_ball_y_coordinates() don't have duplicate code
+    def get_ball_path(self, x_coordinate):
         """ summary: finds the ball's y_coordinate and bottom at the next time it hits the x_coordinate
             IMPORTANT: this function should be called when the ball is going the desired horizontal direction
 
@@ -96,7 +97,8 @@ class PongType(abc.ABC):
             returns: Path; the path of the ball from its current x_coordinate to the end x_coordinate
         """
 
-        path = Path([])
+        path = Path(Point(self.ball.x_coordinate, self.ball.y_coordinate))
+
         time_to_travel_distance = abs(x_coordinate - self.ball.x_coordinate) / self.ball.forwards_velocity
 
         ball_y_coordinate = self.ball.y_coordinate
@@ -120,21 +122,49 @@ class PongType(abc.ABC):
                 displacement = distance if ball_is_moving_down else -distance
                 time = time_to_travel_distance
 
-            end_ball_y_coordinate = ball_y_coordinate + displacement
-            end_ball_x_coordinate = ball_x_coordinate + time * self.ball.forwards_velocity
-            y_coordinate_line = LineSegment(Point(ball_x_coordinate, ball_y_coordinate),
-                                                    Point(end_ball_x_coordinate, end_ball_y_coordinate))
+            ball_y_coordinate += displacement
+            ball_x_coordinate += time * self.ball.forwards_velocity
 
-            path.add(PathLine(y_coordinate_line, self.ball.height))
+            path.add_point(Point(ball_x_coordinate, ball_y_coordinate), self.ball.height)
             ball_is_moving_down = not ball_is_moving_down
-            
-            ball_y_coordinate = end_ball_y_coordinate
-            ball_x_coordinate = end_ball_x_coordinate
 
             time_to_travel_distance -= time
 
         return path
 
+    def get_ball_y_coordinates(self, total_time):
+        path = Path(Point(0, self.ball.y_coordinate))
+
+        ball_y_coordinate = self.ball.y_coordinate
+        ball_is_moving_down = self.ball.is_moving_down
+        displacement = 0
+
+        last_time = 0
+        while total_time > 0:
+            ball_bottom = ball_y_coordinate + self.ball.height
+
+            if ball_is_moving_down:
+                displacement = screen_height - ball_bottom
+
+            else:
+                displacement = -ball_y_coordinate
+
+            time = abs(displacement / self.ball.upwards_velocity)
+
+            if total_time - time < 0:
+                distance = self.ball.upwards_velocity * total_time
+                displacement = distance if ball_is_moving_down else -distance
+                time = total_time
+
+            ball_y_coordinate += displacement
+
+            path.add_point(Point(last_time + time, ball_y_coordinate), self.ball.height)
+            ball_is_moving_down = not ball_is_moving_down
+
+            total_time -= time
+            last_time = time
+
+        return path
 
 
 

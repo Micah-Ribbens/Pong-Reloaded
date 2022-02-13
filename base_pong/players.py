@@ -18,7 +18,8 @@ class Paddle(GameObject):
 
     can_move_up = True
     can_move_down = True
-    velocity = VelocityCalculator.give_velocity(screen_height, 1500)
+    base_velocity = VelocityCalculator.give_velocity(screen_height, 1500)
+    velocity = base_velocity
     power = 10.5
     attributes = ["x_coordinate", "y_coordinate"]
 
@@ -53,7 +54,7 @@ class Player(Paddle):
     up_key = pygame.K_UP
     down_key = pygame.K_DOWN
 
-    def run(self):
+    def movement(self):
         """ summary: moves the paddle up and down if those keys were hit
             params: None
             returns: None
@@ -272,6 +273,9 @@ class AI(Paddle):
     def render(self):
         paddle_image = pygame.transform.scale(pygame.image.load("images/paddle.png"), (int(self.length), int(self.height)))
         game_window.get_window().blit(paddle_image, (self.x_coordinate, self.y_coordinate))
+
+        if self.path is not None:
+            self.path.render()
 
     def add_path(self, path):
         """Makes the AI follow the specified path until it hits the path's end"""

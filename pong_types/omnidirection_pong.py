@@ -1,12 +1,16 @@
 import pygame.key
 
 from base_pong.engines import CollisionsFinder
+from base_pong.equations import Point, LineSegment
 from base_pong.events import Event
 from base_pong.important_variables import screen_height, screen_length
+from base_pong.path import VelocityPath, Path, PathLine
+from base_pong.players import AI
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.velocity_calculator import VelocityCalculator
 from pong_types.normal_pong import NormalPong
 from pong_types.pong_type import PongType
+from base_pong.utility_functions import key_is_hit
 
 # TODO fix code so you don't have to assume player2 is the ai
 class OmnidirectionalPong(NormalPong):
@@ -19,7 +23,7 @@ class OmnidirectionalPong(NormalPong):
         GOING_TOWARDS_CENTER = 4
         WAITING = 5
 
-    current_state = States.INIT
+    current_state = States.GOING_TOWARDS_GOAL
 
     ball_sandwiched_event = Event()
 
@@ -28,6 +32,7 @@ class OmnidirectionalPong(NormalPong):
     debug = False
 
     player_who_hit_ball_key = "player who hit ball"
+    player_path = None
 
     def __init__(self, player1, player2, ball):
         """ summary: Initializes the PongType with the needed objects to run its methods
@@ -44,20 +49,25 @@ class OmnidirectionalPong(NormalPong):
         self.last_ball = self.ball
         self.player1.can_move_left, self.player2.can_move_left = False, False
         self.player1.can_move_right, self.player2.can_move_right = False, False
-        self.player1.is_moving_left, self.player2.is_moving_left = False, False
-        self.player1.is_moving_right, self.player2.is_moving_right = False, False
+
         self.player2.action = self.run_ai
+        self.player2: AI = self.player2
+        distance_to_goal = self.player2.x_coordinate
+        time_to_goal = distance_to_goal / self.player2.velocity
 
-    def set_paddles_movements(self, player):
-        """ summary: sets all the ways the player can move (up and down)
+        ball_path: Path = self.get_ball_y_coordinates(time_to_goal)
 
-            params:
-                paddle: Paddle; the paddle will have its movement directions it can move set
+        self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
 
-            returns: None
-        """
+        for time in self.get_important_times(ball_path):
+            x_coordinate = self.player2.x_coordinate - time * self.player2.velocity
 
-        self.run_player_boundaries(player)
+            y_coordinate = ball_path.get_y_coordinate(time)
+
+            if y_coordinate >= screen_height - self.player2.height:
+                y_coordinate = screen_height - self.player2.height
+
+            self.player_path.add_time_point(Point(x_coordinate, y_coordinate), time)
 
     def run(self):
         """ summary: runs all the code that is necessary for this pong type
@@ -75,8 +85,12 @@ class OmnidirectionalPong(NormalPong):
         self.horizontal_player_movements(self.player2, pygame.K_LEFT, pygame.K_RIGHT)
         self.ball_sandwiched_event.run(self.ball_is_sandwiched())
         self.run_ball_sandwiching()
+
         if self.ball.can_move:
             self.ball_movement()
+        self.run_player_movement()
+        self.run_player_boundaries(self.player2)
+        self.run_player_boundaries(self.player1)
 
     def paddle_collisions(self):
         """ summary: runs all the collisions between paddles
@@ -131,14 +145,19 @@ class OmnidirectionalPong(NormalPong):
         """
         if CollisionsFinder.is_collision(self.ball, player):
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
+            velocity_reduction = .8
+            player.velocity = player.base_velocity * velocity_reduction
+
+        else:
+            player.velocity = player.base_velocity
 
         if CollisionsFinder.is_left_collision(self.ball, player) and not self.ball_is_sandwiched():
-            self.ball.x_coordinate = player.right_edge + self.ball.length * .2
+            self.ball.x_coordinate = player.right_edge
             self.ball.is_moving_right = True
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
 
         if CollisionsFinder.is_right_collision(self.ball, player) and not self.ball_is_sandwiched():
-            self.ball.x_coordinate = player.x_coordinate - self.ball.length * 1.2
+            self.ball.x_coordinate = player.x_coordinate - self.ball.length
             self.ball.is_moving_right = False
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
 
@@ -153,17 +172,10 @@ class OmnidirectionalPong(NormalPong):
 
         if player.can_move_left and controls[left_key]:
             player.x_coordinate -= VelocityCalculator.calc_distance(player.velocity)
-            player.is_moving_left = True
-
-        else:
-            player.is_moving_left = False
 
         if player.can_move_right and controls[right_key] and not controls[left_key]:
             player.x_coordinate += VelocityCalculator.calc_distance(player.velocity)
-            player.is_moving_right = True
 
-        else:
-            player.is_moving_right = False
 
     def run_player_boundaries(self, player):
         """ summary: sets the players can move left and right based on if the player is within the screens bounds
@@ -259,33 +271,76 @@ class OmnidirectionalPong(NormalPong):
 
     # From here down is the code for AI
     def run_ai(self):
-        state_to_function = {
-            self.States.GOING_TOWARDS_GOAL: self.go_towards_goal,
-            self.States.GOING_TOWARDS_BALL: self.go_towards_ball,
-            self.States.GOING_TOWARDS_CENTER: self.go_towards_center
-        }
-        function = state_to_function.get(self.current_state)
+        # TODO change back
+        # state_to_function = {
+        #     self.States.GOING_TOWARDS_GOAL: self.go_towards_goal,
+        #     self.States.GOING_TOWARDS_BALL: self.go_towards_ball,
+        #     self.States.GOING_TOWARDS_CENTER: self.go_towards_center
+        # }
+        # function = state_to_function.get(self.current_state)
+        #
+        # if function is not None:
+        #     function()
+        #
+        # if self.ball_is_sandwiched():
+        #     self.current_state = self.States.WAITING
+        #
+        # if self.current_state == self.States.WAITING and not self.ball_is_sandwiched():
+        #     self.current_state = self.States.GOING_TOWARDS_BALL
 
-        if function is not None:
-            function()
-
-        if self.ball_is_sandwiched():
-            self.current_state = self.States.WAITING
-
-        if self.current_state == self.States.WAITING and not self.ball_is_sandwiched():
-            self.current_state = self.States.GOING_TOWARDS_BALL
+        self.go_towards_goal()
 
     def go_towards_goal(self):
         """Moves the AI towards the ball and should only be called if moving directly to the ball
         means going towards the goal and the ball is being hit by the AI"""
 
-        if self.ball.y_coordinate < self.player2.y_coordinate:
-            self.player2.y_coordinate -= VelocityCalculator.calc_distance(self.player2.velocity)
+        # distance_to_goal = self.player2.x_coordinate
+        # time_to_goal = distance_to_goal / self.player2.velocity
+        #
+        # ball_path: Path = self.player2.pong_type.get_ball_y_coordinates(time_to_goal)
+        #
+        # player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
+        #
+        # for time in self.get_important_times(ball_path):
+        #     x_coordinate = self.player2.x_coordinate - time * self.player2.velocity
+        #
+        #     y_coordinate = ball_path.get_y_coordinate(time)
+        #
+        #     if y_coordinate >= screen_height - self.player2.height:
+        #         y_coordinate = screen_height - self.player2.height
+        #
+        #     print(x_coordinate, y_coordinate, time)
+        #     player_path.add_time_point(Point(x_coordinate, y_coordinate), time)
 
-        elif self.ball.y_coordinate > self.player2.bottom:
-            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+        # print(player_path)
+        self.player2.x_coordinate, self.player2.y_coordinate = self.player_path.get_coordinates()
+        # self.player2.add_path(player_path)
 
-        self.player2.x_coordinate -= VelocityCalculator.calc_distance(self.player2.velocity)
+    def get_important_times(self, ball_path):
+        """Finds and returns the important times for the players path; important is being defined by points where a major
+        change happens. The major changes are transitioning into the bottom of the screen and transitioning out of the bottom of the screen"""
+
+        important_times = []
+        for path_line in ball_path.path_lines:
+            line: LineSegment = path_line.y_coordinate_line
+
+            # Or more accurately the player transitions into the bottom of the screen or out of the bottom of the screen
+            time_at_bottom = line.get_x_coordinate(screen_height - self.player2.height)
+            min_time = line.start_point.x_coordinate
+            max_time = line.end_point.x_coordinate
+
+            player_is_at_bottom = time_at_bottom > min_time and time_at_bottom < max_time
+
+            if player_is_at_bottom and line.slope_is_positive():
+                important_times.append(time_at_bottom)
+
+            elif player_is_at_bottom:
+                important_times.append(time_at_bottom)
+
+            if not important_times.__contains__(max_time):
+                important_times.append(max_time)
+
+        return important_times
 
     def go_towards_ball(self):
         distance = VelocityCalculator.calc_distance(self.player2.velocity)

@@ -4,7 +4,7 @@ from base_pong.engines import CollisionsFinder
 from pong_types.pong_type import PongType
 from base_pong.drawable_objects import GameObject
 from base_pong.ball import Ball
-from base_pong.players import Paddle
+from base_pong.players import Paddle, AI
 import pygame
 
 
@@ -92,6 +92,16 @@ class NormalPong(PongType):
         """
         self.ball_collisions()
         self.ball_movement()
+        self.run_player_movement()
+
+    def run_player_movement(self):
+        """Runs the code that allows the players to move"""
+        self.set_paddles_movements(self.player2)
+        self.set_paddles_movements(self.player1)
+        self.player1.movement()
+
+        if type(self.player2) != AI:
+            self.player2.movement
 
     def reset(self):
         """ summary: resets everything necessary after each time someone scores
