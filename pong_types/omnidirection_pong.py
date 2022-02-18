@@ -6,26 +6,30 @@ from base_pong.events import Event
 from base_pong.important_variables import screen_height, screen_length
 from base_pong.path import VelocityPath, Path, PathLine
 from base_pong.players import AI
-from base_pong.utility_classes import HistoryKeeper
+from base_pong.utility_classes import HistoryKeeper, StateChange
 from base_pong.velocity_calculator import VelocityCalculator
 from pong_types.normal_pong import NormalPong
 from pong_types.pong_type import PongType
-from base_pong.utility_functions import key_is_hit
+from base_pong.utility_functions import key_is_hit, get_leftmost_object, get_rightmost_object, get_displacement
 
 # TODO fix code so you don't have to assume player2 is the ai
 class OmnidirectionalPong(NormalPong):
     """Pong where the player can move 4 directions"""''
     # States for the AI
     class States:
-        GOING_TOWARDS_GOAL = 1
-        GOING_TOWARDS_BALL = 2
-        INIT = 3
-        GOING_TOWARDS_CENTER = 4
-        WAITING = 5
+        GOING_TOWARDS_GOAL = "GOING_TOWARDS_GOAL"
+        INTERCEPTING_BALL = "INTERCEPTING_BALL"
+        CENTERING = "CENTERING"
+        BACKING_UP = "BACKING_UP"
+        INTERCEPTING_PLAYER = "INTERCEPTING_PLAYER"
+        WAITING = "WAITING"
 
-    current_state = States.GOING_TOWARDS_GOAL
+    current_state = States.INTERCEPTING_BALL
+    next_state = States.INTERCEPTING_BALL
 
     ball_sandwiched_event = Event()
+    ball_is_spawned = False
+    a_player_has_scored = False
 
     # Stores the value of the ball at the start of the cycle; the ball gets modified in the code making this necesary
     last_ball = None
@@ -51,23 +55,7 @@ class OmnidirectionalPong(NormalPong):
         self.player1.can_move_right, self.player2.can_move_right = False, False
 
         self.player2.action = self.run_ai
-        self.player2: AI = self.player2
-        distance_to_goal = self.player2.x_coordinate
-        time_to_goal = distance_to_goal / self.player2.velocity
-
-        ball_path: Path = self.get_ball_y_coordinates(time_to_goal)
-
-        self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
-
-        for time in self.get_important_times(ball_path):
-            x_coordinate = self.player2.x_coordinate - time * self.player2.velocity
-
-            y_coordinate = ball_path.get_y_coordinate(time)
-
-            if y_coordinate >= screen_height - self.player2.height:
-                y_coordinate = screen_height - self.player2.height
-
-            self.player_path.add_time_point(Point(x_coordinate, y_coordinate), time)
+        self.player2 = self.player2
 
     def run(self):
         """ summary: runs all the code that is necessary for this pong type
@@ -176,7 +164,6 @@ class OmnidirectionalPong(NormalPong):
         if player.can_move_right and controls[right_key] and not controls[left_key]:
             player.x_coordinate += VelocityCalculator.calc_distance(player.velocity)
 
-
     def run_player_boundaries(self, player):
         """ summary: sets the players can move left and right based on if the player is within the screens bounds
 
@@ -269,52 +256,129 @@ class OmnidirectionalPong(NormalPong):
         """
         return self.player1 if self.player1.x_coordinate > self.player2.x_coordinate else self.player2
 
-    # From here down is the code for AI
+    def reset(self):
+        """Resets everything necessary after someone scored"""
+        super().reset()
+        self.ball_is_spawned = True
+        self.a_player_has_scored = True
+
+    # AI CODE
     def run_ai(self):
-        # TODO change back
-        # state_to_function = {
-        #     self.States.GOING_TOWARDS_GOAL: self.go_towards_goal,
-        #     self.States.GOING_TOWARDS_BALL: self.go_towards_ball,
-        #     self.States.GOING_TOWARDS_CENTER: self.go_towards_center
-        # }
-        # function = state_to_function.get(self.current_state)
-        #
-        # if function is not None:
-        #     function()
-        #
-        # if self.ball_is_sandwiched():
-        #     self.current_state = self.States.WAITING
-        #
-        # if self.current_state == self.States.WAITING and not self.ball_is_sandwiched():
-        #     self.current_state = self.States.GOING_TOWARDS_BALL
+        # So when it is first initialized there is a player path
+        if self.next_state != self.current_state or self.player_path is None:
+            self.run_state_changes()
 
-        self.go_towards_goal()
+        # BACKING_UP
+        self.run_state_change(self.States.BACKING_UP, [
+            StateChange(self.is_done_backing_up(), self.States.WAITING)])
+        # INTERCEPTING_PLAYER
+        self.run_state_change(self.States.INTERCEPTING_PLAYER, [
+            StateChange(not self.can_intercept_object(self.player1.velocity, self.player1), self.States.CENTERING),
+            StateChange(not CollisionsFinder.is_collision(self.player1, self.last_ball), self.States.INTERCEPTING_BALL)])
+        # CENTERING
+        self.run_state_change(self.States.CENTERING, [
+            StateChange(self.ball_is_spawned, self.States.INTERCEPTING_BALL)])
+        # INTERCEPTING_BALL
+        self.run_state_change(self.States.INTERCEPTING_BALL, [
+            StateChange(CollisionsFinder.is_left_collision(self.player2, self.last_ball), self.States.GOING_TOWARDS_GOAL),
+            StateChange(not self.can_intercept_object(self.ball.forwards_velocity, self.last_ball), self.States.CENTERING),
+            StateChange(CollisionsFinder.is_collision(self.player1, self.last_ball), self.States.INTERCEPTING_PLAYER)
+        ])
+        # WAITING
+        prev_player = HistoryKeeper.get_last(self.player1.name)
+        opponent_has_moved = prev_player is not None and prev_player.x_coordinate != self.player1.x_coordinate
+        opponent_is_touching_ball = CollisionsFinder.is_collision(self.player1, self.last_ball)
+        self.run_state_change(self.States.WAITING, [
+            StateChange(opponent_has_moved and opponent_is_touching_ball, self.States.INTERCEPTING_PLAYER),
+            StateChange(self.ball.is_moving_right and self.ball.x_coordinate >= self.player2.right_edge, self.States.INTERCEPTING_BALL)])
+        # State Changes no matter what State
+        self.next_state = self.States.BACKING_UP if self.ball_is_sandwiched() else self.next_state
+        self.next_state = self.States.INTERCEPTING_BALL if self.a_player_has_scored else self.next_state
 
-    def go_towards_goal(self):
-        """Moves the AI towards the ball and should only be called if moving directly to the ball
-        means going towards the goal and the ball is being hit by the AI"""
+        if self.player_path is not None:
+            self.player2.x_coordinate, self.player2.y_coordinate = self.player_path.get_coordinates()
 
-        # distance_to_goal = self.player2.x_coordinate
-        # time_to_goal = distance_to_goal / self.player2.velocity
-        #
-        # ball_path: Path = self.player2.pong_type.get_ball_y_coordinates(time_to_goal)
-        #
-        # player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
-        #
-        # for time in self.get_important_times(ball_path):
-        #     x_coordinate = self.player2.x_coordinate - time * self.player2.velocity
-        #
-        #     y_coordinate = ball_path.get_y_coordinate(time)
-        #
-        #     if y_coordinate >= screen_height - self.player2.height:
-        #         y_coordinate = screen_height - self.player2.height
-        #
-        #     print(x_coordinate, y_coordinate, time)
-        #     player_path.add_time_point(Point(x_coordinate, y_coordinate), time)
+        # Done using this variable, so it should be False again
+        self.a_player_has_scored = False
 
-        # print(player_path)
-        self.player2.x_coordinate, self.player2.y_coordinate = self.player_path.get_coordinates()
-        # self.player2.add_path(player_path)
+    def can_intercept_object(self, intercepted_object_velocity, intercepted_object):
+        """returns: boolean; if the AI can intercept that object (assumes the object is going rightwards)"""
+        return_value = True
+
+        distance_needed = intercepted_object.right_edge - self.player2.x_coordinate
+
+        velocity_difference = self.player2.velocity - intercepted_object_velocity
+
+        if velocity_difference <= 0:
+            return_value = False
+
+        else:
+            # The max amonut of time the AI has to travel the distance
+            max_time = (screen_length - intercepted_object.right_edge) / intercepted_object_velocity
+
+            return_value = (distance_needed / velocity_difference) <= max_time
+
+        return return_value
+
+    def is_done_backing_up(self):
+        """returns: boolean; if the AI is done backing away from the ball"""
+        return_value = False
+
+        # Assumes the backing up path is one singular line
+        start_x_coordinate: Point = self.player_path.x_coordinate_lines[0].start_point.y_coordinate
+        end_x_coordinate: Point = self.player_path.x_coordinate_lines[0].end_point.y_coordinate
+
+        path_is_leftwards = start_x_coordinate > end_x_coordinate
+
+        if path_is_leftwards and self.player2.x_coordinate <= end_x_coordinate:
+            return_value = True
+
+        if not path_is_leftwards and self.player2.x_coordinate >= end_x_coordinate:
+            return_value = True
+
+        return return_value
+
+    def run_state_change(self, needed_state, states_changes):
+        """ summary: changes the attribute 'next_state' if one of the state change's condition is True
+
+            params:
+                needed_state: int; the state that the AI has to be in in order to change states
+                state_changes: List of StateChange; the states that are allowed
+        """
+
+        for state_change in states_changes:
+            if state_change.condition and self.current_state == needed_state:
+                self.next_state = state_change.state
+            if state_change.condition and self.current_state == needed_state and needed_state == self.States.WAITING:
+                print("EH", self.next_state)
+
+    def run_state_changes(self):
+        """Runs all the code that should be done when the state changes"""
+
+        self.current_state = self.next_state
+
+        # GOING_TOWARDS_GOAL
+        if self.current_state == self.States.GOING_TOWARDS_GOAL:
+            self.go_to_goal()
+
+        # INTERCEPTING_BALL
+        if self.current_state == self.States.INTERCEPTING_BALL:
+            self.intercept_object(self.ball.forwards_velocity, self.ball)
+
+        # INTERCEPTING_PLAYER
+        if self.current_state == self.States.INTERCEPTING_PLAYER:
+            # The ball is touching the player so it has to intercept the ball that is touching the player
+            self.intercept_object(self.player2.forwards_velocity, self.ball)
+
+        # BACKING_UP
+        if self.current_state == self.States.BACKING_UP:
+            self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
+            self.player_path.add_point(Point(self.player2.x_coordinate + 50, self.player2.y_coordinate + 10))
+
+        # CENTERING
+        if self.current_state == self.States.CENTERING:
+            self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
+            self.player_path.add_point(Point(screen_length / 2, screen_height / 2))
 
     def get_important_times(self, ball_path):
         """Finds and returns the important times for the players path; important is being defined by points where a major
@@ -342,52 +406,78 @@ class OmnidirectionalPong(NormalPong):
 
         return important_times
 
-    def go_towards_ball(self):
-        distance = VelocityCalculator.calc_distance(self.player2.velocity)
-        # displacement = distance if self.player2.x_coordinate <
-        if self.ball.y_coordinate > self.player2.y_coordinate:
-            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+    def intercept_object(self, intercepted_objects_velocity, intercepted_object):
+        """ summary: makes the AI's path intercept the other object using the parameters
+
+            params:
+                intercepted_objects_velocity: double; the velocity of the intercepted_object
+                intercepted_object: GameObject; the object that will be intercepted
+
+            returns: None
+        """
+        path_is_leftwards = get_rightmost_object(intercepted_object, self.player2) == self.player2
+        self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [],
+                                        self.player2.velocity)
+
+        # Gets the horizontal distance for the rightwards path and if the path is leftwards then it changes the distance
+        horizontal_buffer = VelocityCalculator.give_measurement(screen_length, 5)
+        horizontal_distance = int(intercepted_object.right_edge - self.player2.x_coordinate + horizontal_buffer)
+        if path_is_leftwards:
+            horizontal_distance = int(self.player2.x_coordinate - intercepted_object.right_edge)
+
+        velocity_difference = self.player2.velocity - intercepted_objects_velocity
+        horizontal_time = horizontal_distance / velocity_difference
+
+        ball_path = self.get_ball_y_coordinates(horizontal_time)
+        vertical_buffer = VelocityCalculator.give_measurement(screen_height, 15)
+        end_point: Point = ball_path.get_end_points()[0]
+
+        intercepted_object_end_y_coordinate = end_point.y_coordinate
+        # Starts out finding the vertical displacement if the AI is above the intercepted object at the end and if it
+        # isn't then it changes the vertical displacement
+        vertical_displacement = intercepted_object_end_y_coordinate + intercepted_object.height - self.player2.bottom
+        if intercepted_object_end_y_coordinate < self.player2.x_coordinate:
+            vertical_displacement = intercepted_object_end_y_coordinate - self.player2.y_coordinate
+
+        vertical_time = abs(vertical_displacement) / self.player2.velocity
+
+        if vertical_time > horizontal_time or path_is_leftwards:
+            displacement = get_displacement(self.player2.velocity, horizontal_time, path_is_leftwards)
+            self.add_path_point(intercepted_object.right_edge + displacement, end_point.y_coordinate, horizontal_time)
 
         else:
-            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+            # The time that the AI should go from moving only horizontally to a slant of vertical + horizontal movement
+            time_vertical_ascent_should_start = horizontal_time - vertical_time
+            displacement = get_displacement(self.player2.velocity, time_vertical_ascent_should_start, path_is_leftwards)
 
-    def intercept_opponent(self):
-        self.player2.x_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+            self.add_path_point(intercepted_object.right_edge + displacement, self.player2.y_coordinate, time_vertical_ascent_should_start)
 
-        if self.ball.y_coordinate > self.player2.y_coordinate:
-            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+            displacement = get_displacement(self.player2.velocity, vertical_time, path_is_leftwards)
 
-        else:
-            self.player2.y_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
+            self.add_path_point(intercepted_object.right_edge + displacement, end_point.y_coordinate, horizontal_time)
+        print(f"PATH {self.player_path}\n")
 
-        distance_to_cover = self.ball.right_edge - self.player2.x_coordinate
-        velocities_difference = self.player2.velocity - self.player1.velocity
+    def add_path_point(self, x_coordinate, y_coordinate, time):
+        """Adds a point to the attribute 'player_path' and makes sure the point is within the screens bounds"""
+        if y_coordinate >= screen_height - self.player2.height:
+            y_coordinate = screen_height - self.player2.height
 
-        # Prevents a dividing by 0 error
-        if velocities_difference == 0:
-            return
+        self.player_path.add_time_point(Point(x_coordinate, y_coordinate), time)
 
-        # NOTE: Code under this point won't be executed if velocities_difference == 0
-        time_to_reach_opponent = distance_to_cover / velocities_difference
+    def go_to_goal(self):
+        """Changes the AI's path, so it will move towards the goal"""
+        distance_to_goal = self.player2.x_coordinate
+        time_to_goal = distance_to_goal / self.player2.velocity
 
-        if time_to_reach_opponent * self.player2.velocity >= screen_height:
-            self.current_state = self.States.GOING_TOWARDS_CENTER
+        ball_path: Path = self.get_ball_y_coordinates(time_to_goal)
 
-    def go_towards_center(self):
-        center = screen_length / 2
+        self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [],
+                                        self.player2.velocity)
 
-        is_at_center = self.player2.x_coordinate >= center and self.player2 <= center + screen_length * .05
+        for time in self.get_important_times(ball_path):
+            x_coordinate = self.player2.x_coordinate - time * self.player2.velocity
 
-        # So it is close to the center, but doesn't have to be right on
-        if not is_at_center and self.player2.x_coordinate >= center:
-            self.player2.x_coordinate -= VelocityCalculator.calc_distance(self.player2.velocity)
-
-        elif not is_at_center:
-            self.player2.x_coordinate += VelocityCalculator.calc_distance(self.player2.velocity)
-
-        if self.last_ball.x_coordinate == center:
-            self.current_state = self.States.GOING_TOWARDS_BALL
-
+            self.add_path_point(x_coordinate, ball_path.get_y_coordinate(time), time)
 
 
 

@@ -166,7 +166,25 @@ def mod(number, divider):
 
     return result
 
+
 def key_is_hit(key):
     """returns: boolean; if the key has gotten pressed"""
 
     return pygame.key.get_pressed()[key]
+
+
+def get_leftmost_object(object1, object2):
+    """returns: GameObject; the object whose x coordinate is the smallest"""
+    return object1 if object1.x_coordinate < object2.x_coordinate else object2
+
+
+def get_rightmost_object(object1, object2):
+    """returns: GameObject; the object whose x coordinate is the biggest"""
+    return object1 if object1.x_coordinate > object2.x_coordinate else object2
+
+
+def get_displacement(velocity, time, is_leftwards):
+    """returns: double; the displacement (left is negative and right is positive"""
+
+    distance = time * velocity
+    return -distance if is_leftwards else distance

@@ -146,3 +146,15 @@ class Fraction:
         """
         return f"{self.numerator}/{self.denominator}"
 
+
+class StateChange:
+    """Stores the information for changing between states"""
+
+    condition = False
+    state = 0
+
+    def __init__(self, condition, state):
+        """Initializes the object"""
+
+        self.condition = condition
+        self.state = state

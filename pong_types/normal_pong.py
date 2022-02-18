@@ -101,7 +101,7 @@ class NormalPong(PongType):
         self.player1.movement()
 
         if type(self.player2) != AI:
-            self.player2.movement
+            self.player2.movement()
 
     def reset(self):
         """ summary: resets everything necessary after each time someone scores

@@ -26,7 +26,7 @@ class CollisionsFinder:
 
         if prev_object1 is None or prev_object2 is None:
             # Don't want to actually abort the code if this happens since it does on the first cycle; but it is a message to fix something
-            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+            # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
         return prev_object1.right_edge < prev_object2.right_edge and CollisionsFinder.is_collision(object1, object2)
@@ -46,7 +46,7 @@ class CollisionsFinder:
         prev_object2 = HistoryKeeper.get_last(object2.name)
         if prev_object1 is None or prev_object2 is None:
             # Don't want to actually abort the code if this happens since it does on the first cycle; but it is a message to fix something
-            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+            # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
         return prev_object1.x_coordinate > prev_object2.x_coordinate and CollisionsFinder.is_collision(object1, object2)
 
@@ -128,7 +128,7 @@ class CollisionsFinder:
         prev_object2 = HistoryKeeper.get_last(object2.name)
 
         if prev_object1 is None or prev_object2 is None:
-            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+            # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
         prev_bottom_object = CollisionsFinder.get_bottommost_object(prev_object1, prev_object2)
@@ -154,7 +154,7 @@ class CollisionsFinder:
         prev_object2 = HistoryKeeper.get_last(object2.name)
 
         if prev_object1 is None or prev_object2 is None:
-            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+            # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
         prev_bottom_object = CollisionsFinder.get_bottommost_object(prev_object1, prev_object2)

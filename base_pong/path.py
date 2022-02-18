@@ -75,11 +75,13 @@ class Path:
     def get_end_points(self):
         """returns: List of Point; [y_coordinate end point, bottom end point] for the last y_coordinate_line and bottom_line
         in the attribute 'path_lines'"""
-
-        last_index = len(self.path_lines) - 1
-        y_coordinate_point = self.path_lines[last_index].y_coordinate_line.end_point
-        bottom_point = self.path_lines[last_index].bottom_line.end_point
-        return [y_coordinate_point, bottom_point]
+        try:
+            last_index = len(self.path_lines) - 1
+            y_coordinate_point = self.path_lines[last_index].y_coordinate_line.end_point
+            bottom_point = self.path_lines[last_index].bottom_line.end_point
+            return [y_coordinate_point, bottom_point]
+        except:
+            pass
 
     def get_y_coordinate(self, x_coordinate):
         """returns: double; the y_coordinate at that x_coordinate"""
@@ -118,6 +120,8 @@ class VelocityPath(Path):
 
         self.velocity = velocity
         self.path_lines = []
+        self.x_coordinate_lines = []
+        self.y_coordinate_lines = []
 
         self.last_point = start_point
 
@@ -127,9 +131,6 @@ class VelocityPath(Path):
     def add_point(self, point):
         """Does some calculations to find the time from the start of the last point to the end of the parameter 'point'
         and then calls add_time_point() to add the point"""
-        path_line = PathLine(LineSegment(self.last_point, point), 30)
-        super().add(path_line)
-
         x_distance = self.last_point.x_coordinate - point.x_coordinate
         y_distance = self.last_point.y_coordinate - point.y_coordinate
 
@@ -148,12 +149,23 @@ class VelocityPath(Path):
         self.y_coordinate_lines.append(y_coordinate_line)
         self.last_end_time = end_time
 
+        # The height for the path_line doesn't matter
+        path_line = PathLine(LineSegment(self.last_point, point), 0)
+        self.path_lines.append(path_line)
+
+        self.last_point = point
+
     def get_coordinates(self):
         """returns: [x_coordinate, y_coordinate] for that time"""
-
         if not self.times.__contains__(VelocityCalculator.time):
             self.times.append(VelocityCalculator.time)
             self.total_time += VelocityCalculator.time
+
+        # By default it starts out as the end of the path and if the time falls within the path uses those coordinates
+        last_index = len(self.x_coordinate_lines) - 1
+        end_x_coordinate = self.x_coordinate_lines[last_index].end_point.y_coordinate
+        end_y_coordinate = self.y_coordinate_lines[last_index].end_point.y_coordinate
+        coordinates = [end_x_coordinate, end_y_coordinate]
 
         for x in range(len(self.y_coordinate_lines)):
             y_coordinate_line: LineSegment = self.y_coordinate_lines[x]
@@ -161,11 +173,11 @@ class VelocityPath(Path):
             start_point = y_coordinate_line.start_point
             end_point = y_coordinate_line.end_point
 
-            print(start_point.x_coordinate, end_point.x_coordinate)
             if self.total_time >= start_point.x_coordinate and self.total_time <= end_point.x_coordinate:
-                return [x_coordinate_line.get_y_coordinate(self.total_time), y_coordinate_line.get_y_coordinate(self.total_time)]
+                # print(x_coordinate_line, y_coordinate_line)
+                coordinates = [x_coordinate_line.get_y_coordinate(self.total_time), y_coordinate_line.get_y_coordinate(self.total_time)]
 
-        return [0, 0] # Invalid input
+        return coordinates
 
     def __str__(self):
         string = ""

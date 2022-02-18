@@ -19,7 +19,7 @@ class GameScreen(Screen):
     game_paused = False
     ball = Ball()
     player1 = Player()
-    player2 = AI(100000, ball)
+    player2 = AI(90, ball)
     player1_score = 0
     player2_score = 0
     pause_button = PauseButton()
@@ -54,8 +54,7 @@ class GameScreen(Screen):
         self.ball.reset()
         self.pong_type.reset()
 
-        self.ball.x_coordinate = self.player2.x_coordinate - self.ball.length
-        self.ball.y_coordinate = self.player2.y_midpoint
+        self.player2.y_coordinate = screen_height - self.player2.height
         if type(self.player2) == AI:
             self.player2.reset()
 

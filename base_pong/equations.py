@@ -43,7 +43,13 @@ class LineSegment:
 
             returns: None
         """
-        self.slope = (start_point.y_coordinate - end_point.y_coordinate) / (start_point.x_coordinate - end_point.x_coordinate)
+        # So there isn't a dividing by 0 error
+        if start_point.x_coordinate - end_point.x_coordinate != 0:
+            self.slope = (start_point.y_coordinate - end_point.y_coordinate) / (start_point.x_coordinate - end_point.x_coordinate)
+
+        else:
+            self.slope = 0
+
         self.y_intercept = start_point.y_coordinate - self.slope * start_point.x_coordinate
 
         self.start_point = start_point
@@ -66,6 +72,7 @@ class LineSegment:
         """
 
         return self.slope * x_coordinate + self.y_intercept
+
 
     def get_x_coordinate(self, y_coordinate):
         """ summary: finds the x coordinate using the equation x = (y - b) / m
