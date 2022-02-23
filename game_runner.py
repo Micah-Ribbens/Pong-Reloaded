@@ -54,9 +54,7 @@ while True:
 
     current_screen = screen
     VelocityCalculator.time = time.time() - start_time
-    HistoryKeeper.last_time = HistoryKeeper.get_last_time()
+    # if HistoryKeeper.get_last(game_screen.ball) is not None:
+    #     print(game_screen.ball.x_coordinate, HistoryKeeper.get_last(game_screen.ball.name).x_coordinate)
     function_runner.run()
-
-
-
-
+    HistoryKeeper.last_time = HistoryKeeper.get_last_time()

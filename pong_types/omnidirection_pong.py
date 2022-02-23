@@ -54,7 +54,8 @@ class OmnidirectionalPong(NormalPong):
         self.player1.can_move_left, self.player2.can_move_left = False, False
         self.player1.can_move_right, self.player2.can_move_right = False, False
 
-        self.player2.action = self.run_ai
+        # TODO uncomment
+        # self.player2.action = self.run_ai
         self.player2 = self.player2
 
     def run(self):
@@ -66,17 +67,17 @@ class OmnidirectionalPong(NormalPong):
         if pygame.key.get_pressed()[pygame.K_SPACE]:
             self.ball.can_move = True
 
-        self.ball_collisions(self.player1)
-        self.ball_collisions(self.player2)
         self.paddle_collisions()
         self.horizontal_player_movements(self.player1, pygame.K_a, pygame.K_d)
         self.horizontal_player_movements(self.player2, pygame.K_LEFT, pygame.K_RIGHT)
         self.ball_sandwiched_event.run(self.ball_is_sandwiched())
         self.run_ball_sandwiching()
 
-        if self.ball.can_move:
-            self.ball_movement()
+        # if self.ball.can_move:
+        self.ball_movement()
         self.run_player_movement()
+        self.ball_collisions(self.player1)
+        self.ball_collisions(self.player2)
         self.run_player_boundaries(self.player2)
         self.run_player_boundaries(self.player1)
 
@@ -131,7 +132,12 @@ class OmnidirectionalPong(NormalPong):
 
             returns: None
         """
-        if CollisionsFinder.is_collision(self.ball, player):
+        if CollisionsFinder.sim_collision(self.last_ball, player) and not CollisionsFinder.is_collision(self.last_ball, player):
+            CollisionsFinder.is_collision(self.last_ball, player)
+
+        # if CollisionsFinder.is_collision(self.last_ball, player):
+        #     print("COLLLISION")
+        if CollisionsFinder.is_collision(self.last_ball, player):
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
             velocity_reduction = .8
             player.velocity = player.base_velocity * velocity_reduction
@@ -173,7 +179,6 @@ class OmnidirectionalPong(NormalPong):
             returns: None
         """
         is_collision = CollisionsFinder.is_collision(self.player1, self.player2) or self.ball_is_sandwiched()
-
         if player.right_edge >= screen_length:
             player.x_coordinate = screen_length - player.length
             player.can_move_right = False
@@ -264,6 +269,7 @@ class OmnidirectionalPong(NormalPong):
 
     # AI CODE
     def run_ai(self):
+        # TODO uncomment lines
         # So when it is first initialized there is a player path
         if self.next_state != self.current_state or self.player_path is None:
             self.run_state_changes()
@@ -349,8 +355,6 @@ class OmnidirectionalPong(NormalPong):
         for state_change in states_changes:
             if state_change.condition and self.current_state == needed_state:
                 self.next_state = state_change.state
-            if state_change.condition and self.current_state == needed_state and needed_state == self.States.WAITING:
-                print("EH", self.next_state)
 
     def run_state_changes(self):
         """Runs all the code that should be done when the state changes"""

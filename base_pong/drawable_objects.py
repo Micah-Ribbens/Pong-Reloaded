@@ -178,8 +178,8 @@ class Ellipse(GameObject):
         # x_center is the same as h and y_center is the same as k
         x_center = self.x_coordinate + self.length / 2
         y_center = self.y_coordinate + self.height / 2
-        a = self.x_midpoint - self.x_coordinate
-        b = self.y_midpoint - self.y_coordinate
+        a = self.length / 2
+        b = self.height / 2
 
         return [x_center, y_center, a, b]
 

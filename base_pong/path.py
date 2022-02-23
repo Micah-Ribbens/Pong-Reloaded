@@ -45,6 +45,19 @@ class Path:
         self.last_point = start_point
         self.path_lines = []
 
+    def get_x_coordinate_path(prev_game_object, game_object):
+        """returns: Path; the path of the game object using the x coordinate"""
+        path = Path(Point(prev_game_object.x_coordinate, prev_game_object.y_coordinate))
+        path.add_point(Point(game_object.x_coordinate, game_object.y_coordinate), game_object.height)
+        return path
+
+    def get_right_edge_path(prev_game_object, game_object):
+        """returns: Path; the path of the game object using the right edge"""
+
+        path = Path(Point(prev_game_object.right_edge, prev_game_object.y_coordinate))
+        path.add_point(Point(game_object.right_edge, game_object.y_coordinate), game_object.height)
+        return path
+
     def add_point(self, point, height):
         """Adds the path_line to the attribute 'path_lines'"""
 
@@ -102,6 +115,26 @@ class Path:
             string += f"{self.path_lines[x].y_coordinate_line}\n"
 
         return string
+
+    def get_lines(self):
+        """returns: List of LineSegment; all the lines that this path has"""
+
+        lines = []
+
+        for path_line in self.path_lines:
+            y_line = path_line.y_coordinate_line
+            bottom_line = path_line.bottom_line
+
+            lines.append(y_line)
+            lines.append(bottom_line)
+
+            lines.append(LineSegment(y_line.start_point, bottom_line.start_point))
+            lines.append(LineSegment(y_line.end_point, bottom_line.end_point))
+
+        return lines
+
+
+
 
 class VelocityPath(Path):
     """A path that takes into account velocity"""

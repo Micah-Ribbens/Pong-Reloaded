@@ -12,10 +12,8 @@ class HistoryKeeperObject:
     def __init__(self, object_being_stored):
         """ summary: initializes the HistoryKeeperObject,
             so its attributes reflects what is passed through the parameters
-
             params:
                 object: Object; the object that is being stored
-
             returns: None
         """
 
@@ -41,12 +39,10 @@ class HistoryKeeper:
 
     def add(object, name, is_game_object):
         """ summary: adds the object to the HistoryKeeper; IMPORTANT: make sure to provide a unique name for each unique object!
-
             params:
                 object: Object; the object that is going to be added to the HistoryKeeper
                 name: String; the unique name (identifier) for the object
                 is_game_object: boolean; the object provided is an instance of GameObject
-
             returns: None
         """
 
@@ -62,10 +58,8 @@ class HistoryKeeper:
 
     def get_last(name):
         """ summary: gets the version of that object from the last cycle
-
             params:
                 name: String; the unique name (identifier) given for the object in HistoryKeeper.add() that is used to retrieve the previous version of the object
-
             returns: the version of the object from the last cycle
         """
 
@@ -99,7 +93,6 @@ class Fraction:
                 numerator: int; the top part of the fraction
                 denominator: int; the bottom part of the fraction
             returns: None
-
         """
         self.numerator = numerator
         self.denominator = denominator
@@ -120,10 +113,8 @@ class Fraction:
 
     def get_fraction_to_power(self, power):
         """ summary: uses the function pow() to get the fraction to the specified power
-
             params:
                 power: int; the power to which the fraction is raised
-
             returns: Fraction; a new fraction where the numerator and denominator are raised to the power specified
         """
         return Fraction(pow(self.numerator, power), pow(self.denominator, power))
@@ -133,7 +124,6 @@ class Fraction:
     def get_fraction_to_become_one(self):
         """ summary: gets the fraction that makes the current fraction + the new fraction equal to one
             for instance if the current fraction is 3/4 then 1 - 3/4 the new fraction would be 1/4
-
             params: None
             returns: Fraction; a new Fraction where the current fraction + the new fraction equals one
         """

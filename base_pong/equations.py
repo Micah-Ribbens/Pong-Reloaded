@@ -1,6 +1,7 @@
 from base_pong.quadratic_equations import *
 from base_pong.important_variables import *
 from base_pong.colors import *
+from base_pong.utility_functions import min, max, is_within_range, is_between_values
 
 
 class Point:
@@ -34,6 +35,10 @@ class LineSegment:
     end_point = 0
     color = purple
 
+    # If it is either a x_equals or y_equals then these will not be None
+    x_equals = None
+    y_equals = None
+
     def __init__(self, start_point: Point, end_point: Point):
         """ summary: initializes the object
 
@@ -43,13 +48,14 @@ class LineSegment:
 
             returns: None
         """
-        # So there isn't a dividing by 0 error
-        if start_point.x_coordinate - end_point.x_coordinate != 0:
-            self.slope = (start_point.y_coordinate - end_point.y_coordinate) / (start_point.x_coordinate - end_point.x_coordinate)
+        # Added .01, so elsewhere when I am doing collisions I don't have to worry about straight lines :)
+        if start_point.x_coordinate == end_point.x_coordinate:
+            end_point.x_coordinate += .00000001
 
-        else:
-            self.slope = 0
+        if start_point.y_coordinate == end_point.y_coordinate:
+            end_point.y_coordinate += .00000001
 
+        self.slope = (start_point.y_coordinate - end_point.y_coordinate) / (start_point.x_coordinate - end_point.x_coordinate)
         self.y_intercept = start_point.y_coordinate - self.slope * start_point.x_coordinate
 
         self.start_point = start_point
@@ -73,7 +79,6 @@ class LineSegment:
 
         return self.slope * x_coordinate + self.y_intercept
 
-
     def get_x_coordinate(self, y_coordinate):
         """ summary: finds the x coordinate using the equation x = (y - b) / m
 
@@ -89,6 +94,53 @@ class LineSegment:
         """returns: boolean; if the slope is >= 0"""
 
         return self.slope >= 0
+
+    def is_x_equals_line(self):
+        """returns: boolean; if the line is something like 'x = 6'"""
+
+        return self.start_point.x_coordinate == self.end_point.x_coordinate
+
+    def is_y_equals_line(self):
+        """returns: boolean; if the line is something like 'y = 6'"""
+
+        return self.start_point.y_coordinate == self.end_point.y_coordinate
+
+    def get_x_min_and_max(self):
+        """returns: [min x coordinate, max x coordinate]"""
+
+        x_min = min(self.start_point.x_coordinate, self.end_point.x_coordinate)
+        x_max = max(self.start_point.x_coordinate, self.end_point.x_coordinate)
+
+        return [x_min, x_max]
+
+    def get_y_min_and_max(self):
+        """returns: [min y coordinate, max y coordinate]"""
+
+        y_min = min(self.start_point.y_coordinate, self.end_point.y_coordinate)
+        y_max = max(self.start_point.y_coordinate, self.end_point.y_coordinate)
+
+        return [y_min, y_max]
+
+    def contains_point(self, point: Point, amount_can_be_off_by):
+        """ summary: finds out if the line contains the point (the point can differ from the line by 'percent_error_acceptable')
+
+            params:
+                point: Point; the point in question
+                percent_error_acceptable: double; the amount the point can differ from the line
+
+            returns: boolean; if the line contains the point
+        """
+
+        x_min, x_max = self.get_x_min_and_max()
+        y_min, y_max = self.get_y_min_and_max()
+
+        x_is_on_line = is_between_values(x_min, x_max, point.x_coordinate, amount_can_be_off_by)
+        y_is_on_line = is_between_values(y_min, y_max, point.y_coordinate, amount_can_be_off_by)
+        x_and_y_are_on_line = x_is_on_line and y_is_on_line
+
+        return x_and_y_are_on_line and is_within_range(self.get_y_coordinate(point.x_coordinate), point.y_coordinate, amount_can_be_off_by)
+
+
 
     def __str__(self):
         return f"{self.start_point} -> {self.end_point}"

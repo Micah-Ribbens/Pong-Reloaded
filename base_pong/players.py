@@ -181,13 +181,13 @@ class AI(Paddle):
         should_get_ball_coordinates = prev_ball_is_moving_left and self.ball.is_moving_right and not self.get_path_was_called
 
         if self.is_going_to_hit_ball and should_get_ball_coordinates:
-            ball_path = self.pong_type.get_path(self.x_coordinate - self.ball.length)
+            ball_path = self.pong_type.get_ball_path(self.x_coordinate - self.ball.length)
             ball_y_coordinate, ball_bottom = self.get_ball_end_coordinates(ball_path)
             self.move_towards_ball(ball_y_coordinate, ball_bottom)
             self.get_path_was_called = True
 
         elif not self.is_going_to_hit_ball and should_get_ball_coordinates:
-            ball_path = self.pong_type.get_path(self.x_coordinate - self.ball.length)
+            ball_path = self.pong_type.get_ball_path(self.x_coordinate - self.ball.length)
             ball_y_coordinate, ball_bottom = self.get_ball_end_coordinates(ball_path)
             self.move_away_from_ball(ball_y_coordinate, ball_bottom)
             self.get_path_was_called = True
