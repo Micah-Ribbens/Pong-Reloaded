@@ -24,7 +24,7 @@ class CollisionsFinder:
         largest_path_line = path1_line if path1_distance > path2_distance else path2_line
         return largest_path_line.start_point.x_coordinate > largest_path_line.end_point.x_coordinate
 
-    def is_right_collision(object1, object2):
+    def is_left_collision(object1, object2):
         """ summary: uses CollisionsFinder.is_collision() to check if there was a collision and HistoryKeeper to
             get the objects from the previous cycle
 
@@ -34,19 +34,26 @@ class CollisionsFinder:
 
             returns: boolean; if the object1 was previously to the left of object2, but now isn't and if the objects have collided
         """
-
+        # TODO change back
         prev_object1 = HistoryKeeper.get_last(object1.name)
         prev_object2 = HistoryKeeper.get_last(object2.name)
-
         if prev_object1 is None or prev_object2 is None:
             # Don't want to actually abort the code if this happens since it does on the first cycle; but it is a message to fix something
             # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
-        object1_path = Path.get_x_coordinate_path(prev_object1, object1)
-        object2_path = Path.get_x_coordinate_path(prev_object2, object2)
-        return not CollisionsFinder.largest_path_direction_is_leftwards(object1_path, object2_path) and CollisionsFinder.is_collision(object1, object2)
+        return prev_object1.x_coordinate > prev_object2.x_coordinate and CollisionsFinder.is_collision(object1, object2)
+        # prev_object1 = HistoryKeeper.get_last(object1.name)
+        # prev_object2 = HistoryKeeper.get_last(object2.name)
+        #
+        # if prev_object1 is None or prev_object2 is None:
+        #     # Don't want to actually abort the code if this happens since it does on the first cycle; but it is a message to fix something
+        #     # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+        #     return False
+        # object1_path = Path.get_x_coordinate_path(prev_object1, object1)
+        # object2_path = Path.get_x_coordinate_path(prev_object2, object2)
+        # return not CollisionsFinder.largest_path_direction_is_leftwards(object1_path, object2_path) and CollisionsFinder.is_collision(object1, object2)
 
-    def is_left_collision(object1, object2):
+    def is_right_collision(object1, object2):
         """ summary: uses CollisionsFinder.is_collision() to check if there was a collision and HistoryKeeper to
             get the objects from the previous cycle
 
@@ -56,29 +63,40 @@ class CollisionsFinder:
 
             returns: boolean; if the object1 was previously to the right of object2, but now isn't and if the objects have collided
         """
-
+        # TODO change back
         prev_object1 = HistoryKeeper.get_last(object1.name)
         prev_object2 = HistoryKeeper.get_last(object2.name)
+
         if prev_object1 is None or prev_object2 is None:
             # Don't want to actually abort the code if this happens since it does on the first cycle; but it is a message to fix something
             # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
-        object1_path = Path.get_x_coordinate_path(prev_object1, object1)
-        object2_path = Path.get_x_coordinate_path(prev_object2, object2)
-        # if CollisionsFinder.is_collision(object1, object2) and not CollisionsFinder.largest_path_direction_is_leftwards(object1_path, object2_path):
-        #     print("OH NO")
-        return CollisionsFinder.largest_path_direction_is_leftwards(object1_path, object2_path) and CollisionsFinder.is_collision(object1, object2)
+
+        return prev_object1.right_edge < prev_object2.right_edge and CollisionsFinder.is_collision(object1, object2)
+        # prev_object1 = HistoryKeeper.get_last(object1.name)
+        # prev_object2 = HistoryKeeper.get_last(object2.name)
+        # if prev_object1 is None or prev_object2 is None:
+        #     # Don't want to actually abort the code if this happens since it does on the first cycle; but it is a message to fix something
+        #     # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+        #     return False
+        # object1_path = Path.get_x_coordinate_path(prev_object1, object1)
+        # object2_path = Path.get_x_coordinate_path(prev_object2, object2)
+        # # if CollisionsFinder.is_collision(object1, object2) and not CollisionsFinder.largest_path_direction_is_leftwards(object1_path, object2_path):
+        # #     print("OH NO")
+        # return CollisionsFinder.largest_path_direction_is_leftwards(object1_path, object2_path) and CollisionsFinder.is_collision(object1, object2)
 
     def is_collision(object1: GameObject, object2: GameObject):
         """ summary: uses get_x_coordinates() and get_y_coordinates_from_x_coordinate() (methods from GameObject)
             to check if the objects share a point(s) (x_coordinate, y_coordinate)
 
-            params: 
+            params:
                 object1: GameObject; one of the objects that is used to see if the two objects provided have collided
                 object2: GameObject; one of the objects that is used to see if the two objects provided have collided
 
-            returns: boolean; if the two objects provided have collided        
+            returns: boolean; if the two objects provided have collided
         """
+        # TODO change back
+        return CollisionsFinder.sim_collision(object1, object2)
 
         prev_object1 = HistoryKeeper.get_last(object1.name)
         prev_object2 = HistoryKeeper.get_last(object2.name)
@@ -209,17 +227,39 @@ class CollisionsFinder:
 
         return return_value
 
-    def is_line_collision(line1: LineSegment, line2: LineSegment):
-        """returns: boolean; if the two lines have crossed"""
+    def get_line_collision_point(line1, line2):
+        """returns: Point; the point at which line1 and line2 collide (None if they don't collide)"""
 
         # If the lines are parallel they couldn't have collided
         if line1.slope == line2.slope:
-            return False
+            return None
 
         x_collision_point = (line2.y_intercept - line1.y_intercept) / (line1.slope - line2.slope)
         collision_point = Point(x_collision_point, line1.get_y_coordinate(x_collision_point))
 
-        return line1.contains_point(collision_point, 1) and line2.contains_point(collision_point, 1)
+        # If one of the line segments doesn't contain that collision point then the lines couldn't have collided
+        if not line1.contains_point(collision_point, 1) or not line2.contains_point(collision_point, 1):
+            collision_point = None
+
+        return collision_point
+
+    def is_line_collision(line1: LineSegment, line2: LineSegment):
+        """returns: boolean; if the two lines have crossed"""
+
+        return CollisionsFinder.get_line_collision_point(line1, line2) is not None
+
+    def get_path_line_collision_point(line: LineSegment, path: Path):
+        """returns: Point; the x and y coordinate at which the line and path collide (None if they don't collide)"""
+
+        collision_point = None
+
+        for path_line in path.get_lines():
+            collision_point = CollisionsFinder.get_line_collision_point(path_line, line)
+
+            if collision_point is not None:
+                break
+
+        return collision_point
 
     def is_height_collision(object1, object2):
         """ summary: finds out if the object's y_coordinates have collided
@@ -249,6 +289,7 @@ class CollisionsFinder:
 
     def sim_collision(object1, object2):
         return CollisionsFinder.is_height_collision(object1, object2) and CollisionsFinder.is_length_collision(object1, object2)
+
     def get_bottommost_object(object1, object2):
         """ summary: finds the object whose y_coordinate is the biggest (top of the screen is 0)
 

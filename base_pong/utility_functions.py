@@ -212,6 +212,12 @@ def solve_quadratic(a, b, c):
 def min(item1, item2):
     """returns: double; the smallest item"""
 
+    if item1 is None:
+        return item2
+
+    if item2 is None:
+        return item1
+
     return item1 if item1 < item2 else item2
 
 
@@ -259,6 +265,9 @@ def is_between_values(min_value, max_value, got, amount_can_be_off_by):
     max_value = max_value + amount_can_be_off_by
 
     return got >= min_value and got <= max_value
+
+
+
 
 
 
