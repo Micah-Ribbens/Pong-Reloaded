@@ -66,13 +66,17 @@ class NormalPong(PongType):
 
         is_collision = CollisionsFinder.is_collision(ball, paddle)
 
-        if CollisionsFinder.is_bottom_collision(ball, paddle):
-            ball.tip_hit(paddle.power / 10)
-            ball.is_moving_down = True
+        # TODO Change back
+        # if CollisionsFinder.is_bottom_collision(ball, paddle):
+        #     ball.tip_hit(paddle.power / 10)
+        #     ball.is_moving_down = True
+        #
+        # elif CollisionsFinder.is_top_collision(ball, paddle):
+        #     ball.tip_hit(paddle.power / 10)
+        #     ball.is_moving_down = False
 
-        elif CollisionsFinder.is_top_collision(ball, paddle):
-            ball.tip_hit(paddle.power / 10)
-            ball.is_moving_down = False
+        if False:
+            pass
 
         elif is_collision:
             ball.middle_hit(paddle.power / 10)

@@ -148,3 +148,28 @@ class StateChange:
 
         self.condition = condition
         self.state = state
+
+
+class Range:
+    """Stores the information for a start and end of a range"""
+
+    start = 0
+    end = 0
+
+    def __init__(self, start, end):
+        self.start = start
+        self.end = end
+
+    def is_less_than(self, other_range):
+        """returns: boolean; if this range's start is less than the other range's start"""
+        starts_are_equal = self.start == other_range.start
+
+        if starts_are_equal:
+            return self.end < other_range.end
+
+        else:
+            return self.start < other_range.start
+
+    def __str__(self):
+        return f"{self.start} -> {self.end}"
+

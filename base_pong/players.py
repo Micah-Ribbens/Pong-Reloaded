@@ -43,9 +43,9 @@ class Paddle(GameObject):
         tip_height = self.height * .1
         return GameObject(self.x_coordinate, self.bottom - tip_height, tip_height, self.length)
 
-    def render(self):
-        paddle_image = pygame.transform.scale(pygame.image.load("images/paddle.png"), (int(self.length), int(self.height)))
-        game_window.get_window().blit(paddle_image, (self.x_coordinate, self.y_coordinate))
+    # def render(self):
+    #     paddle_image = pygame.transform.scale(pygame.image.load("images/paddle.png"), (int(self.length), int(self.height)))
+    #     game_window.get_window().blit(paddle_image, (self.x_coordinate, self.y_coordinate))
 
 
 class Player(Paddle):

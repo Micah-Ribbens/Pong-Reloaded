@@ -2,6 +2,7 @@ from math import sqrt
 
 import pygame.draw_py
 from base_pong.equations import LineSegment, Point
+from base_pong.utility_functions import max_value, get_leftmost_object
 from base_pong.velocity_calculator import VelocityCalculator
 
 
@@ -26,14 +27,17 @@ class PathLine:
         self.bottom_line = LineSegment(Point(self.y_coordinate_line.start_point.x_coordinate, self.y_coordinate_line.start_point.y_coordinate + height),
                                        Point(self.y_coordinate_line.end_point.x_coordinate, self.y_coordinate_line.end_point.y_coordinate + height))
 
-
+# TODO rethink how paths work: 3-11-2022
 class Path:
     """Stores the path of an object"""
 
     path_lines = []
     last_point = None
+    height = 0
+    length = 0
+    is_leftwards = False
 
-    def __init__(self, start_point):
+    def __init__(self, start_point, height, length):
         """ summary: initializes the object
 
             params:
@@ -44,24 +48,13 @@ class Path:
 
         self.last_point = start_point
         self.path_lines = []
+        self.height = height
+        self.length = length
 
-    def get_x_coordinate_path(prev_game_object, game_object):
-        """returns: Path; the path of the game object using the x coordinate"""
-        path = Path(Point(prev_game_object.x_coordinate, prev_game_object.y_coordinate))
-        path.add_point(Point(game_object.x_coordinate, game_object.y_coordinate), game_object.height)
-        return path
-
-    def get_right_edge_path(prev_game_object, game_object):
-        """returns: Path; the path of the game object using the right edge"""
-
-        path = Path(Point(prev_game_object.right_edge, prev_game_object.y_coordinate))
-        path.add_point(Point(game_object.right_edge, game_object.y_coordinate), game_object.height)
-        return path
-
-    def add_point(self, point, height):
+    def add_point(self, point):
         """Adds the path_line to the attribute 'path_lines'"""
 
-        path_line = PathLine(LineSegment(self.last_point, point), height)
+        path_line = PathLine(LineSegment(self.last_point, point), self.height)
         self.path_lines.append(path_line)
         self.last_point = point
 
@@ -93,6 +86,7 @@ class Path:
             y_coordinate_point = self.path_lines[last_index].y_coordinate_line.end_point
             bottom_point = self.path_lines[last_index].bottom_line.end_point
             return [y_coordinate_point, bottom_point]
+
         except:
             pass
 
@@ -117,8 +111,6 @@ class Path:
         return string
 
     def get_lines(self):
-        """returns: List of LineSegment; all the lines that this path has"""
-
         lines = []
 
         for path_line in self.path_lines:
@@ -133,7 +125,57 @@ class Path:
 
         return lines
 
+    def get_time_lines(self):
+        """ summary: gets all the lines in the path; IMPORTANT must only be called if the path is only between two points;
+            anything more and it will not work. Also all the lines are in relation to time: 0 -> VelocityCalculator.time
 
+            params: None
+
+            returns: List of Line; [x_coordinate_line, right_edge_line, y_coordinate_line, bottom_line]
+        """
+
+        path_line: PathLine = self.path_lines[0]
+        path_y_line = path_line.y_coordinate_line
+        path_bottom_line = path_line.bottom_line
+
+        if self.is_leftwards:
+            # The path starts at object's right_edge and goes to object's x_coordinate, so I have to add or substract
+            # The length to offset that
+            x_coordinate_line = self._get_time_line(path_y_line.start_point.x_coordinate - self.length, path_y_line.end_point.x_coordinate)
+            right_edge_line = self._get_time_line(path_y_line.start_point.x_coordinate, path_y_line.end_point.x_coordinate + self.length)
+
+        else:
+            # The path starts at object's x_coordinate and goes to object's right_edge, so I have to add or substract
+            # The length to offset that
+            x_coordinate_line = self._get_time_line(path_y_line.start_point.x_coordinate, path_y_line.end_point.x_coordinate - self.length)
+            right_edge_line = self._get_time_line(path_y_line.start_point.x_coordinate + self.length, path_y_line.end_point.x_coordinate)
+
+        y_coordinate_line = self._get_time_line(path_y_line.start_point.y_coordinate, path_y_line.end_point.y_coordinate)
+        bottom_line = self._get_time_line(path_bottom_line.start_point.y_coordinate, path_bottom_line.end_point.y_coordinate)
+
+        return [x_coordinate_line, right_edge_line, y_coordinate_line, bottom_line]
+
+    def _get_time_line(self, start_coordinate, end_coordinate):
+        """ returns: LineSegment; a line that has time as the x coordinate and the y coordinate is the coordinates
+            provided in the parameters"""
+
+        return LineSegment(Point(0, start_coordinate), Point(VelocityCalculator.time, end_coordinate))
+
+    def get_path(prev_object, current_object):
+        is_moving_leftwards = get_leftmost_object(prev_object, current_object) == current_object
+
+        path = None
+
+        if is_moving_leftwards:
+            path = Path(Point(prev_object.right_edge, prev_object.y_coordinate), prev_object.height, prev_object.length)
+            path.add_point(Point(current_object.x_coordinate, current_object.y_coordinate))
+
+        else:
+            path = Path(Point(prev_object.x_coordinate, prev_object.y_coordinate), prev_object.height, prev_object.length)
+            path.add_point(Point(current_object.right_edge, current_object.y_coordinate))
+
+        path.is_leftwards = is_moving_leftwards
+        return path
 
 
 class VelocityPath(Path):
@@ -167,7 +209,7 @@ class VelocityPath(Path):
         x_distance = self.last_point.x_coordinate - point.x_coordinate
         y_distance = self.last_point.y_coordinate - point.y_coordinate
 
-        end_time = max(x_distance / self.velocity, y_distance / self.velocity) + self.last_end_time
+        end_time = max_value(x_distance / self.velocity, y_distance / self.velocity) + self.last_end_time
         self.add_time_point(point, end_time)
 
     def add_time_point(self, point, end_time):

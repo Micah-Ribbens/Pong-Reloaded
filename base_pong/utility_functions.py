@@ -199,7 +199,7 @@ def solve_quadratic(a, b, c):
     number_under_square_root = pow(b, 2) - 4 * a * c
 
     if number_under_square_root < 0:
-        return False
+        return None
 
     square_root = sqrt(number_under_square_root)
 
@@ -209,7 +209,7 @@ def solve_quadratic(a, b, c):
 
 
 
-def min(item1, item2):
+def min_value(item1, item2):
     """returns: double; the smallest item"""
 
     if item1 is None:
@@ -221,7 +221,7 @@ def min(item1, item2):
     return item1 if item1 < item2 else item2
 
 
-def max(item1, item2):
+def max_value(item1, item2):
     """returns double; the biggest item"""
 
     return item1 if item1 > item2 else item2
@@ -265,6 +265,8 @@ def is_between_values(min_value, max_value, got, amount_can_be_off_by):
     max_value = max_value + amount_can_be_off_by
 
     return got >= min_value and got <= max_value
+
+
 
 
 

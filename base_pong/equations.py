@@ -1,7 +1,7 @@
 from base_pong.quadratic_equations import *
 from base_pong.important_variables import *
 from base_pong.colors import *
-from base_pong.utility_functions import min, max, is_within_range, is_between_values
+from base_pong.utility_functions import min_value, max_value, is_within_range, is_between_values
 
 
 class Point:
@@ -108,16 +108,16 @@ class LineSegment:
     def get_x_min_and_max(self):
         """returns: [min x coordinate, max x coordinate]"""
 
-        x_min = min(self.start_point.x_coordinate, self.end_point.x_coordinate)
-        x_max = max(self.start_point.x_coordinate, self.end_point.x_coordinate)
+        x_min = min_value(self.start_point.x_coordinate, self.end_point.x_coordinate)
+        x_max = max_value(self.start_point.x_coordinate, self.end_point.x_coordinate)
 
         return [x_min, x_max]
 
     def get_y_min_and_max(self):
         """returns: [min y coordinate, max y coordinate]"""
 
-        y_min = min(self.start_point.y_coordinate, self.end_point.y_coordinate)
-        y_max = max(self.start_point.y_coordinate, self.end_point.y_coordinate)
+        y_min = min_value(self.start_point.y_coordinate, self.end_point.y_coordinate)
+        y_max = max_value(self.start_point.y_coordinate, self.end_point.y_coordinate)
 
         return [y_min, y_max]
 
@@ -164,7 +164,14 @@ class LineSegment:
 
         return LineSegment(start_point, end_point)
 
-
-
     def __str__(self):
         return f"{self.start_point} -> {self.end_point}"
+
+
+class CollisionLine(LineSegment):
+    is_bottom_line = False
+
+    def __init__(self, line, is_bottom_line):
+        super().__init__(line.start_point, line.end_point)
+
+        self.is_bottom_line = is_bottom_line
