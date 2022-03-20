@@ -22,16 +22,7 @@ class NormalPong(PongType):
             returns: None
         """
 
-        # TODO explain distance_change logic better
-        if ball.bottom >= screen_height:
-            distance_change = ball.bottom - screen_height
-            ball.is_moving_down = False
-            ball.y_coordinate = screen_height - distance_change - ball.height
-
-        if ball.y_coordinate <= 0:
-            distance_change = -ball.y_coordinate
-            ball.y_coordinate = ball.y_coordinate + distance_change
-            ball.is_moving_down = True
+        self.ball_screen_boundary_collisions(ball)
 
         if CollisionsFinder.is_collision(player1, ball):
             self.paddle_collisions(ball, player1)
@@ -66,14 +57,13 @@ class NormalPong(PongType):
 
         is_collision = CollisionsFinder.is_collision(ball, paddle)
 
-        # TODO Change back
-        # if CollisionsFinder.is_bottom_collision(ball, paddle):
-        #     ball.tip_hit(paddle.power / 10)
-        #     ball.is_moving_down = True
-        #
-        # elif CollisionsFinder.is_top_collision(ball, paddle):
-        #     ball.tip_hit(paddle.power / 10)
-        #     ball.is_moving_down = False
+        if CollisionsFinder.is_bottom_collision(ball, paddle):
+            ball.tip_hit(paddle.power / 10)
+            ball.is_moving_down = True
+
+        elif CollisionsFinder.is_top_collision(ball, paddle):
+            ball.tip_hit(paddle.power / 10)
+            ball.is_moving_down = False
 
         if False:
             pass
@@ -126,3 +116,14 @@ class NormalPong(PongType):
         distance_change = VelocityCalculator.calc_distance(ball.upwards_velocity)
         ball.y_coordinate += distance_change if ball.is_moving_down else -distance_change
         ball.movement()
+
+    def ball_screen_boundary_collisions(self, ball):
+        if ball.bottom >= screen_height:
+            distance_change = ball.bottom - screen_height
+            ball.is_moving_down = False
+            ball.y_coordinate = screen_height - distance_change - ball.height
+
+        if ball.y_coordinate <= 0:
+            distance_change = -ball.y_coordinate
+            ball.y_coordinate = ball.y_coordinate + distance_change
+            ball.is_moving_down = True

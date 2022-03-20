@@ -54,11 +54,9 @@ while True:
         game_window.display_screen(screen)
 
     current_screen = screen
-    # if HistoryKeeper.get_last(game_screen.ball) is not None:
-    #     print(game_screen.ball.x_coordinate, HistoryKeeper.get_last(game_screen.ball.name).x_coordinate)
+
     CollisionsFinder.objects_to_data = {}
-    # if CollisionsFinder.sim_collision(game_screen.player1, game_screen.ball) or CollisionsFinder.is_collision(game_screen.player1, game_screen.ball):
-    #     CollisionsFinder.is_collision(game_screen.player1, game_screen.ball)
+    print(CollisionsFinder.objects_to_data)
     function_runner.run()
     changer.run_changes()
     HistoryKeeper.last_time = VelocityCalculator.time

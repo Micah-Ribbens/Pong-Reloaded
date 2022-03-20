@@ -87,8 +87,8 @@ class CollisionsFinder:
             CollisionsFinder.objects_to_data[f"{id(object1)} {id(object2)}"] = CollisionData(False, False, False, (0, 0), (0, 0))
             return
 
-        # TODO change back
         # if CollisionsFinder.objects_to_data.__contains__(f"{id(object1)} {id(object2)}"):
+        #     print("RETURN")
         #     return
 
         object1_has_moved = prev_object1.x_coordinate != object1.x_coordinate or prev_object1.y_coordinate != object1.y_coordinate

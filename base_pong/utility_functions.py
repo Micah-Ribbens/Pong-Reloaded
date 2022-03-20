@@ -285,10 +285,3 @@ def values_are_equal(object1, object2, attributes):
         print("EH")
     return return_value
 
-
-
-
-
-
-
-
