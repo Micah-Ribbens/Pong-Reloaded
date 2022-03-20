@@ -2,7 +2,7 @@ from base_pong.ball import Ball
 from base_pong.drawable_objects import GameObject, Ellipse
 from base_pong.engine_utility_classes import CollisionsUtilityFunctions, CollisionData
 from base_pong.equations import Point, LineSegment
-from base_pong.path import Path
+from base_pong.path import Path, ObjectPath
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.important_variables import (
     screen_height,
@@ -48,7 +48,7 @@ class CollisionsFinder:
 
     def get_objects_xy(object1, object2):
         """returns: List of Point; [object1's xy, object2's xy]"""
-
+        CollisionsFinder.update_data(object1, object2)
         return [CollisionsFinder.get_collision_data(object1, object2).object_xy,
                 CollisionsFinder.get_collision_data(object2, object1).object_xy]
 
@@ -94,8 +94,8 @@ class CollisionsFinder:
         object1_has_moved = prev_object1.x_coordinate != object1.x_coordinate or prev_object1.y_coordinate != object1.y_coordinate
         object2_has_moved = prev_object2.x_coordinate != object2.x_coordinate or prev_object2.y_coordinate != object2.y_coordinate
 
-        object1_path = Path.get_path(prev_object1, object1)
-        object2_path = Path.get_path(prev_object2, object2)
+        object1_path = ObjectPath(prev_object1, object1)
+        object2_path = ObjectPath(prev_object2, object2)
         collision_time = -1
         is_moving_collision = False
         

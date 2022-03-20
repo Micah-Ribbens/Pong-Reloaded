@@ -81,45 +81,57 @@ class OmnidirectionalPong(NormalPong):
         #     print("THAT IS A COLLISION EH EH EH")
         #     CollisionsFinder.is_collision(self.player1, self.ball)
 
+        # TODO ALWAYS have collisions after movement; very very important
         # ORDER MATTERS! This must go first
-        self.ball_movement()
+        if self.ball.can_move:
+            self.ball_movement()
 
         self.last_ball = self.ball
-        self.paddle_collisions()
         self.horizontal_player_movements(self.player1, pygame.K_a, pygame.K_d)
         self.horizontal_player_movements(self.player2, pygame.K_LEFT, pygame.K_RIGHT)
-        self.ball_sandwiched_event.run(self.ball_is_sandwiched())
-        self.run_ball_sandwiching()
 
         # if self.ball.can_move:
         self.run_player_movement()
-        print(self.player1, self.ball)
-        self.ball_collisions(self.player1)
-        self.ball_collisions(self.player2)
+        # print(self.player1, self.ball)
         self.run_player_boundaries(self.player2)
         self.run_player_boundaries(self.player1)
 
-        # has_collided_with_a_player = (CollisionsFinder.is_collision(self.player1, self.ball)
-        #                               or CollisionsFinder.is_collision(self.player2, self.ball))
-        #
-        # if not has_collided_with_a_player and not self.ball_is_sandwiched():
-        #     self.ball.can_move = True
+        self.ball_sandwiched_event.run(self.ball_is_sandwiched())
+        # Collisions
+        self.ball_collisions(self.player1)
+        self.ball_collisions(self.player2)
+        self.paddle_collisions()
+        self.run_ball_sandwiching()
+
+        has_collided_with_a_player = (CollisionsFinder.is_collision(self.player1, self.ball)
+                                      or CollisionsFinder.is_collision(self.player2, self.ball))
+
+        if not has_collided_with_a_player and not self.ball_is_sandwiched():
+            self.ball.can_move = True
 
     def paddle_collisions(self):
         """ summary: runs all the collisions between paddles
             params: None
             returns: None
         """
-        if CollisionsFinder.is_collision(self.player1, self.player2):
+        if CollisionsFinder.sim_collision(self.player1, self.player2) and not CollisionsFinder.is_moving_collision(self.player1, self.player2):
+            CollisionsFinder.is_moving_collision(self.player1, self.player2)
+        if CollisionsFinder.is_moving_collision(self.player1, self.player2):
             self.get_leftmost_player().can_move_right = False
             self.get_rightmost_player().can_move_left = False
             player1_xy, player2_xy = CollisionsFinder.get_objects_xy(self.player1, self.player2)
-            print(f"BEFORE: player1 right_edge {self.player1.right_edge} player2 x {self.player2.x_coordinate}")
+            print(f"BEFORE:", self.player1, self.player2)
 
+            # TODO fix this logic witht the times and stuff, but right now it ain't working
             self.player1.x_coordinate, self.player1.y_coordinate = player1_xy.x_coordinate, player1_xy.y_coordinate
-            self.player2.x_coordinate, self.player2.y_coordinate = player2_xy.x_coordinate, player2_xy.y_coordinate
-            print(f"AFTER: player1 right_edge {self.player1.right_edge} player2 x {self.player2.x_coordinate}")
-            self.should_stop = True
+            if self.get_leftmost_player() == self.player2:
+                self.player2.x_coordinate = self.player1.x_coordinate - self.player2.length
+            else:
+                self.player2.x_coordinate = self.player1.right_edge
+
+            print(f"AFTER:", self.player1, self.player2)
+            # self.should_stop = True
+            print("COLLIDE")
 
         self.run_player_boundaries(self.player1)
         self.run_player_boundaries(self.player2)
@@ -133,7 +145,6 @@ class OmnidirectionalPong(NormalPong):
         if self.ball_is_sandwiched():
             # changer.add_change(self.ball, "can_move", False)
             # changer.add_change(self.ball, "x_coordinate", self.get_leftmost_player().right_edge)
-            self.ball.can_move = False
             self.ball.x_coordinate = self.get_leftmost_player().right_edge
 
         if self.ball_is_sandwiched() and not self.ball_sandwiched_event.happened_last_cycle():
@@ -164,7 +175,7 @@ class OmnidirectionalPong(NormalPong):
         # if CollisionsFinder.is_collision(self.last_ball, player) and not CollisionsFinder.is_collision(self.last_ball, player):
         #     CollisionsFinder.is_collision(self.last_ball, player)
 
-        if CollisionsFinder.is_collision(self.last_ball, player) or self.ball_is_sandwiched():
+        if self.ball_is_sandwiched():
             self.ball.can_move = False
 
         if CollisionsFinder.is_moving_collision(self.last_ball, player):
@@ -208,7 +219,7 @@ class OmnidirectionalPong(NormalPong):
         if prev_player is not None:
             player_is_moving_horizontally = player.x_coordinate != prev_player.x_coordinate
 
-            self.ball.can_move = player_is_moving_horizontally
+            # self.ball.can_move = player_is_moving_horizontally
 
     def horizontal_player_movements(self, player, left_key, right_key):
         controls = pygame.key.get_pressed()

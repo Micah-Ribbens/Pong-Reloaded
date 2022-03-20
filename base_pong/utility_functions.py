@@ -267,6 +267,25 @@ def is_between_values(min_value, max_value, got, amount_can_be_off_by):
     return got >= min_value and got <= max_value
 
 
+def get_distance(point1, point2):
+    """returns: double; the distance from point1 -> point2; uses formula d = sqrt((x1 - x2)^2 + (y1 - y2)^2))"""
+
+    return sqrt(pow(point1.x_coordinate - point2.x_coordinate, 2) + pow(point1.y_coordinate - point2.y_coordinate, 2))
+
+
+def values_are_equal(object1, object2, attributes):
+    """returns: boolean; if object1 and object2 have the same value for the attributes"""
+
+    return_value = True
+    try:
+        for attribute in attributes:
+            if object1.__dict__[attribute] != object2.__dict__[attribute]:
+                return_value = False
+    except:
+        print("EH")
+    return return_value
+
+
 
 
 

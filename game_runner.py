@@ -59,7 +59,7 @@ while True:
     CollisionsFinder.objects_to_data = {}
     # if CollisionsFinder.sim_collision(game_screen.player1, game_screen.ball) or CollisionsFinder.is_collision(game_screen.player1, game_screen.ball):
     #     CollisionsFinder.is_collision(game_screen.player1, game_screen.ball)
-    VelocityCalculator.time = time.time() - start_time
     function_runner.run()
     changer.run_changes()
-    HistoryKeeper.last_time = HistoryKeeper.get_last_time()
+    HistoryKeeper.last_time = VelocityCalculator.time
+    VelocityCalculator.time = time.time() - start_time
