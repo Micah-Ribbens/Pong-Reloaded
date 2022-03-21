@@ -1,7 +1,10 @@
 import random
 
 import pygame
+
+from base_pong.equations import Point
 from base_pong.important_variables import game_window
+from base_pong.path import Path, VelocityPath
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.utility_functions import percentage_to_number
 from base_pong.engines import CollisionsFinder
@@ -14,7 +17,7 @@ from base_pong.events import Event, TimedEvent
 from pong_types.utility_functions import get_random_item
 
 
-class PortalOpening(GameObject):
+class PortalOpening(Ellipse):
     """An opening that allows objects to teleport through it"""
 
     attributes = ["x_coordinate", "y_coordinate"]
@@ -188,6 +191,7 @@ class RandomPortal(Portal):
     """A portal where it can teleport to multiple openings"""
 
     possible_outputs = []
+    portal_end = None
 
     def __init__(self, color, portal_opening, possible_outputs):
         """ summary: initializes the object
@@ -208,6 +212,7 @@ class RandomPortal(Portal):
         self.portal_disabled_event = TimedEvent(3, False)
         # It extends a regular portal and that uses portal_opening2, so this prevents a NoneType Exception
         self.portal_opening2 = PortalOpening(0, 0, 0, 0, False)
+        self.portal_end = self.get_portal_end()
 
     def run(self, ball):
         # Stores value of is_enabled, which other things in this function modify
@@ -217,9 +222,9 @@ class RandomPortal(Portal):
         self.portal_disabled_event.run(False, is_portal_collision)
 
         if is_portal_collision and is_enabled:
-            portal_end = self.get_portal_end()
-            self.teleport(portal_end, ball)
-            portal_end.was_teleported = True
+            self.teleport(self.portal_end, ball)
+            self.portal_end.was_teleported = True
+            self.portal_end = self.get_portal_end()
 
         if self.portal_disabled_event.is_started and not self.portal_disabled_event.is_done():
             self.disable()
@@ -281,6 +286,7 @@ class PortalPong(PongType):
             possible_outputs += [portal.portal_opening1, portal.portal_opening2]
 
         self.portals.append(RandomPortal(purple, PortalOpening(50, 50, 25, 25, False), possible_outputs))
+        self.player2.set_action(self.run_ai)
         
     def run(self):
         """ summary: runs all the necessary things in order for this game mode to work
@@ -323,4 +329,84 @@ class PortalPong(PongType):
         for portal in self.portals:
             HistoryKeeper.add(portal.portal_opening1, portal.portal_opening1.name, False)
             HistoryKeeper.add(portal.portal_opening2, portal.portal_opening2.name, False)
+
+    # AI CODE
+    def run_ai(self):
+        if self.ball.right_edge >= self.player2.x_coordinate:
+            print("YESSIR")
+        prev_ball = HistoryKeeper.get_last(self.ball.name)
+        if prev_ball is not None and self.ball_is_going_towards_ai():
+            self.set_player_path()
+
+        if self.player2.path is not None:
+            self.player2.x_coordinate, self.player2.y_coordinate = self.player2.path.get_coordinates()
+            # print(self.player2.path)
+            # print(self.player2)
+
+    def set_player_path(self):
+        """Sets the player's path; NOTE must only be called if the ball is going towards the player"""
+
+        ball_x_coordinate, ball_y_coordinate = self.ball.x_coordinate, self.ball.y_coordinate
+        ball_is_moving_down = self.ball.is_moving_down
+
+        next_portal = "placeholder instead of None"
+        ball_path = None
+        last_portal = None
+        print("\n\nI WAS CALLED")
+
+        while True:
+            print("=====CYCLE=======\n")
+            ball_path = self.get_ball_path_from(ball_y_coordinate, ball_x_coordinate, self.player2.x_coordinate,
+                                                ball_is_moving_down)
+
+            next_portal = self.get_next_portal_collision(ball_path)
+
+            if last_portal is not None and self.get_next_portal(ball_path) == last_portal:
+                next_portal = None
+
+            if next_portal is None:
+                break
+
+            ball_is_moving_down = self.ball_direction_is_down(ball_y_coordinate, ball_x_coordinate, self.player2.x_coordinate, ball_is_moving_down)
+
+            ball_x_coordinate, ball_y_coordinate = next_portal.x_midpoint, next_portal.y_midpoint
+            last_portal = self.get_next_portal(ball_path)
+            print(ball_path, next_portal, Point(ball_x_coordinate, ball_y_coordinate))
+
+        ball_end_point = ball_path.get_end_points()[0]
+        print(ball_path)
+        self.player2.add_path(VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate),
+                                           [Point(ball_end_point.x_coordinate, ball_end_point.y_coordinate)], self.player2.velocity))
+    def ball_is_going_towards_ai(self):
+        """returns: boolean; if the ball is going towards the ai"""
+
+        return not HistoryKeeper.get_last(self.ball.name).is_moving_right and self.ball.is_moving_right
+
+    def get_next_portal_collision(self, ball_path: Path):
+        """returns: PortalOpening; the next portal opening that the ball will hit; None if it doesn't hit a portal"""
+
+        for line in ball_path.get_lines():
+            for portal in self.portals:
+                is_random_portal = type(portal) == RandomPortal
+
+                if CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening1):
+                    return portal.portal_end if is_random_portal else portal.portal_opening2
+
+                if not is_random_portal and CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening2):
+                    return portal.portal_opening1
+        return None
+
+    def get_next_portal(self, ball_path: Path):
+        """returns: Portal; the next portal the ball will hit"""
+        for line in ball_path.get_lines():
+            for portal in self.portals:
+                is_random_portal = type(portal) == RandomPortal
+                if CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening1):
+                    return portal
+
+                if not is_random_portal and CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening2):
+                    return portal
+        return None
+
+
 

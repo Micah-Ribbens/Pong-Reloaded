@@ -6,6 +6,7 @@ from base_pong.equations import Point, LineSegment
 from base_pong.events import Event
 from base_pong.important_variables import screen_height, screen_length
 from base_pong.path import VelocityPath, Path
+from base_pong.players import Player
 from base_pong.utility_classes import HistoryKeeper, StateChange
 from base_pong.utility_functions import get_leftmost_object, get_rightmost_object, get_displacement, min_value
 from base_pong.velocity_calculator import VelocityCalculator
@@ -14,8 +15,7 @@ from pong_types.normal_pong import NormalPong
 
 # TODO fix code so you don't have to assume player2 is the ai
 # TODO write the code so it takes into account both vertical and horizontal time
-
-
+# TODO get back to OmnidirectionalPong AI; start with someone a bit easier
 class OmnidirectionalPong(NormalPong):
     """Pong where the player can move 4 directions"""''
     # States for the AI
@@ -83,7 +83,10 @@ class OmnidirectionalPong(NormalPong):
 
         self.ball_sandwiched_event.run(self.ball_is_sandwiched())
         self.player1.movement()
-        self.player2.movement()
+        if type(self.player2) == Player:
+            self.player2.movement()
+        else:
+            self.player2.run()
         # Collisions
         self.ball_collisions(self.player1)
         self.ball_collisions(self.player2)
@@ -451,10 +454,8 @@ class OmnidirectionalPong(NormalPong):
         ai_y_line1 = LineSegment.get_line_segment(player2, player2.velocity, True, False)
         ai_y_line2 = LineSegment.get_line_segment(player2, player2.velocity, False, False)
 
-        if CollisionsFinder.get_path_line_collision_point(ai_y_line1, ball_path) is None and CollisionsFinder.get_path_line_collision_point(ai_y_line2, ball_path) is None:
-            print("NOO VERTICAL FAILED")
-        vertical_time1 = CollisionsFinder.get_path_line_collision_point(ai_y_line1, ball_path)
-        vertical_time2 = CollisionsFinder.get_path_line_collision_point(ai_y_line2, ball_path)
+        vertical_time1 = CollisionsFinder.get_path_line_collision(ball_path, ai_y_line1)
+        vertical_time2 = CollisionsFinder.get_path_line_collision(ball_path, ai_y_line2 )
 
         vertical_time = None
         # If they are both None then that means the ai doesn't have to move upwards
@@ -511,9 +512,6 @@ class OmnidirectionalPong(NormalPong):
             displacement = displacement1 if vertical_time == time1 else displacement2
 
         # self.player_path.add_point(Point(player2.x_coordinate + player2.), time)
-
-
-
 
     def intercept_object(self, intercepted_objects_velocity, ball, is_moving_rightwards):
         """ summary: makes the AI's path intercept the other object using the parameters

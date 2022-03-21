@@ -19,7 +19,7 @@ class GameScreen(Screen):
     game_paused = False
     ball = Ball()
     player1 = Player()
-    player2 = Player()
+    player2 = AI(7, ball)
     player1_score = 0
     player2_score = 0
     pause_button = PauseButton()
@@ -49,7 +49,7 @@ class GameScreen(Screen):
         self.player1.right_key = pygame.K_d
         self.player1.left_key = pygame.K_a
         self.player2.x_coordinate = screen_length - self.player2.length
-        # self.player2.set_pong_type(self.pong_type)
+        self.player2.set_pong_type(self.pong_type)
         HistoryKeeper.reset()
         self.ball.reset()
         self.pong_type.reset()

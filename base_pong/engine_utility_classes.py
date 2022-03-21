@@ -209,7 +209,7 @@ class CollisionsUtilityFunctions:
         for line in moving_object_path.get_lines():
             time = None
             if type(stationary_object) == Ellipse:
-                time = CollisionsUtilityFunctions.get_line_ellipse_collision_time(stationary_object, line, moving_object_path)
+                time = CollisionsUtilityFunctions.get_line_ellipse_collision_time(line, stationary_object, moving_object_path)
 
             # Assumes that if it isn't an ellipse it must be a rectangle
             else:
@@ -257,21 +257,19 @@ class CollisionsUtilityFunctions:
 
         return smallest_time if smallest_time != float('inf') else -1
 
-    def get_line_ellipse_collision_time(ellipse: Ellipse, line: LineSegment, moving_object_path):
-        """returns: Point; the point at which the line and the ellipse collide (None if they don't collide)"""
-
+    def get_line_ellipse_collision_points(line, ellipse):
         # I'm using c in place of b since I have two b's one from the ellipse and the other from the line
         h, k, a, c = ellipse.get_equation_variables()
 
         m, b = line.slope, line.y_intercept
 
         # See documentation.md for where these numbers came from
-        # quadratic_a = -(pow(a, 2) * pow(c, 2) - (pow(a, 2) * pow(m, 2) + pow(c, 2)))
-        # quadratic_b = -2 * (pow(a, 2) * (b - k) * m - pow(c, 2) * h)
-        # quadratic_c = -pow(a, 2) * (pow(b, 2) - 2 * b * k + pow(k, 2)) - pow(c, 2) * pow(h, 2)
         quadratic_a = pow(a, 2) * pow(m, 2) + pow(c, 2)
         quadratic_b = 2 * (pow(a, 2) * (b - k) * m - pow(c, 2) * h)
         quadratic_c = pow(a, 2) * pow(b - k, 2) + pow(c, 2) * pow(h, 2) - pow(a, 2) * pow(c, 2)
+
+        answers = solve_quadratic(quadratic_a, quadratic_b, quadratic_c)
+
 
         answers = solve_quadratic(quadratic_a, quadratic_b, quadratic_c)
         # The difference between supposed_collision_points and collision_points is that collision_points takes into account
@@ -291,6 +289,12 @@ class CollisionsUtilityFunctions:
         if answers is not None and line.contains_point(supposed_collision_points[1], 1):
             collision_points.append(supposed_collision_points[1])
 
+        return collision_points
+
+    def get_line_ellipse_collision_time(line: LineSegment, ellipse: Ellipse, moving_object_path):
+        """returns: Point; the point at which the line and the ellipse collide (None if they don't collide)"""
+
+        collision_points = CollisionsUtilityFunctions.get_line_ellipse_collision_points(line, ellipse)
         return CollisionsUtilityFunctions.get_smallest_time(line, moving_object_path, collision_points)
 
     def lines_contain_point(lines, point, amount_can_be_off_by):

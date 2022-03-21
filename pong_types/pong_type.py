@@ -97,13 +97,13 @@ class PongType(abc.ABC):
             returns: Path; the path of the ball from its current x_coordinate to the end x_coordinate
         """
 
-        path = Path(Point(self.ball.x_coordinate, self.ball.y_coordinate), self.ball.height, self.ball.length)
+        return self.get_ball_path_from(self.ball.y_coordinate, self.ball.x_coordinate, x_coordinate, self.ball.is_moving_down)
 
-        time_to_travel_distance = abs(x_coordinate - self.ball.x_coordinate) / self.ball.forwards_velocity
+    def get_ball_path_from(self, ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down):
+        """returns: Path; the ball's path from the x_coordinate -> end_x_coordinate; NOTE ball must be moving correct horizontal direction"""
+        path = Path(Point(ball_x_coordinate, ball_y_coordinate), self.ball.height, self.ball.length)
 
-        ball_y_coordinate = self.ball.y_coordinate
-        ball_is_moving_down = self.ball.is_moving_down
-        ball_x_coordinate = self.ball.x_coordinate
+        time_to_travel_distance = abs(end_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
         displacement = 0
 
         while time_to_travel_distance > 0:
@@ -125,12 +125,37 @@ class PongType(abc.ABC):
             ball_y_coordinate += displacement
             ball_x_coordinate += time * self.ball.forwards_velocity
 
-            path.add_point(Point(ball_x_coordinate, ball_y_coordinate), self.ball.height)
+            path.add_point(Point(ball_x_coordinate, ball_y_coordinate))
             ball_is_moving_down = not ball_is_moving_down
 
             time_to_travel_distance -= time
 
         return path
+
+    def ball_direction_is_down(self, ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down):
+        """returns: boolean; if the ball's movement direction is down"""
+
+        time_to_travel_distance = abs(end_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
+        while time_to_travel_distance > 0:
+            ball_bottom = ball_y_coordinate + self.ball.height
+
+            if ball_is_moving_down:
+                displacement = screen_height - ball_bottom
+
+            else:
+                displacement = -ball_y_coordinate
+
+            time = abs(displacement / self.ball.upwards_velocity)
+
+            if time_to_travel_distance - time < 0:
+                time = time_to_travel_distance
+
+            ball_y_coordinate += displacement
+            ball_is_moving_down = not ball_is_moving_down
+
+            time_to_travel_distance -= time
+
+        return ball_is_moving_down
 
     def get_ball_y_coordinates(self, total_time):
         path = Path(Point(0, self.ball.y_coordinate), 0, 0)
@@ -158,7 +183,7 @@ class PongType(abc.ABC):
 
             ball_y_coordinate += displacement
 
-            path.add_point(Point(last_time + time, ball_y_coordinate), self.ball.height)
+            path.add_point(Point(last_time + time, ball_y_coordinate))
             ball_is_moving_down = not ball_is_moving_down
 
             total_time -= time

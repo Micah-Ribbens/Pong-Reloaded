@@ -156,8 +156,8 @@ class VelocityPath(Path):
     def add_point(self, point):
         """Does some calculations to find the time from the start of the last point to the end of the parameter 'point'
         and then calls add_time_point() to add the point"""
-        x_distance = self.last_point.x_coordinate - point.x_coordinate
-        y_distance = self.last_point.y_coordinate - point.y_coordinate
+        x_distance = abs(self.last_point.x_coordinate - point.x_coordinate)
+        y_distance = abs(self.last_point.y_coordinate - point.y_coordinate)
 
         end_time = max_value(x_distance / self.velocity, y_distance / self.velocity) + self.last_end_time
         self.add_time_point(point, end_time)

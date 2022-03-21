@@ -215,5 +215,20 @@ class CollisionsFinder:
 
         return (CollisionsFinder.is_collision(object1, object2)
                 and prev_top_object.bottom < prev_bottom_object.y_coordinate and top_object.bottom >= bottom_object.y_coordinate)
-        
+
+    def get_path_line_collision(path, line):
+        """returns: Point; the point with the smallest x coordinate in CollisionUtilityFunctions.get_path_line_collision_points()"""
+
+        smallest_point = None
+        smallest_x_coordinate = float("inf")
+        for point in CollisionsUtilityFunctions.get_path_line_collision_point(line, path):
+            if point.x_coordinate < smallest_x_coordinate:
+                smallest_point = point
+                smallest_x_coordinate = point.x_coordinate
+        return smallest_point
+
+    def is_line_ellipse_equation(line, ellipse):
+        return len(CollisionsUtilityFunctions.get_line_ellipse_collision_points(line, ellipse)) != 0
+
+
         

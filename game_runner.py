@@ -56,7 +56,6 @@ while True:
     current_screen = screen
 
     CollisionsFinder.objects_to_data = {}
-    print(CollisionsFinder.objects_to_data)
     function_runner.run()
     changer.run_changes()
     HistoryKeeper.last_time = VelocityCalculator.time
