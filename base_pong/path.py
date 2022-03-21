@@ -2,6 +2,7 @@ from math import sqrt
 
 import pygame.draw_py
 from base_pong.equations import LineSegment, Point
+from base_pong.utility_functions import max_value, get_leftmost_object, get_distance
 from base_pong.velocity_calculator import VelocityCalculator
 
 
@@ -26,14 +27,17 @@ class PathLine:
         self.bottom_line = LineSegment(Point(self.y_coordinate_line.start_point.x_coordinate, self.y_coordinate_line.start_point.y_coordinate + height),
                                        Point(self.y_coordinate_line.end_point.x_coordinate, self.y_coordinate_line.end_point.y_coordinate + height))
 
-
+# TODO rethink how paths work: 3-11-2022
 class Path:
     """Stores the path of an object"""
 
     path_lines = []
     last_point = None
+    height = 0
+    length = 0
+    is_leftwards = False
 
-    def __init__(self, start_point):
+    def __init__(self, start_point, height, length):
         """ summary: initializes the object
 
             params:
@@ -44,11 +48,13 @@ class Path:
 
         self.last_point = start_point
         self.path_lines = []
+        self.height = height
+        self.length = length
 
-    def add_point(self, point, height):
+    def add_point(self, point):
         """Adds the path_line to the attribute 'path_lines'"""
 
-        path_line = PathLine(LineSegment(self.last_point, point), height)
+        path_line = PathLine(LineSegment(self.last_point, point), self.height)
         self.path_lines.append(path_line)
         self.last_point = point
 
@@ -80,6 +86,7 @@ class Path:
             y_coordinate_point = self.path_lines[last_index].y_coordinate_line.end_point
             bottom_point = self.path_lines[last_index].bottom_line.end_point
             return [y_coordinate_point, bottom_point]
+
         except:
             pass
 
@@ -102,6 +109,24 @@ class Path:
             string += f"{self.path_lines[x].y_coordinate_line}\n"
 
         return string
+
+    def get_lines(self):
+        lines = []
+
+        for path_line in self.path_lines:
+            y_line = path_line.y_coordinate_line
+            bottom_line = path_line.bottom_line
+
+            lines.append(y_line)
+            lines.append(bottom_line)
+
+            lines.append(LineSegment(y_line.start_point, bottom_line.start_point))
+            lines.append(LineSegment(y_line.end_point, bottom_line.end_point))
+
+        return lines
+
+
+
 
 class VelocityPath(Path):
     """A path that takes into account velocity"""
@@ -134,7 +159,7 @@ class VelocityPath(Path):
         x_distance = self.last_point.x_coordinate - point.x_coordinate
         y_distance = self.last_point.y_coordinate - point.y_coordinate
 
-        end_time = max(x_distance / self.velocity, y_distance / self.velocity) + self.last_end_time
+        end_time = max_value(x_distance / self.velocity, y_distance / self.velocity) + self.last_end_time
         self.add_time_point(point, end_time)
 
     def add_time_point(self, point, end_time):
@@ -161,6 +186,7 @@ class VelocityPath(Path):
             self.times.append(VelocityCalculator.time)
             self.total_time += VelocityCalculator.time
 
+
         # By default it starts out as the end of the path and if the time falls within the path uses those coordinates
         last_index = len(self.x_coordinate_lines) - 1
         end_x_coordinate = self.x_coordinate_lines[last_index].end_point.y_coordinate
@@ -176,7 +202,6 @@ class VelocityPath(Path):
             if self.total_time >= start_point.x_coordinate and self.total_time <= end_point.x_coordinate:
                 # print(x_coordinate_line, y_coordinate_line)
                 coordinates = [x_coordinate_line.get_y_coordinate(self.total_time), y_coordinate_line.get_y_coordinate(self.total_time)]
-
         return coordinates
 
     def __str__(self):
@@ -188,3 +213,81 @@ class VelocityPath(Path):
             string += f"x {x_coordinate_line}, y {y_coordinate_line}\n"
 
         return string
+
+
+class ObjectPath(Path):
+    """A Path that is specifically for tracking an object from one point to another"""
+
+    prev_object = None
+    current_object = None
+
+    def __init__(self, prev_object, current_object):
+        """initializes the object; does the path that covers the most area of the object"""
+
+        is_moving_leftwards = get_leftmost_object(prev_object, current_object) == current_object
+
+        if is_moving_leftwards:
+            super().__init__(Point(prev_object.right_edge, prev_object.y_coordinate), prev_object.height, prev_object.length)
+            self.add_point(Point(current_object.x_coordinate, current_object.y_coordinate))
+
+        else:
+            super().__init__(Point(prev_object.x_coordinate, prev_object.y_coordinate), prev_object.height, prev_object.length)
+            self.add_point(Point(current_object.right_edge, current_object.y_coordinate))
+
+        self.is_leftwards = is_moving_leftwards
+        self.prev_object = prev_object
+        self.current_object = current_object
+
+    def get_time_lines(self):
+        """ summary: gets all the lines in the path; all the lines are in relation to time: 0 -> VelocityCalculator.time
+
+            params: None
+
+            returns: List of Line; [x_coordinate_line, right_edge_line, y_coordinate_line, bottom_line]
+        """
+
+        x_coordinate_line = self._get_time_line(self.prev_object.x_coordinate, self.current_object.x_coordinate)
+        right_edge_line = self._get_time_line(self.prev_object.right_edge, self.current_object.right_edge)
+        y_coordinate_line = self._get_time_line(self.prev_object.y_coordinate, self.current_object.y_coordinate)
+        bottom_line = self._get_time_line(self.prev_object.bottom, self.current_object.bottom)
+        return [x_coordinate_line, right_edge_line, y_coordinate_line, bottom_line]
+
+    def _get_time_line(self, start_coordinate, end_coordinate):
+        """ returns: LineSegment; a line that has time as the x coordinate and the y coordinate is the coordinates
+            provided in the parameters"""
+
+        return LineSegment(Point(0, start_coordinate), Point(VelocityCalculator.time, end_coordinate))
+
+    def get_start_point(self):
+        """returns: Point; the start point of the object"""
+
+        return Point(self.prev_object.x_coordinate, self.prev_object.y_coordinate)
+
+    def get_xy_point(self, line, point):
+        line_is_rightwards = line.start_point.x_coordinate < line.end_point.x_coordinate
+        is_bottom_line = line.start_point.y_coordinate == self.prev_object.bottom
+
+        if line_is_rightwards:
+            # The end point of the line if it is the current_object's right_edge, so substracting the length gets the x cooordinate
+            point.x_coordinate -= self.length
+
+        if is_bottom_line:
+            # The line is based off the bottom, so subtracting the height gets the y coordinate
+            point.y_coordinate -= self.height
+
+        return point
+
+    def get_end_point(self):
+        """returns: Point; the end point of the object"""
+        return Point(self.current_object.x_coordinate, self.current_object.y_coordinate)
+
+    def get_total_distance(self):
+        """returns: double; the total amonut of distance the object has traveled"""
+        return get_distance(self.get_start_point(), self.get_end_point())
+
+
+
+
+
+
+

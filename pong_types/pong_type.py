@@ -97,7 +97,7 @@ class PongType(abc.ABC):
             returns: Path; the path of the ball from its current x_coordinate to the end x_coordinate
         """
 
-        path = Path(Point(self.ball.x_coordinate, self.ball.y_coordinate))
+        path = Path(Point(self.ball.x_coordinate, self.ball.y_coordinate), self.ball.height, self.ball.length)
 
         time_to_travel_distance = abs(x_coordinate - self.ball.x_coordinate) / self.ball.forwards_velocity
 
@@ -133,7 +133,7 @@ class PongType(abc.ABC):
         return path
 
     def get_ball_y_coordinates(self, total_time):
-        path = Path(Point(0, self.ball.y_coordinate))
+        path = Path(Point(0, self.ball.y_coordinate), 0, 0)
 
         ball_y_coordinate = self.ball.y_coordinate
         ball_is_moving_down = self.ball.is_moving_down
@@ -163,6 +163,7 @@ class PongType(abc.ABC):
 
             total_time -= time
             last_time = time
+            print("PATH", ball_y_coordinate, self.ball.is_moving_right)
 
         return path
 

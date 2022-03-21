@@ -1,5 +1,6 @@
 import pygame.display
 
+from base_pong.engines import CollisionsFinder
 from base_pong.path import *
 from base_pong.utility_classes import HistoryKeeper
 from gui.main_screen import MainScreen
@@ -53,10 +54,10 @@ while True:
         game_window.display_screen(screen)
 
     current_screen = screen
-    VelocityCalculator.time = time.time() - start_time
-    HistoryKeeper.last_time = HistoryKeeper.get_last_time()
+
+    CollisionsFinder.objects_to_data = {}
+    print(CollisionsFinder.objects_to_data)
     function_runner.run()
-
-
-
-
+    changer.run_changes()
+    HistoryKeeper.last_time = VelocityCalculator.time
+    VelocityCalculator.time = time.time() - start_time

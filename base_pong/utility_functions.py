@@ -1,3 +1,5 @@
+from math import sqrt
+
 import pygame
 
 from base_pong.important_variables import game_window, screen_length, screen_height, background_color
@@ -188,3 +190,98 @@ def get_displacement(velocity, time, is_leftwards):
 
     distance = time * velocity
     return -distance if is_leftwards else distance
+
+
+def solve_quadratic(a, b, c):
+    """returns: List of double; [answer1, answer2] the answers to the quadratic
+                and if the answer is an imaginary number it returns: float('nan')"""
+
+    number_under_square_root = pow(b, 2) - 4 * a * c
+
+    if number_under_square_root < 0:
+        return None
+
+    square_root = sqrt(number_under_square_root)
+
+    answer1 = (-b + square_root) / (2 * a)
+    answer2 = (-b - square_root) / (2 * a)
+    return [answer2, answer1]
+
+
+
+def min_value(item1, item2):
+    """returns: double; the smallest item"""
+
+    if item1 is None:
+        return item2
+
+    if item2 is None:
+        return item1
+
+    return item1 if item1 < item2 else item2
+
+
+def max_value(item1, item2):
+    """returns double; the biggest item"""
+
+    return item1 if item1 > item2 else item2
+
+
+def percent_to_number(percent):
+    """returns: double; the percentage as a number"""
+    return percent / 100
+
+
+def is_within_range(want, got, amount_can_be_off_by):
+    """ summary: finds out if want is within range of upper bound and lower bound (want +- amount_can_be_off_by respectively)
+
+        params:
+            want; double; the value that is wanted
+            got: double; the double that is gotten
+            amount_can_be_off_by; the amount that got can differ from want
+
+        returns: boolean; if got is within the range of got
+    """
+
+    lower_bound = want - amount_can_be_off_by
+    upper_bound = want + amount_can_be_off_by
+
+    return got >= lower_bound and got <= upper_bound
+
+
+def is_between_values(min_value, max_value, got, amount_can_be_off_by):
+    """ summary: finds out if want is above min_value and below max_value (can be off by +- amount_can_be_off_by)
+
+        params:
+            min_value: double; the minimum value- must be above this value (can be off by amount_can_be_off_by)
+            max_value: double; the maximum value- must be below this value (can be off amount_can_be_off_by)
+            amount_can_be_off_by: double; the amount it can be off from min_value and max_value
+
+        returns: boolean; if got is within the range of got
+    """
+
+    # Reassigning these variables using percent_error_acceptable
+    min_value = min_value - amount_can_be_off_by
+    max_value = max_value + amount_can_be_off_by
+
+    return got >= min_value and got <= max_value
+
+
+def get_distance(point1, point2):
+    """returns: double; the distance from point1 -> point2; uses formula d = sqrt((x1 - x2)^2 + (y1 - y2)^2))"""
+
+    return sqrt(pow(point1.x_coordinate - point2.x_coordinate, 2) + pow(point1.y_coordinate - point2.y_coordinate, 2))
+
+
+def values_are_equal(object1, object2, attributes):
+    """returns: boolean; if object1 and object2 have the same value for the attributes"""
+
+    return_value = True
+    try:
+        for attribute in attributes:
+            if object1.__dict__[attribute] != object2.__dict__[attribute]:
+                return_value = False
+    except:
+        print("EH")
+    return return_value
+
