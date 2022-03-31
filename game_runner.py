@@ -56,6 +56,9 @@ while True:
     current_screen = screen
 
     CollisionsFinder.objects_to_data = {}
+    if CollisionsFinder.sim_collision(game_screen.player1, game_screen.player2) and not CollisionsFinder.is_collision(game_screen.player1,
+                                                                                                        game_screen.player2):
+        CollisionsFinder.is_collision(game_screen.player1, game_screen.player2)
     function_runner.run()
     changer.run_changes()
     HistoryKeeper.last_time = VelocityCalculator.time

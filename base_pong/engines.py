@@ -88,7 +88,6 @@ class CollisionsFinder:
             return
 
         # if CollisionsFinder.objects_to_data.__contains__(f"{id(object1)} {id(object2)}"):
-        #     print("RETURN")
         #     return
 
         object1_has_moved = prev_object1.x_coordinate != object1.x_coordinate or prev_object1.y_coordinate != object1.y_coordinate
@@ -164,6 +163,16 @@ class CollisionsFinder:
     def sim_collision(object1, object2):
         return CollisionsFinder.is_height_collision(object1, object2) and CollisionsFinder.is_length_collision(object1, object2)
 
+    def is_a_bottom_collision(object1, object2):
+        """returns: boolean; if either object1 or object2 collided with the other one's bottom"""
+
+        return CollisionsFinder.is_bottom_collision(object1, object2) or CollisionsFinder.is_bottom_collision(object2, object1)
+
+    def is_a_top_collision(object1, object2):
+        """returns: boolean; if either object1 or object2 collided with the other one's top"""
+
+        return CollisionsFinder.is_top_collision(object1, object2) or CollisionsFinder.is_top_collision(object2, object1)
+
     def is_bottom_collision(object1, object2):
         """ summary: finds out if the object's collided from the bottom
             
@@ -181,14 +190,8 @@ class CollisionsFinder:
             # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
-        prev_bottom_object = CollisionsUtilityFunctions.get_bottommost_object(prev_object1, prev_object2)
-        prev_top_object = CollisionsUtilityFunctions.get_topmost_object(prev_object1, prev_object2)
-
-        top_object = CollisionsUtilityFunctions.get_topmost_object(object1, object2)
-        bottom_object = CollisionsUtilityFunctions.get_bottommost_object(object1, object2)
-
-        return (CollisionsFinder.is_collision(object1, object2)
-                and prev_bottom_object.y_coordinate > prev_top_object.bottom and bottom_object.y_coordinate <= top_object.bottom)
+        return (CollisionsFinder.is_collision(object1, object2) and prev_object1.y_coordinate > prev_object2.bottom and
+                object1.y_coordinate <= object2.bottom) # Meaning that it isn't the bottom object anymore
 
     def is_top_collision(object1, object2):
         """ summary: finds out if the object's collided from the bottom
@@ -207,14 +210,8 @@ class CollisionsFinder:
             # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
-        prev_bottom_object = CollisionsUtilityFunctions.get_bottommost_object(prev_object1, prev_object2)
-        prev_top_object = CollisionsUtilityFunctions.get_topmost_object(prev_object1, prev_object2)
-
-        top_object = CollisionsUtilityFunctions.get_topmost_object(object1, object2)
-        bottom_object = CollisionsUtilityFunctions.get_bottommost_object(object1, object2)
-
-        return (CollisionsFinder.is_collision(object1, object2)
-                and prev_top_object.bottom < prev_bottom_object.y_coordinate and top_object.bottom >= bottom_object.y_coordinate)
+        return (CollisionsFinder.is_collision(object1, object2) and prev_object1.bottom < prev_object2.y_coordinate
+                and object1.bottom > object2.y_coordinate) # Meaning that it isn't the bottom object anymore
 
     def get_path_line_collision(path, line):
         """returns: Point; the point with the smallest x coordinate in CollisionUtilityFunctions.get_path_line_collision_points()"""

@@ -63,6 +63,30 @@ class OmnidirectionalPong(NormalPong):
         # self.player2.action = self.run_ai
         self.player2 = self.player2
 
+    def set_player_coordinates(self):
+        """Sets the players coordinates and their ability to move after a collision"""
+        player1_xy, player2_xy = CollisionsFinder.get_objects_xy(self.player1, self.player2)
+        self.player1.x_coordinate, self.player1.y_coordinate = player1_xy.x_coordinate, player1_xy.y_coordinate
+        self.player2.x_coordinate, self.player2.y_coordinate = player2_xy.x_coordinate, player2_xy.y_coordinate
+
+        # Horizontal Movement
+        # if not is_top_or_bottom_collision:
+        self.get_leftmost_player().can_move_right = False
+        self.get_rightmost_player().can_move_left = False
+
+        if self.get_leftmost_player() == self.player2:
+            self.player2.x_coordinate = self.player1.x_coordinate - self.player2.length
+
+        else:
+            self.player2.x_coordinate = self.player1.right_edge
+
+        # Vertical Movement
+        # top_player = CollisionsUtilityFunctions.get_topmost_object(self.player1, self.player2)
+        # bottom_player = CollisionsUtilityFunctions.get_bottommost_object(self.player1, self.player2)
+        # if is_top_or_bottom_collision:
+        #     top_player.can_move_down = False
+        #     bottom_player.can_move_up = False
+        #     bottom_player.y_coordinate = top_player.bottom
     def run(self):
         """ summary: runs all the code that is necessary for this pong type
             params: None
@@ -70,6 +94,7 @@ class OmnidirectionalPong(NormalPong):
         """
 
         # TODO ALWAYS have collisions after movement; very very important
+
         # ORDER MATTERS! This must go first
         if self.ball.can_move:
             self.ball_movement()
@@ -77,16 +102,20 @@ class OmnidirectionalPong(NormalPong):
         self.last_ball = self.ball
         self.horizontal_player_movements(self.player1, pygame.K_a, pygame.K_d)
         self.horizontal_player_movements(self.player2, pygame.K_LEFT, pygame.K_RIGHT)
-
-        self.run_player_boundaries(self.player2)
-        self.run_player_boundaries(self.player1)
-
-        self.ball_sandwiched_event.run(self.ball_is_sandwiched())
         self.player1.movement()
         if type(self.player2) == Player:
             self.player2.movement()
         else:
             self.player2.run()
+
+        if CollisionsFinder.is_left_collision(self.player1, self.ball):
+            CollisionsFinder.is_left_collision(self.player1, self.ball)
+        self.set_player_horizontal_movements(self.player2)
+        self.set_player_horizontal_movements(self.player1)
+        self.run_player_boundaries(self.player2)
+        self.run_player_boundaries(self.player1)
+
+        self.ball_sandwiched_event.run(self.ball_is_sandwiched())
         # Collisions
         self.ball_collisions(self.player1)
         self.ball_collisions(self.player2)
@@ -98,20 +127,9 @@ class OmnidirectionalPong(NormalPong):
             params: None
             returns: None
         """
+
         if CollisionsFinder.is_moving_collision(self.player1, self.player2):
-            self.get_leftmost_player().can_move_right = False
-            self.get_rightmost_player().can_move_left = False
-            player1_xy, player2_xy = CollisionsFinder.get_objects_xy(self.player1, self.player2)
-
-            # TODO fix this logic with the times and stuff, but right now it ain't working
-            self.player1.x_coordinate, self.player1.y_coordinate = player1_xy.x_coordinate, player1_xy.y_coordinate
-
-            if self.get_leftmost_player() == self.player2:
-                self.player2.x_coordinate = self.player1.x_coordinate - self.player2.length
-
-            else:
-                self.player2.x_coordinate = self.player1.right_edge
-
+            self.set_player_coordinates()
         self.run_player_boundaries(self.player1)
         self.run_player_boundaries(self.player2)
 
@@ -166,7 +184,18 @@ class OmnidirectionalPong(NormalPong):
         self.ball_screen_boundary_collisions(self.ball)
 
     def horizontal_player_movements(self, player, left_key, right_key):
+        """Runs the horizontal movement of the player"""
+
         controls = pygame.key.get_pressed()
+
+        if player.can_move_left and controls[left_key]:
+            player.x_coordinate -= VelocityCalculator.calc_distance(player.velocity)
+
+        if player.can_move_right and controls[right_key] and not controls[left_key]:
+            player.x_coordinate += VelocityCalculator.calc_distance(player.velocity)
+
+    def set_player_horizontal_movements(self, player):
+        """Sets the directions that the player can move"""
 
         is_collision = CollisionsFinder.is_collision(self.player1, self.player2) or self.ball_is_sandwiched()
         within_screen_right = player.right_edge < screen_length
@@ -177,12 +206,6 @@ class OmnidirectionalPong(NormalPong):
 
         if not is_collision and within_screen_left:
             player.can_move_left = True
-
-        if player.can_move_left and controls[left_key]:
-            player.x_coordinate -= VelocityCalculator.calc_distance(player.velocity)
-
-        if player.can_move_right and controls[right_key] and not controls[left_key]:
-            player.x_coordinate += VelocityCalculator.calc_distance(player.velocity)
 
     def run_player_boundaries(self, player):
         """ summary: sets the players can move left and right based on if the player is within the screens bounds
@@ -200,15 +223,6 @@ class OmnidirectionalPong(NormalPong):
             player.x_coordinate = 0
             player.can_move_left = False
 
-        bottom_player = CollisionsUtilityFunctions.get_bottommost_object(self.player1, self.player2)
-        top_player = CollisionsUtilityFunctions.get_topmost_object(self.player1, self.player2)
-        is_collision = (CollisionsFinder.is_bottom_collision(self.player1, self.player2)
-                        or CollisionsFinder.is_top_collision(self.player1, self.player2))
-
-        if is_collision:
-            bottom_player.can_move_up = False
-            top_player.can_move_down = False
-
         if player.y_coordinate <= 0:
             player.can_move_up = False
             player.y_coordinate = 0
@@ -220,10 +234,10 @@ class OmnidirectionalPong(NormalPong):
         within_screen_bottom = player.bottom < screen_height
         within_screen_top = player.y_coordinate > 0
 
-        if not is_collision and within_screen_top:
+        if within_screen_top:
             player.can_move_up = True
 
-        if not is_collision and within_screen_bottom:
+        if within_screen_bottom:
             player.can_move_down = True
 
     def ball_is_sandwiched(self):
