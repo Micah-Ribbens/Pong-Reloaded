@@ -62,12 +62,10 @@ class CollisionsUtilityFunctions:
             # Since object2 traveled a greater distance its displacement matters more (if it goes leftwards into the ball
             # it would be a left collision and if it goes rightwards it would be a right collision)
             is_right_collision = object2_x_displacement > 0
-            # print("O2 taken", object2_x_displacement)
 
-        elif object2_x_distance_traveled < object1_x_distance_traveled:
-            # Otherwise since object1 has traveled the greater distance the direction it goes matters most
+        else:
+            # Otherwise, since object1 has traveled the greater distance the direction it goes matters most
             is_right_collision = object1_x_displacement < 0
-            # print("01 taken", object1_x_displacement)
 
         return is_right_collision
 
@@ -81,7 +79,6 @@ class CollisionsUtilityFunctions:
         object1_displacement = object1.x_coordinate - prev_object1.x_coordinate
         object2_displacement = object2.x_coordinate - prev_object2.x_coordinate
         object_xy = CollisionsUtilityFunctions.get_object_xy(object1, prev_object1, collision_time)
-        # TODO have is_left_collision and is_right_collision be a part of CollisionData!
         is_right_collision = CollisionsUtilityFunctions.get_is_right_collision(object1_displacement, object2_displacement)
         is_left_collision = not is_right_collision
 
@@ -102,7 +99,7 @@ class CollisionsUtilityFunctions:
         x_ranges = [CollisionsUtilityFunctions.get_times_between(x_line1, x_line2, right_edge_line2),
                     CollisionsUtilityFunctions.get_times_between(right_edge_line1, x_line2, right_edge_line2),
                     CollisionsUtilityFunctions.get_times_between(x_line2, x_line1, right_edge_line1),
-                    CollisionsUtilityFunctions.get_times_between(right_edge_line2, x_line1, right_edge_line2)]
+                    CollisionsUtilityFunctions.get_times_between(right_edge_line2, x_line1, right_edge_line1)]
 
         y_ranges = [CollisionsUtilityFunctions.get_times_between(y_line1, y_line2, bottom_line2),
                     CollisionsUtilityFunctions.get_times_between(bottom_line1, y_line2, bottom_line2),
@@ -114,6 +111,7 @@ class CollisionsUtilityFunctions:
         return_value = float('inf')
         prev_object1, current_object1 = object1_path.prev_object, object1_path.current_object
         prev_object2, current_object2 = object2_path.prev_object, object2_path.current_object
+
         for x_range in x_ranges:
             y_and_bottom_equal = (prev_object1.y_coordinate == prev_object2.y_coordinate and
                                   current_object1.bottom == current_object2.bottom)
@@ -142,18 +140,19 @@ class CollisionsUtilityFunctions:
 
         return_value = []
         for x in range(len(ranges)):
-            if not (ranges[x].start == 0 and ranges[x].end == 0) and not ranges[x].start < 0 and not ranges[x].end < 0:
+            ranges_are_positive = ranges[x].start < 0 and ranges[x].end < 0
+            if not (ranges[x].start == 0 and ranges[x].end == 0) and not ranges_are_positive:
                 return_value.append(ranges[x])
         return return_value
 
     def is_between_lines(line, bottom_line, top_line, is_testing_end_points):
         """returns: boolean; if the line's end or start point are between the bottom_line's and top_line's end or start point"""
         if is_testing_end_points:
-            return (line.end_point.y_coordinate > bottom_line.end_point.y_coordinate and
-                    line.end_point.y_coordinate < top_line.end_point.y_coordinate)
+            return (line.end_point.y_coordinate >= bottom_line.end_point.y_coordinate and
+                    line.end_point.y_coordinate <= top_line.end_point.y_coordinate)
         else:
-            return (line.start_point.y_coordinate > bottom_line.start_point.y_coordinate and
-                    line.start_point.y_coordinate < top_line.start_point.y_coordinate)
+            return (line.start_point.y_coordinate >= bottom_line.start_point.y_coordinate and
+                    line.start_point.y_coordinate <= top_line.start_point.y_coordinate)
 
     def get_times_between(line: LineSegment, bottom_line: LineSegment, top_line: LineSegment):
         """returns: List of Range; the times that 'line' is between 'top_line' and 'bottom_line' NOTE: the lines must have
@@ -169,12 +168,11 @@ class CollisionsUtilityFunctions:
         collision_times += [time1.x_coordinate] if time1 is not None else []
         collision_times += [time2.x_coordinate] if time2 is not None else []
 
-        # Getting rid of all numbers that are 0
-        collision_times = list(filter(lambda item: item > 0, collision_times))
-
         collision_times.sort()
+        collision_times = list(filter(lambda item: item != 0, collision_times))
 
         start_time = 0
+
         return_value = None
         for collision_time in collision_times:
             if is_between_lines:
@@ -187,16 +185,16 @@ class CollisionsUtilityFunctions:
             return_value = Range(start_time, VelocityCalculator.time)
 
         if len(collision_times) == 0 or return_value is None:
+            always_between_lines = is_between_lines and CollisionsUtilityFunctions.is_between_lines(line, bottom_line, top_line, True)
             # If the lines never collide and it is between the lines that means it was always between the lines otherwise it never was
-            return Range(0, 0) if not is_between_lines else Range(0, VelocityCalculator.time)
+            return_value = Range(0, 0) if not always_between_lines else Range(0, VelocityCalculator.time)
 
-        else:
-            return return_value
+        return return_value
 
     def get_moving_collision_time(moving_object_path: ObjectPath, stationary_object):
         """ summary: Calls is_line_ellipse_collision() or is_line_rectangle_collision()
                      depending on if the stationary object is elliptical or rectangular; NOTE make sure to call only if
-                     that the objects from the previous cycle aren't touching otherwise it may not work properly
+                     the objects from the previous cycle aren't touching otherwise it may not work properly
 
             params:
                 moving_object_path: Path; the moving object's path
@@ -231,14 +229,13 @@ class CollisionsUtilityFunctions:
         ]
 
         collision_time = float('inf')
-        start_xy_point = moving_object_path.get_start_point()
+        # start_xy_point = moving_object_path.get_start_point()
 
         for rectangle_line in rectangle_lines:
             collision_point = CollisionsUtilityFunctions.get_line_collision_point(rectangle_line, line)
 
             if collision_point is not None:
-                xy_point = moving_object_path.get_xy_point(line, collision_point)
-                distance_to_point = get_distance(start_xy_point, xy_point)
+                distance_to_point = get_distance(line.start_point, collision_point)
                 time = CollisionsUtilityFunctions.get_time_to_point(distance_to_point, moving_object_path.get_total_distance())
                 collision_time = time if time < collision_time else collision_time
 
@@ -268,26 +265,22 @@ class CollisionsUtilityFunctions:
         quadratic_b = 2 * (pow(a, 2) * (b - k) * m - pow(c, 2) * h)
         quadratic_c = pow(a, 2) * pow(b - k, 2) + pow(c, 2) * pow(h, 2) - pow(a, 2) * pow(c, 2)
 
-        answers = solve_quadratic(quadratic_a, quadratic_b, quadratic_c)
+        x_coordinates = solve_quadratic(quadratic_a, quadratic_b, quadratic_c)
 
-
-        answers = solve_quadratic(quadratic_a, quadratic_b, quadratic_c)
         # The difference between supposed_collision_points and collision_points is that collision_points takes into account
         # That it is a line segment while supposed_collision_points doesn't
-        supposed_collision_points = []
         collision_points = []
-        # solve_quadratic returns False if it gets an imaginary number meaning there isn't a collision
 
-        if answers is not None:
-            x_coordinate1, x_coordinate2 = answers
-            y_coordinate1, y_coordinate2 = line.get_y_coordinate(x_coordinate1), line.get_y_coordinate(x_coordinate2)
-            supposed_collision_points = [Point(x_coordinate1, y_coordinate1), Point(x_coordinate2, y_coordinate2)]
+        # TODO fix so there does not have to be a 2 return statements
+        if x_coordinates is None:
+            return []
 
-        if answers is not None and line.contains_point(supposed_collision_points[0], 1):
-            collision_points.append(supposed_collision_points[0])
+        for x_coordinate in x_coordinates:
+            for y_coordinate in ellipse.get_y_coordinate_min_and_max(x_coordinate):
+                point = Point(x_coordinate, y_coordinate)
 
-        if answers is not None and line.contains_point(supposed_collision_points[1], 1):
-            collision_points.append(supposed_collision_points[1])
+                if line.contains_point(point, 1):
+                    collision_points.append(point)
 
         return collision_points
 
@@ -355,6 +348,12 @@ class CollisionsUtilityFunctions:
         """returns: boolean; if the two lines have crossed"""
 
         return CollisionsUtilityFunctions.get_line_collision_point(line1, line2) is not None
+
+    # def get_approximate_line_collision_point(line1, line2):
+    #     """returns: Point; the approximate point that the lines intersect- changes the start point if they both start
+    #     at the same location"""
+
+
 
     def get_path_line_collision_point(line: LineSegment, path: Path):
         """returns: Point; the x and y coordinate at which the line and path collide (None if they don't collide)"""

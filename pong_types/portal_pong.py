@@ -389,10 +389,10 @@ class PortalPong(PongType):
             for portal in self.portals:
                 is_random_portal = type(portal) == RandomPortal
 
-                if CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening1):
+                if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening1):
                     return portal.portal_end if is_random_portal else portal.portal_opening2
 
-                if not is_random_portal and CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening2):
+                if not is_random_portal and CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
                     return portal.portal_opening1
         return None
 
@@ -401,10 +401,10 @@ class PortalPong(PongType):
         for line in ball_path.get_lines():
             for portal in self.portals:
                 is_random_portal = type(portal) == RandomPortal
-                if CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening1):
+                if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening1):
                     return portal
 
-                if not is_random_portal and CollisionsFinder.is_line_ellipse_equation(line, portal.portal_opening2):
+                if not is_random_portal and CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
                     return portal
         return None
 

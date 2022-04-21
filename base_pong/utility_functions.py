@@ -201,11 +201,17 @@ def solve_quadratic(a, b, c):
     if number_under_square_root < 0:
         return None
 
+    number_under_square_root = rounded(number_under_square_root, 4)
+
     square_root = sqrt(number_under_square_root)
 
     answer1 = (-b + square_root) / (2 * a)
     answer2 = (-b - square_root) / (2 * a)
-    return [answer2, answer1]
+
+    answers = [answer2, answer1]
+
+    # If the answers are the same I should only return one of them
+    return answers if answers[0] != answers[1] else [answers[0]]
 
 
 
@@ -284,4 +290,17 @@ def values_are_equal(object1, object2, attributes):
     except:
         print("EH")
     return return_value
+
+
+def rounded(number, places):
+    """returns: double; the number rounded to that many decimal places"""
+
+    rounded_number = int(number * pow(10, places))
+
+    # Converting it back to the proper decimals once it gets rounded from above
+    return rounded_number / pow(10, places)
+
+
+
+
 

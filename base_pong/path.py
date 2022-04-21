@@ -1,9 +1,11 @@
+from copy import deepcopy
 from math import sqrt
 
 import pygame.draw_py
 from base_pong.equations import LineSegment, Point
 from base_pong.utility_functions import max_value, get_leftmost_object, get_distance
 from base_pong.velocity_calculator import VelocityCalculator
+from gui_components.component import Component
 
 
 class PathLine:
@@ -27,8 +29,8 @@ class PathLine:
         self.bottom_line = LineSegment(Point(self.y_coordinate_line.start_point.x_coordinate, self.y_coordinate_line.start_point.y_coordinate + height),
                                        Point(self.y_coordinate_line.end_point.x_coordinate, self.y_coordinate_line.end_point.y_coordinate + height))
 
-# TODO rethink how paths work: 3-11-2022
-class Path:
+
+class Path(Component):
     """Stores the path of an object"""
 
     path_lines = []
@@ -125,7 +127,8 @@ class Path:
 
         return lines
 
-
+    def run(self):
+        pass
 
 
 class VelocityPath(Path):
@@ -220,6 +223,7 @@ class ObjectPath(Path):
 
     prev_object = None
     current_object = None
+    is_runnable = False
 
     def __init__(self, prev_object, current_object):
         """initializes the object; does the path that covers the most area of the object"""
@@ -266,16 +270,17 @@ class ObjectPath(Path):
     def get_xy_point(self, line, point):
         line_is_rightwards = line.start_point.x_coordinate < line.end_point.x_coordinate
         is_bottom_line = line.start_point.y_coordinate == self.prev_object.bottom
+        xy_point = deepcopy(point)
 
         if line_is_rightwards:
             # The end point of the line if it is the current_object's right_edge, so substracting the length gets the x cooordinate
-            point.x_coordinate -= self.length
+            xy_point.x_coordinate -= self.length
 
         if is_bottom_line:
             # The line is based off the bottom, so subtracting the height gets the y coordinate
-            point.y_coordinate -= self.height
+            xy_point.y_coordinate -= self.height
 
-        return point
+        return xy_point
 
     def get_end_point(self):
         """returns: Point; the end point of the object"""
@@ -285,7 +290,25 @@ class ObjectPath(Path):
         """returns: double; the total amonut of distance the object has traveled"""
         return get_distance(self.get_start_point(), self.get_end_point())
 
+    def get_lines(self):
+        """returns: List of LineSegment; the lines of the object path"""
 
+        return [
+            LineSegment(Point(self.prev_object.x_coordinate, self.prev_object.y_coordinate), Point(self.current_object.x_coordinate, self.current_object.y_coordinate)),
+            LineSegment(Point(self.prev_object.right_edge, self.prev_object.y_coordinate), Point(self.current_object.right_edge, self.current_object.y_coordinate)),
+            LineSegment(Point(self.prev_object.right_edge, self.prev_object.bottom), Point(self.current_object.right_edge, self.current_object.bottom)),
+            LineSegment(Point(self.prev_object.y_coordinate, self.prev_object.bottom), Point(self.current_object.y_coordinate, self.current_object.bottom)),
+        ]
+
+    def get_x_distance(self):
+        """returns: double; the x distance of the line"""
+        return abs(self.path_line.end_point - self.path_line.start_point.x_coordinate)
+
+    @property
+    def path_line(self):
+        """returns: PathLine; the only path_line since it is an object path"""
+
+        return self.path_lines[0].y_coordinate_line
 
 
 

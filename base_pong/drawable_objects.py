@@ -2,7 +2,7 @@ from math import sqrt
 
 import pygame
 from base_pong.important_variables import game_window
-from base_pong.utility_functions import percentage_to_number
+from base_pong.utility_functions import percentage_to_number, rounded
 
 from gui_components.component import Component
 
@@ -200,6 +200,12 @@ class Ellipse(GameObject):
         # This will make the left_side look like (x - h)^2 / a^2 + (y - k)^2 / b^2
         x_fraction = pow(x_coordinate - h, 2) / pow(a, 2)
 
+        x_fraction = rounded(x_fraction, 4)
+
+        right_side = 1 - x_fraction
+        # Equation now looks like (y - k)^2 = (1 - (x - h)^2 / a^2) * b^2
+        right_side *= pow(b, 2)
+
         # Equation now looks like (y - k)^2 / b^2 = 1 - (x - h)^2 / a^2
         right_side = 1 - x_fraction
         # Equation now looks like (y - k)^2 = (1 - (x - h)^2 / a^2) * b^2
@@ -209,7 +215,10 @@ class Ellipse(GameObject):
         y_min = sqrt(right_side) + k
         y_max = -sqrt(right_side) + k
 
-        return [y_min, y_max]
+        return_value = [y_max, y_min]
+
+        # If the ansers are the same only one of them should be returned
+        return return_value if return_value[0] != return_value[1] else [return_value[0]]
 
     def get_y_coordinate_min(self, x_coordinate):
         """ summary: overrides GameObject.get_y_coordinate_max(); calls get_y_coordinate_min_and_max() to the y_coordinate max

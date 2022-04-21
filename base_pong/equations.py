@@ -64,9 +64,10 @@ class LineSegment:
     def render(self):
         """Renders the object"""
 
+        line_height = 3
         pygame.draw_py.draw_line(game_window.get_window(), self.color,
-                                 (int(self.start_point.x_coordinate), int(self.start_point.y_coordinate)),
-                                 (int(self.end_point.x_coordinate), int(self.end_point.y_coordinate)), 9)
+                                 (int(self.start_point.x_coordinate), int(self.start_point.y_coordinate) - line_height),
+                                 (int(self.end_point.x_coordinate), int(self.end_point.y_coordinate) - line_height), line_height)
 
     def get_y_coordinate(self, x_coordinate):
         """ summary: finds the y_coordinate using the equation y = mx + b

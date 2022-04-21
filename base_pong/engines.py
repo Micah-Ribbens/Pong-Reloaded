@@ -118,6 +118,7 @@ class CollisionsFinder:
             # If they started out touching then it was not a moving collision; they were already collided beforehand
             if objects_were_touching:
                 collision_time = -1
+                print("ALREADY WERE TOUCHING")
 
             is_moving_collision = collision_time != -1
 
@@ -127,7 +128,6 @@ class CollisionsFinder:
         if objects_are_touching:
             # The last case where neither object has moved and is checking if the objects are touching each other
             collision_time = 0
-
 
         CollisionsFinder.objects_to_data[f"{id(object1)} {id(object2)}"] = CollisionsUtilityFunctions.get_collision_data(object1, object2, collision_time, is_moving_collision)
         CollisionsFinder.objects_to_data[f"{id(object2)} {id(object1)}"] = CollisionsUtilityFunctions.get_collision_data(object2, object1, collision_time, is_moving_collision)
@@ -224,7 +224,7 @@ class CollisionsFinder:
                 smallest_x_coordinate = point.x_coordinate
         return smallest_point
 
-    def is_line_ellipse_equation(line, ellipse):
+    def is_line_ellipse_collision(line, ellipse):
         return len(CollisionsUtilityFunctions.get_line_ellipse_collision_points(line, ellipse)) != 0
 
 
