@@ -118,7 +118,6 @@ class CollisionsFinder:
             # If they started out touching then it was not a moving collision; they were already collided beforehand
             if objects_were_touching:
                 collision_time = -1
-                print("ALREADY WERE TOUCHING")
 
             is_moving_collision = collision_time != -1
 

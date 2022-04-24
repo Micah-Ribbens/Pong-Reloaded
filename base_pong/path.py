@@ -297,7 +297,7 @@ class ObjectPath(Path):
             LineSegment(Point(self.prev_object.x_coordinate, self.prev_object.y_coordinate), Point(self.current_object.x_coordinate, self.current_object.y_coordinate)),
             LineSegment(Point(self.prev_object.right_edge, self.prev_object.y_coordinate), Point(self.current_object.right_edge, self.current_object.y_coordinate)),
             LineSegment(Point(self.prev_object.right_edge, self.prev_object.bottom), Point(self.current_object.right_edge, self.current_object.bottom)),
-            LineSegment(Point(self.prev_object.y_coordinate, self.prev_object.bottom), Point(self.current_object.y_coordinate, self.current_object.bottom)),
+            LineSegment(Point(self.prev_object.x_coordinate, self.prev_object.bottom), Point(self.current_object.x_coordinate, self.current_object.bottom)),
         ]
 
     def get_x_distance(self):

@@ -158,6 +158,8 @@ class GameObject(Component):
 class Ellipse(GameObject):
     """A GameObject this is elliptical"""
 
+    is_outline = False
+
     def render(self):
         """ summary: Draws the ellipse onto the screen based upon these values:
             x_coordinate, y_coordinate, length, height, and color
@@ -165,8 +167,19 @@ class Ellipse(GameObject):
             params: None
             returns: None
         """
-        pygame.draw.ellipse(game_window.get_window(), self.color, (self.x_coordinate,
-                            self.y_coordinate, self.length, self.height))
+
+        if self.is_outline:
+            outline_length = self.length * .1
+            outline_height = self.height * .1
+            pygame.draw.ellipse(game_window.get_window(), self.color, (self.x_coordinate + outline_length,
+                                self.y_coordinate + outline_height, self.length - outline_length, self.height - outline_height))
+
+            pygame.draw.ellipse(game_window.get_window(), self.color, (self.x_coordinate,
+                                self.y_coordinate, self.length, self.height))
+
+        else:
+            pygame.draw.ellipse(game_window.get_window(), self.color, (self.x_coordinate,
+                                self.y_coordinate, self.length, self.height))
 
     def get_equation_variables(self):
         """ summary: finds the equations for this equation of an ellipse: (x - h)^2 / a^2 + (y - k)^2 / b^2 = 1
@@ -206,14 +219,21 @@ class Ellipse(GameObject):
         # Equation now looks like (y - k)^2 = (1 - (x - h)^2 / a^2) * b^2
         right_side *= pow(b, 2)
 
+        if not (x_coordinate <= self.right_edge and x_coordinate >= self.x_coordinate):
+            print()
+
         # Equation now looks like (y - k)^2 / b^2 = 1 - (x - h)^2 / a^2
         right_side = 1 - x_fraction
         # Equation now looks like (y - k)^2 = (1 - (x - h)^2 / a^2) * b^2
         right_side *= pow(b, 2)
 
         # Since a sqrt can either be positive or negative you have to do +-
-        y_min = sqrt(right_side) + k
-        y_max = -sqrt(right_side) + k
+        try:
+            y_min = sqrt(right_side) + k
+            y_max = -sqrt(right_side) + k
+        except:
+            print("BAAAAAAD")
+            return [0, 0]
 
         return_value = [y_max, y_min]
 

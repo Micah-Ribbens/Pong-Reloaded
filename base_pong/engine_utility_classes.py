@@ -229,8 +229,6 @@ class CollisionsUtilityFunctions:
         ]
 
         collision_time = float('inf')
-        # start_xy_point = moving_object_path.get_start_point()
-
         for rectangle_line in rectangle_lines:
             collision_point = CollisionsUtilityFunctions.get_line_collision_point(rectangle_line, line)
 

@@ -25,11 +25,9 @@ class NormalPong(PongType):
         self.ball_screen_boundary_collisions(ball)
 
         if CollisionsFinder.is_collision(player1, ball):
-            # print("COLLISION")
             self.paddle_collisions(ball, player1)
 
         if CollisionsFinder.is_collision(player2, ball):
-            # print("COLLISOIn")
             self.paddle_collisions(ball, player2)
 
     def ball_collisions(self):

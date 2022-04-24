@@ -188,7 +188,6 @@ class PongType(abc.ABC):
 
             total_time -= time
             last_time = time
-            print("PATH", ball_y_coordinate, self.ball.is_moving_right)
 
         return path
 

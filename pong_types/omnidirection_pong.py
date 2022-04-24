@@ -109,7 +109,6 @@ class OmnidirectionalPong(NormalPong):
             self.player2.run()
         if not CollisionsFinder.sim_collision(self.player1, self.player2) and CollisionsFinder.is_collision(self.player1, self.player2):
             CollisionsFinder.is_collision(self.player1, self.player2)
-            print("YESSIR")
 
         self.set_player_horizontal_movements(self.player2)
         self.set_player_horizontal_movements(self.player1)

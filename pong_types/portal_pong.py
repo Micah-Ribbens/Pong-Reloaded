@@ -84,8 +84,8 @@ class Portal:
             returns: None
         """
 
-        portal_opening1.name = id(self.portal_opening1)
-        portal_opening2.name = id(self.portal_opening2)
+        portal_opening1.name = "portal1 "+str(random.random())+str(id(self.portal_opening1))
+        portal_opening2.name = "portal2 "+str(random.random())+str(id(self.portal_opening2))
         self.portal_opening1 = portal_opening1
         self.portal_opening2 = portal_opening2
         self.portal_disabled_event = TimedEvent(3, False)
@@ -121,12 +121,11 @@ class Portal:
 
         portal_opening2_collision = CollisionsFinder.is_collision(ball, self.portal_opening2)
 
-        p1_x = self.portal_opening1.get_x_coordinates()
-        p2_x = self.portal_opening2.get_x_coordinates()
-        is_x_coll = False
-        for x_coordinate in ball.get_x_coordinates():
-            if p1_x.__contains__(x_coordinate) or p2_x.__contains__(x_coordinate):
-                is_x_coll = True
+        if not CollisionsFinder.sim_collision(ball, self.portal_opening1) and portal_opening1_collision:
+            CollisionsFinder.is_collision(ball, self.portal_opening1)
+
+        elif not CollisionsFinder.sim_collision(ball, self.portal_opening2) and portal_opening2_collision:
+            CollisionsFinder.is_collision(ball, self.portal_opening2)
 
         is_portal_collision = portal_opening1_collision or portal_opening2_collision
 
@@ -186,65 +185,6 @@ class Portal:
         self.portal_opening2.enable(self.enabled_color)
         self.is_enabled = True
 
-
-class RandomPortal(Portal):
-    """A portal where it can teleport to multiple openings"""
-
-    possible_outputs = []
-    portal_end = None
-
-    def __init__(self, color, portal_opening, possible_outputs):
-        """ summary: initializes the object
-
-            params:
-                color: tuple; the (Red, Green, Blue) values of the portal's color
-                portal_opening: PortalOpening; the opening of the portal
-                possible_outputs: List of PortalOpening; the possible portal openings that the ball could be teleported to
-
-            returns: None
-        """
-
-        self.enabled_color = color
-        self.portal_opening1 = portal_opening
-        self.portal_opening1.color = color
-        self.possible_outputs = possible_outputs
-        portal_opening.name = id(self.portal_opening1)
-        self.portal_disabled_event = TimedEvent(3, False)
-        # It extends a regular portal and that uses portal_opening2, so this prevents a NoneType Exception
-        self.portal_opening2 = PortalOpening(0, 0, 0, 0, False)
-        self.portal_end = self.get_portal_end()
-
-    def run(self, ball):
-        # Stores value of is_enabled, which other things in this function modify
-        is_enabled = self.is_enabled
-        is_portal_collision = CollisionsFinder.is_collision(ball, self.portal_opening1)
-
-        self.portal_disabled_event.run(False, is_portal_collision)
-
-        if is_portal_collision and is_enabled:
-            self.teleport(self.portal_end, ball)
-            self.portal_end.was_teleported = True
-            self.portal_end = self.get_portal_end()
-
-        if self.portal_disabled_event.is_started and not self.portal_disabled_event.is_done():
-            self.disable()
-
-        # The ball shouldn't re-enable if the ball is too close to either opening
-        ball_is_too_close_to_portal = is_portal_collision
-
-        if self.portal_disabled_event.is_done() and not ball_is_too_close_to_portal:
-            self.enable()
-            self.portal_disabled_event.reset()
-
-    def get_portal_end(self):
-        """ summary: finds a random portal output and returns it
-            params: None
-            returns: The place where the object should be teleported to (the portal end)
-        """
-
-        return get_random_item(self.possible_outputs)
-
-
 class PortalPong(PongType):
     """Pong where there are portals"""
 
@@ -285,7 +225,6 @@ class PortalPong(PongType):
         for portal in self.portals:
             possible_outputs += [portal.portal_opening1, portal.portal_opening2]
 
-        self.portals.append(RandomPortal(purple, PortalOpening(50, 50, 25, 25, False), possible_outputs))
         self.player2.set_action(self.run_ai)
         
     def run(self):
@@ -387,12 +326,11 @@ class PortalPong(PongType):
 
         for line in ball_path.get_lines():
             for portal in self.portals:
-                is_random_portal = type(portal) == RandomPortal
 
                 if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening1):
-                    return portal.portal_end if is_random_portal else portal.portal_opening2
+                    return portal.portal_opening2
 
-                if not is_random_portal and CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
+                if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
                     return portal.portal_opening1
         return None
 
@@ -400,11 +338,10 @@ class PortalPong(PongType):
         """returns: Portal; the next portal the ball will hit"""
         for line in ball_path.get_lines():
             for portal in self.portals:
-                is_random_portal = type(portal) == RandomPortal
                 if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening1):
                     return portal
 
-                if not is_random_portal and CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
+                if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
                     return portal
         return None
 

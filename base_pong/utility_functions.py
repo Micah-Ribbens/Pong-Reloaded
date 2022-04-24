@@ -197,11 +197,10 @@ def solve_quadratic(a, b, c):
                 and if the answer is an imaginary number it returns: float('nan')"""
 
     number_under_square_root = pow(b, 2) - 4 * a * c
+    number_under_square_root = rounded(number_under_square_root, 4)
 
     if number_under_square_root < 0:
         return None
-
-    number_under_square_root = rounded(number_under_square_root, 4)
 
     square_root = sqrt(number_under_square_root)
 
@@ -301,6 +300,13 @@ def rounded(number, places):
     return rounded_number / pow(10, places)
 
 
+def get_next_index(current_index, max_index):
+    next_index = current_index + 1
+    return next_index if next_index <= max_index else 0
 
 
+def get_prev_index(current_index, max_index):
+    prev_index = current_index - 1
+
+    return prev_index if prev_index > 0 else max_index
 

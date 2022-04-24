@@ -1,6 +1,6 @@
 from pong_types.pong_type import PongType
 from pong_types.utility_functions import *
-from pong_types.gravity_pong import GravityPong
+from pong_types.gravity_pong_real import GravityPong
 from pong_types.middle_paddle_pong import MiddlePaddlePong
 from pong_types.normal_pong import NormalPong
 from pong_types.portal_pong import PortalPong
@@ -15,7 +15,7 @@ class GameModeSelector:
     # If a game mode isn't selected from the gui, then the game mode will be Random
     game_mode = "Pick Pong Type"
     # If a pong_type isn't selected from the gui, then the game mode will be Normal Pong
-    pong_type = "Omnidirectional Pong"
+    pong_type = "Gravity Pong"
     number_of_players = "2 Player"
 
     all_game_modes = ["Chaos", "Civilized",
