@@ -21,16 +21,19 @@ class TestData:
     ball_forwards_velocity = 0
     time_in_air = 0
     actual_y_coordinate = 0 # The y_coordinate the ball ended on
-    physics_equation = None
+    unaltered_physics_equation = None
+    current_physics_equation = None
+    new_physics_equation = None
 
     def __init__(self, end_x_coordinate, ball_x_coordinate, ball_y_coordinate, ball_forwards_velocity, time_in_air,
-                 actual_y_coordinate, physics_equation):
+                 actual_y_coordinate, unaltered_physics_equation, current_physics_equation, new_physics_equation):
         """Initializes the object"""
 
         self.end_x_coordinate, self.ball_x_coordinate = end_x_coordinate, ball_x_coordinate
         self.ball_y_coordinate, self.ball_forwards_velocity = ball_y_coordinate, ball_forwards_velocity
         self.time_in_air, self.actual_y_coordinate = time_in_air, actual_y_coordinate
-        self.physics_equation = physics_equation
+        self.unaltered_physics_equation, self.current_physics_equation = unaltered_physics_equation, current_physics_equation
+        self.new_physics_equation = new_physics_equation
 
 
 class GravityPongAITester:
@@ -47,16 +50,27 @@ class GravityPongAITester:
         fr = FileReader("C:\\Users\\mdrib\\Downloads\\Games\\Pong\\data.txt")
 
         for x in range(fr.get_int("number_of_tests")):
+            if x + 1 == 6:
+                continue
             s = f"test_number{x + 1}."
-            physics_equation = PhysicsEquation()
-            acceleration, initial_velocity, initial_distance = fr.get_number_list(f"{s}physics_equation")
-            physics_equation.set_variables(acceleration=acceleration, initial_velocity=initial_velocity, initial_distance=initial_distance)
-            self.tests.append(TestData(fr.get_double(f"{s}x_coordinate"), fr.get_double(f"{s}ball_x_coordinate"),
+            unaltered_physics_equation = PhysicsEquation()
+            acceleration, initial_velocity, initial_distance = fr.get_number_list(f"{s}current_physics_equation")
+            unaltered_physics_equation.set_variables(acceleration=acceleration, initial_velocity=initial_velocity, initial_distance=initial_distance)
+
+            current_physics_equation = PhysicsEquation()
+            acceleration, initial_velocity, initial_distance = fr.get_number_list(f"{s}unaltered_physics_equation")
+            current_physics_equation.set_variables(acceleration=acceleration, initial_velocity=initial_velocity, initial_distance=initial_distance)
+
+            new_physics_equation = PhysicsEquation()
+            acceleration, initial_velocity, initial_distance = fr.get_number_list(f"{s}new_physics_equation")
+            new_physics_equation.set_variables(acceleration=acceleration, initial_velocity=initial_velocity, initial_distance=initial_distance)
+
+            self.tests.append(TestData(fr.get_double(f"{s}end_x_coordinate"), fr.get_double(f"{s}ball_x_coordinate"),
                                        fr.get_double(f"{s}ball_y_coordinate"), fr.get_double(f"{s}ball_forward_velocity"),
                                        fr.get_double(f"{s}time"), fr.get_double(f"{s}actual_y_coordinate"),
-                                       physics_equation))
+                                       unaltered_physics_equation, current_physics_equation, new_physics_equation))
 
-        for x in range(len(self.tests[:3])):
+        for x in range(len(self.tests)):
             print(x + 1)
             self.run_test(x + 1)
 
@@ -74,13 +88,12 @@ class GravityPongAITester:
         ball.y_coordinate = test_data.ball_y_coordinate
         gravity_pong.time = test_data.time_in_air
         ball.forwards_velocity = test_data.ball_forwards_velocity
-        gravity_pong.physics_equation = test_data.physics_equation
+        gravity_pong.unaltered_physics_equation = test_data.unaltered_physics_equation
+        gravity_pong.physics_equation = test_data.current_physics_equation
+        gravity_pong.new_physics_equation = test_data.new_physics_equation
 
-        ball_path = gravity_pong.get_ball_path_from(test_data.ball_y_coordinate, test_data.ball_x_coordinate,
-                                                    test_data.end_x_coordinate, True)
-
-        predicted_y_coordinate = ball_path.get_end_points()[0].y_coordinate
-
+        predicted_y_coordinate = gravity_pong.get_ball_path_from(test_data.ball_y_coordinate, test_data.ball_x_coordinate,
+                                                                 test_data.end_x_coordinate, True)
         self.cases.append(TestCase(predicted_y_coordinate, test_data.actual_y_coordinate, test_data.end_x_coordinate))
 
 screen = AI_GUI(GravityPongAITester().get_cases(), 10)

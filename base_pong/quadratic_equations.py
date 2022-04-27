@@ -179,7 +179,7 @@ class PhysicsEquation:
         return self.get_time_to_vertex() * 2
 
     def __str__(self):
-        return f"[{self.acceleration},{self.initial_velocity},{self.initial_distance}]"
+        return f"[{self.acceleration},{self.initial_velocity},{self.initial_distance},]"
 
     def __eq__(self, other):
         return (self.acceleration == other.acceleration and self.initial_velocity == other.initial_velocity and

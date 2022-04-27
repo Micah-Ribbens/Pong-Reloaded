@@ -42,14 +42,17 @@ class AI_GUI(Screen):
 
         self.cases, self.deviation_acceptable = cases, deviation_acceptable
 
-        for x in range(len(self.cases)):
+        for x in range(len(self.cases) - 1):
             self.add_screen(x + 1)
 
     def add_screen(self, case_number):
         """Adds the screen that is associated with the case_number"""
 
         case = self.cases[case_number - 1]
-        deviation = abs(case.actual_y_coordinate - case.predicted_y_coordinate)
+        try:
+            deviation = abs(case.actual_y_coordinate - case.predicted_y_coordinate)
+        except:
+            print("BAD")
         has_predicted_wrongly = deviation > self.deviation_acceptable
 
         # General Information for the screen
