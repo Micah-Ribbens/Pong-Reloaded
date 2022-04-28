@@ -294,7 +294,7 @@ def values_are_equal(object1, object2, attributes):
 def rounded(number, places):
     """returns: double; the number rounded to that many decimal places"""
 
-    rounded_number = int(number * pow(10, places))
+    rounded_number = number * pow(10, places)
 
     # Converting it back to the proper decimals once it gets rounded from above
     return rounded_number / pow(10, places)

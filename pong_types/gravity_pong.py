@@ -28,7 +28,7 @@ class GravityPong(PongType):
     s = None
     new_physics_equation = None
     # The physics equation that would be the 'normal' parabola of the ball- just makes increasing parabola height easier
-    unaltered_physics_equation = None
+    bottom_to_top_physics_equation = None
     expected_vertex = None
 
     def __init__(self, player1, player2, ball):

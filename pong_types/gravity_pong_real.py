@@ -19,16 +19,15 @@ class GravityPong(PongType):
     time = 0
     physics_equation = None
     base_physics_equation = None
-    vertex_increase = 0
+    needed_vertex_increase = 0
     hits = 0
     is_writing = False
     data = ""
     test_number = 1
     has_written = False
     s = None
-    new_physics_equation = None
     # The physics equation that would be the 'normal' parabola of the ball- just makes increasing parabola height easier
-    unaltered_physics_equation = None
+    bottom_to_top_physics_equation = None
     total_time = None
 
     def __init__(self, player1, player2, ball):
@@ -48,7 +47,7 @@ class GravityPong(PongType):
         self.physics_equation.set_all_variables(250, 1, 250, screen_height - self.ball.height)
         self.ball.y_coordinate = screen_height - self.ball.height
         self.velocity_increase = self.get_velocity_increase(4, 1, 0)
-        self.unaltered_physics_equation = deepcopy(self.physics_equation)
+        self.bottom_to_top_physics_equation = deepcopy(self.physics_equation)
 
     def get_velocity_increase(self, amount_of_hits_to_double, time, vertex):
         """ summary: finds the velocity increase by using the equation d = vit + 1/2 * at^2 where d is displacement, vi is initial velocity,
@@ -75,20 +74,13 @@ class GravityPong(PongType):
 
         if ball_has_collided:
             self.ball.is_moving_right = not self.ball.is_moving_right
-            self.new_physics_equation = deepcopy(self.unaltered_physics_equation)
-
-            if self.new_physics_equation is not None and self.unaltered_physics_equation != self.new_physics_equation:
-                # Because the other increase that should have happened was not accounted for
-                self.new_physics_equation.set_variables(initial_velocity=self.unaltered_physics_equation.initial_velocity-self.velocity_increase * 2)
-
-
-            else:
-                self.new_physics_equation.set_variables(initial_velocity=self.unaltered_physics_equation.initial_velocity-self.velocity_increase)
+            self.needed_vertex_increase += self.velocity_increase
+            print("BALL HAS COLLIDED", self.needed_vertex_increase)
 
         if CollisionsFinder.is_collision(self.ball, self.player1):
             self.ball.x_coordinate = self.player1.right_edge
-            self.data += f"""{self.s}unaltered_physics_equation:{self.unaltered_physics_equation}
-{self.s}new_physics_equation:{self.new_physics_equation}
+            self.data += f"""{self.s}bottom_to_top_physics_equation:{self.bottom_to_top_physics_equation}
+{self.s}needed_vertex_increase:{self.needed_vertex_increase}
 {self.s}current_physics_equation:{self.physics_equation}\n"""
             print("IS COLLISION STARTING AI LOGIC PLAYER1 !!!! !!!!\n\n")
             self.total_time = VelocityCalculator.time
@@ -104,14 +96,10 @@ class GravityPong(PongType):
             returns: None
         """
 
-        if self.ball.bottom > screen_height and self.new_physics_equation is not None and self.unaltered_physics_equation != self.new_physics_equation:
-            self.time = self.get_overshoot_time()
-            print("HIT BOTTOM", self.total_time, self.get_overshoot_time())
-            self.physics_equation, self.unaltered_physics_equation = deepcopy(self.new_physics_equation), deepcopy(self.new_physics_equation)
-            self.ball.y_coordinate = screen_height - self.ball.height
-            self.new_physics_equation = None
-
-        elif self.ball.y_coordinate < 0 and self.time > 0:
+        if self.ball.y_coordinate < 0 and self.time > 0:
+            print(f"HIT TOP tt {self.total_time} ot {self.get_overshoot_time()} nvi {self.needed_vertex_increase}")
+            if self.get_overshoot_time() < 0:
+                self.get_overshoot_time()
             self.time = self.get_overshoot_time()
 
             # Not making it negative because get_velocity_using_displacement gets the seconds number, which is when it is falling
@@ -121,7 +109,9 @@ class GravityPong(PongType):
             self.ball.y_coordinate = 0
 
         elif self.ball.bottom > screen_height and self.time > 0:
-            print("HIT BOTTOM", self.total_time, self.get_overshoot_time())
+            print(f"HIT BOTTOM tt {self.total_time} ot {self.get_overshoot_time()} nvi {self.needed_vertex_increase}")
+            if self.get_overshoot_time() < 0:
+                self.get_overshoot_time()
             self.time = self.get_overshoot_time()
 
             # If the ball has not hit the top of the screen from start -> end it's y coordinate has not changed
@@ -129,9 +119,10 @@ class GravityPong(PongType):
 
             # Making it negative to make it go the opposite direction
             initial_velocity = -self.physics_equation.get_velocity_using_displacement(displacement)
-
-            self.physics_equation.set_variables(initial_velocity=initial_velocity, initial_distance=screen_height-self.ball.height)
-            self.unaltered_physics_equation = deepcopy(self.physics_equation)
+            print(self.needed_vertex_increase)
+            self.physics_equation.set_variables(initial_velocity=initial_velocity-self.needed_vertex_increase, initial_distance=screen_height-self.ball.height)
+            self.needed_vertex_increase = 0
+            self.bottom_to_top_physics_equation = deepcopy(self.physics_equation)
 
             self.ball.y_coordinate = screen_height - self.ball.height
 
@@ -189,6 +180,7 @@ class GravityPong(PongType):
 
         # Meaning the ball is coming from hitting the top of the screen
         elif self.physics_equation.initial_velocity > 0 and self.ball.bottom > screen_height:
+            # Second number because 0 would be the vertex, so I want the right side of the equation not the left
             return_value = self.time - self.physics_equation.get_times_to_point(screen_height - self.ball.height)[1]
 
         # Meaning the ball is not coming from the top of the screen: like "normal"
@@ -212,7 +204,7 @@ class GravityPong(PongType):
 {self.s}end_x_coordinate:{end_x_coordinate}
 {self.s}ball_forward_velocity:{self.ball.forwards_velocity}\n"""
         # return super().get_ball_path_from(ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down)
-        return_value = None
+#         return_value = None
 
         time_to_travel_distance = abs(end_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
 
@@ -221,87 +213,6 @@ class GravityPong(PongType):
 
         else:
             return_value = self.get_abnormal_end_y_coordinate(time_to_travel_distance)
-
-        return return_value
-    def get_time_to_vertex(self):
-        """returns: double; the time it will take for the ball to reach its vertex"""
-
-        vertex = 0 if self.physics_equation.get_vertex() < 0 else self.physics_equation.get_vertex()
-
-        # The first point is needed because that will be the vertex; there is only one point also
-        return self.physics_equation.get_times_to_point(vertex)[0]
-
-    def get_time_to_bottom(self):
-        """returns: double; the time it will take for the ball to go from the vertex to the bottom"""
-
-        return_value = None
-
-        if self.physics_equation.get_vertex() < self.ball.height:
-            return_value = self.get_downwards_physics_equation().get_times_to_point(screen_height - self.ball.height)[1]
-
-        else:
-            return_value = self.physics_equation.get_time_to_vertex() # Time to go to vertex is same as going from vertex -> bottom
-
-        return return_value
-
-    # def get_data(self, physics_equation, ball_y_coordinate, current_time):
-    #     """returns: Object[]; [ball_y_coordinate, current_time] from this cycle"""
-    #
-    #     if ball_y_coordinate <= 0:
-    #         current_time = self.get_overshoot_time()
-    #
-    #         # Not making it negative because get_velocity_using_displacement gets the seconds number, which is when it is falling
-    #         # Making it already to the sign (+/-) it should be
-    #         initial_velocity = self.physics_equation.get_velocity_using_displacement(-screen_height + self.ball.height)
-    #         physics_equation.set_variables(initial_velocity=initial_velocity, initial_distance=self.ball.height)
-    #         self.ball.y_coordinate = 0
-    #
-    #     elif self.ball.bottom >= screen_height:
-    #         current_time = self.get_overshoot_time()
-    #
-    #         time_to_vertex = physics_equation.get_time_to_vertex()
-    #         displacement = screen_height - self.ball.height if physics_equation.get_distance(time_to_vertex) < 0 else 0
-    #
-    #         # Making it negative to make it go the opposite direction
-    #         initial_velocity = -physics_equation.get_velocity_using_displacement(displacement)
-    #         physics_equation.set_variables(initial_velocity=initial_velocity, initial_distance=screen_height-self.ball.height)
-    #
-    #         self.ball.y_coordinate = screen_height - self.ball.height
-    #
-    #     return [ball_y_coordinate, current_time]
-
-    def get_downwards_physics_equation(self):
-        """returns: PhysicsEquation; the physics equation will the ball has just hit the top"""
-
-        physics_equation = deepcopy(self.physics_equation)
-        initial_velocity = physics_equation.get_velocity_using_displacement(-screen_height + self.ball.height)
-        physics_equation.set_variables(initial_velocity=initial_velocity, initial_distance=self.ball.height)
-        return physics_equation
-
-    def get_time_to_next_point(self):
-        """returns: double; the time to the next major point (the vertex or bottom)"""
-
-        time_at_next_point = None
-
-        if self.get_next_point() == screen_height - self.ball.height:
-            # Want the second one from the descent
-            time_at_next_point = self.physics_equation.get_times_to_point(self.get_next_point())[1]
-
-        else:
-            time_at_next_point = self.physics_equation.get_times_to_point(self.get_next_point())[0]
-
-        return time_at_next_point - self.time
-
-    def get_next_point(self):
-        """returns: double; the next major point (the vertex or bottom)"""
-
-        return_value = None
-        if self.time < self.physics_equation.get_time_to_vertex():
-            ball_vertex = self.physics_equation.get_vertex()
-            return_value = ball_vertex if ball_vertex > 0 else 0
-
-        else:
-            return_value = screen_height - self.ball.height
 
         return return_value
 
@@ -318,10 +229,14 @@ class GravityPong(PongType):
         else:
             time_to_travel_distance -= time_to_bottom
 
+        new_physics_equation = deepcopy(self.physics_equation)
+
+        new_physics_equation.set_variables(initial_velocity=new_physics_equation.initial_velocity-self.needed_vertex_increase)
         # So the first if statement has not been triggered allowing to move on to new physics equation
         if return_value is None:
-            time_to_travel_distance %= self.new_physics_equation.get_full_cycle_time()
-            return_value = self.new_physics_equation.get_distance(time_to_travel_distance)
+            # Removing all the unnecessary cycles for calculation (where it ended where it has started)
+            time_to_travel_distance %= new_physics_equation.get_full_cycle_time()
+            return_value = new_physics_equation.get_distance(time_to_travel_distance)
 
         return return_value
 
@@ -330,7 +245,68 @@ class GravityPong(PongType):
 
         return_value = None
 
-        # time_from_top_to_bottom =
+        top_to_bottom_physics_equation, time_from_top_to_bottom,  time_from_bottom_to_top = self.get_initial_variables()
+        ball_is_going_upwards = self.bottom_to_top_physics_equation == self.physics_equation
+
+        if ball_is_going_upwards and (time_from_bottom_to_top - self.time) >= time_to_travel_distance:
+            return_value = self.bottom_to_top_physics_equation.get_distance(self.time + time_to_travel_distance)
+
+        elif ball_is_going_upwards:
+            time_to_travel_distance -= (time_from_bottom_to_top - self.time)
+
+        # It is gurranteed now that the ball's position will be at the top of the screen because it if was not then the
+        # Previous if statements would have moved it to the top; same type as logic before- the ball has not
+        # Reached the other player before hitting the ground
+        if (time_from_top_to_bottom - self.time) >= time_to_travel_distance and return_value is None:
+            return_value = top_to_bottom_physics_equation.get_distance(time_to_travel_distance)
+
+        elif return_value is None:
+            time_to_travel_distance -= (time_from_top_to_bottom - self.time)
+
+        bottom_to_top_physics_equation, top_to_bottom_physics_equation, time_from_top_to_bottom, time_from_bottom_to_top = self.get_end_variables()
+        # The code below has return_value is None to make sure the bal has not already reached the other player
+        if return_value is None:
+            # Removing all the unnecessary cycles for calculation (where it ended where it has started)
+            time_to_travel_distance %= (time_from_bottom_to_top + time_from_top_to_bottom)
+
+        if time_from_bottom_to_top >= time_to_travel_distance and return_value is None:
+            return_value = bottom_to_top_physics_equation.get_distance(time_to_travel_distance)
+
+        elif return_value is None:
+            time_to_travel_distance -= time_from_bottom_to_top
+
+        if return_value is None:
+            return_value = top_to_bottom_physics_equation.get_distance(time_to_travel_distance)
+
+        return return_value
+
+    def get_initial_variables(self):
+        """returns: [top_to_bottom_physics_equation, time_from_top_to_bottom, time_from_bottom_to_top]"""
+
+        top_to_bottom_physics_equation = deepcopy(self.bottom_to_top_physics_equation)
+        initial_velocity = top_to_bottom_physics_equation.get_velocity_using_displacement(-screen_height + self.ball.height)
+        top_to_bottom_physics_equation.set_variables(initial_velocity=initial_velocity, initial_distance=0)
+
+        time_from_top_to_bottom = top_to_bottom_physics_equation.get_times_to_point(screen_height - self.ball.height)[1]
+        time_from_bottom_to_top = self.bottom_to_top_physics_equation.get_times_to_point(0)[0]
+
+        return [top_to_bottom_physics_equation, time_from_top_to_bottom, time_from_bottom_to_top]
+
+    def get_end_variables(self):
+        """returns: [bottom_to_top_physics_equation, top_to_bottom_physics_equation, time_from_top_to_bottom, time_from_bottom_to_top]"""
+        bottom_to_top_physics_equation = deepcopy(self.bottom_to_top_physics_equation)
+        bottom_to_top_physics_equation.set_variables(initial_velocity=bottom_to_top_physics_equation.initial_velocity-self.needed_vertex_increase)
+
+        initial_velocity = bottom_to_top_physics_equation.get_velocity_using_displacement(-screen_height + self.ball.height)
+        top_to_bottom_physics_equation = deepcopy(self.bottom_to_top_physics_equation)
+        top_to_bottom_physics_equation.set_variables(initial_velocity=initial_velocity, initial_distance=0)
+
+        time_from_top_to_bottom = top_to_bottom_physics_equation.get_times_to_point(screen_height - self.ball.height)[1]
+        time_from_bottom_to_top = bottom_to_top_physics_equation.get_times_to_point(0)[0]
+
+        return [bottom_to_top_physics_equation, top_to_bottom_physics_equation, time_from_top_to_bottom, time_from_bottom_to_top]
+
+
 
 
 
