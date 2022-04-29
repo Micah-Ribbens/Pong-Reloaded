@@ -282,12 +282,10 @@ def values_are_equal(object1, object2, attributes):
     """returns: boolean; if object1 and object2 have the same value for the attributes"""
 
     return_value = True
-    try:
-        for attribute in attributes:
-            if object1.__dict__[attribute] != object2.__dict__[attribute]:
-                return_value = False
-    except:
-        print("EH")
+    for attribute in attributes:
+        if object1.__dict__[attribute] != object2.__dict__[attribute]:
+            return_value = False
+
     return return_value
 
 

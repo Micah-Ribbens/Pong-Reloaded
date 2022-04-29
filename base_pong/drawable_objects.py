@@ -219,21 +219,15 @@ class Ellipse(GameObject):
         # Equation now looks like (y - k)^2 = (1 - (x - h)^2 / a^2) * b^2
         right_side *= pow(b, 2)
 
-        if not (x_coordinate <= self.right_edge and x_coordinate >= self.x_coordinate):
-            print()
-
         # Equation now looks like (y - k)^2 / b^2 = 1 - (x - h)^2 / a^2
         right_side = 1 - x_fraction
         # Equation now looks like (y - k)^2 = (1 - (x - h)^2 / a^2) * b^2
         right_side *= pow(b, 2)
 
         # Since a sqrt can either be positive or negative you have to do +-
-        try:
-            y_min = sqrt(right_side) + k
-            y_max = -sqrt(right_side) + k
-        except:
-            print("BAAAAAAD")
-            return [0, 0]
+        y_min = sqrt(right_side) + k
+        y_max = -sqrt(right_side) + k
+
 
         return_value = [y_max, y_min]
 

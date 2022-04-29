@@ -7,10 +7,7 @@ class FileReader:
         lines = LineFinder.get_lines(file_path)
 
         for line in lines:
-            try:
-                delimeter_start = line.index(":")
-            except:
-                print("NAH")
+            delimeter_start = line.index(":")
 
             name = line[:delimeter_start]
             data = line[delimeter_start + 1:]

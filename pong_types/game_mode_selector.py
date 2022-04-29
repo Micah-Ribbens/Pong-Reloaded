@@ -1,6 +1,6 @@
 from pong_types.pong_type import PongType
 from pong_types.utility_functions import *
-from pong_types.gravity_pong_real import GravityPong
+from pong_types.gravity_pong import GravityPong
 from pong_types.middle_paddle_pong import MiddlePaddlePong
 from pong_types.normal_pong import NormalPong
 from pong_types.portal_pong import PortalPong

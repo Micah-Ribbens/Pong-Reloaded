@@ -185,10 +185,7 @@ class VelocityPath(Path):
 
     def get_coordinates(self):
         """returns: [x_coordinate, y_coordinate] for that time"""
-        if not self.times.__contains__(VelocityCalculator.time):
-            self.times.append(VelocityCalculator.time)
-            self.total_time += VelocityCalculator.time
-
+        self.total_time += VelocityCalculator.time
 
         # By default it starts out as the end of the path and if the time falls within the path uses those coordinates
         last_index = len(self.x_coordinate_lines) - 1
@@ -203,7 +200,6 @@ class VelocityPath(Path):
             end_point = y_coordinate_line.end_point
 
             if self.total_time >= start_point.x_coordinate and self.total_time <= end_point.x_coordinate:
-                # print(x_coordinate_line, y_coordinate_line)
                 coordinates = [x_coordinate_line.get_y_coordinate(self.total_time), y_coordinate_line.get_y_coordinate(self.total_time)]
         return coordinates
 

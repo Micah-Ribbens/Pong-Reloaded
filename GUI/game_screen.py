@@ -81,7 +81,7 @@ class GameScreen(Screen):
             self.ball.is_moving_right = True
 
         self.pong_type.add_needed_objects()
-        self.player2.run()
+        # self.player2.run()
 
     def reset_after_scoring(self):
         """ summary: resets everything after someone has scored
@@ -92,5 +92,4 @@ class GameScreen(Screen):
         HistoryKeeper.reset()
         self.ball.reset()
         self.pong_type.reset()
-
-
+        self.player2.reset()

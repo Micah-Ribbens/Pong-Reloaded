@@ -86,7 +86,6 @@ class PongType(abc.ABC):
         if paddle.bottom >= screen_height:
             paddle.y_coordinate = screen_height - paddle.height
 
-    # TODO make it so get_ball_path() and get_ball_y_coordinates() don't have duplicate code
     def get_ball_path(self, x_coordinate):
         """ summary: finds the ball's y_coordinate and bottom at the next time it hits the x_coordinate
             IMPORTANT: this function should be called when the ball is going the desired horizontal direction
@@ -99,12 +98,27 @@ class PongType(abc.ABC):
 
         return self.get_ball_path_from(self.ball.y_coordinate, self.ball.x_coordinate, x_coordinate, self.ball.is_moving_down)
 
+    def get_ball_end_y_coordinate(self, ai_x_coordinate):
+        """returns: double; the ball's y_coordinate when it reaches the ai"""
+
+        return self.get_ball_path(ai_x_coordinate).get_end_points()[0].y_coordinate
+
+    def get_ai_data(self, ai_x_coordinate):
+        """ summary: calls get_ball_path() to get the ball's path and then just calculates the time for the ball to reach the ai
+
+            params:
+                ai_x_coordinate: double; the x coordinate of the ai
+
+            returns: [ball_y_coordinate, ball_time_to_ai]"""
+        time_to_travel_distance = abs(ai_x_coordinate - self.ball.x_coordinate) / self.ball.forwards_velocity
+
+        return [self.get_ball_end_y_coordinate(ai_x_coordinate), time_to_travel_distance]
+
     def get_ball_path_from(self, ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down):
         """returns: Path; the ball's path from the x_coordinate -> end_x_coordinate; NOTE ball must be moving correct horizontal direction"""
         path = Path(Point(ball_x_coordinate, ball_y_coordinate), self.ball.height, self.ball.length)
 
         time_to_travel_distance = abs(end_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
-        displacement = 0
 
         while time_to_travel_distance > 0:
             ball_bottom = ball_y_coordinate + self.ball.height

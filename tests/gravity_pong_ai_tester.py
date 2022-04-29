@@ -8,7 +8,7 @@ from base_pong.quadratic_equations import PhysicsEquation
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.velocity_calculator import VelocityCalculator
 from logic.file_reader import FileReader
-from pong_types.gravity_pong_real import GravityPong
+from pong_types.gravity_pong import GravityPong
 from tests.AI_GUI import TestCase, AI_GUI
 
 
@@ -85,8 +85,6 @@ class GravityPongAITester:
         gravity_pong.physics_equation = test_data.current_physics_equation
         gravity_pong.needed_vertex_increase = test_data.needed_vertex_increase
 
-        if test_number == 3:
-            print("ME SOOOO VERRRRY VEEEERY BAD I DON'T Like me!!!!")
         predicted_y_coordinate = gravity_pong.get_ball_path_from(test_data.ball_y_coordinate, test_data.ball_x_coordinate,
                                                                  test_data.end_x_coordinate, True)
         self.cases.append(TestCase(predicted_y_coordinate, test_data.actual_y_coordinate, test_data.end_x_coordinate))

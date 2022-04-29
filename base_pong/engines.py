@@ -130,8 +130,6 @@ class CollisionsFinder:
 
         CollisionsFinder.objects_to_data[f"{id(object1)} {id(object2)}"] = CollisionsUtilityFunctions.get_collision_data(object1, object2, collision_time, is_moving_collision)
         CollisionsFinder.objects_to_data[f"{id(object2)} {id(object1)}"] = CollisionsUtilityFunctions.get_collision_data(object2, object1, collision_time, is_moving_collision)
-        # if type(object1) == Ball:
-        #     print(collision_time, is_moving_collision, CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_moving_collision, CollisionsFinder.objects_to_data.get(f"{id(object2)} {id(object1)}").is_moving_collision)
 
     def is_height_collision(object1, object2):
         """ summary: finds out if the object's y_coordinates have collided
@@ -186,7 +184,7 @@ class CollisionsFinder:
         prev_object2 = HistoryKeeper.get_last(object2.name)
 
         if prev_object1 is None or prev_object2 is None:
-            # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
         return (CollisionsFinder.is_collision(object1, object2) and prev_object1.y_coordinate > prev_object2.bottom and
@@ -206,7 +204,7 @@ class CollisionsFinder:
         prev_object2 = HistoryKeeper.get_last(object2.name)
 
         if prev_object1 is None or prev_object2 is None:
-            # print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
+            print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
 
         return (CollisionsFinder.is_collision(object1, object2) and prev_object1.bottom < prev_object2.y_coordinate

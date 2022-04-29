@@ -291,7 +291,6 @@ class PortalPong(PongType):
         next_portal = "placeholder instead of None"
         ball_path = None
         last_portal = None
-        print("\n\nI WAS CALLED")
 
         while True:
             print("=====CYCLE=======\n")
