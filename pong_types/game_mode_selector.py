@@ -15,7 +15,7 @@ class GameModeSelector:
     # If a game mode isn't selected from the gui, then the game mode will be Random
     game_mode = "Pick Pong Type"
     # If a pong_type isn't selected from the gui, then the game mode will be Normal Pong
-    pong_type = "Gravity Pong"
+    pong_type = "Portal Pong"
     number_of_players = "2 Player"
 
     all_game_modes = ["Chaos", "Civilized",

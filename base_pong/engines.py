@@ -4,15 +4,7 @@ from base_pong.engine_utility_classes import CollisionsUtilityFunctions, Collisi
 from base_pong.equations import Point, LineSegment
 from base_pong.path import Path, ObjectPath
 from base_pong.utility_classes import HistoryKeeper
-from base_pong.important_variables import (
-    screen_height,
-    screen_length
-)
-from base_pong.utility_functions import get_rightmost_object, get_leftmost_object
-from base_pong.utility_functions import lists_share_an_item, solve_quadratic, min_value, is_within_range
-from base_pong.velocity_calculator import VelocityCalculator
 
-# TODO fix code with ball collision! At least collisions are working again for the most part! LEEEEETTTS GOOOOO!
 class CollisionsFinder:
     """Gives a series of methods to find if two (or more objects) have collided"""
 
@@ -29,15 +21,8 @@ class CollisionsFinder:
         return CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_moving_collision
 
     def is_left_collision(object1, object2):
-        """ summary: uses CollisionsUtilityFunctions.is_collision() to check if there was a collision and HistoryKeeper to
-            get the objects from the previous cycle
+        """ returns: boolean; if object1 has hit object2's x_coordinate"""
 
-            params: 
-                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
-                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
-
-            returns: boolean; if the object1 was previously to the left of object2, but now isn't and if the objects have collided
-        """
         CollisionsFinder.update_data(object1, object2)
         collision_data: CollisionData = CollisionsFinder.get_collision_data(object1, object2)
         return collision_data.is_moving_collision and collision_data.is_left_collision
@@ -53,15 +38,7 @@ class CollisionsFinder:
                 CollisionsFinder.get_collision_data(object2, object1).object_xy]
 
     def is_right_collision(object1, object2):
-        """ summary: uses CollisionsUtilityFunctions.is_collision() to check if there was a collision and HistoryKeeper to
-            get the objects from the previous cycle
-
-            params: 
-                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
-                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
-
-            returns: boolean; if the object1 was previously to the right of object2, but now isn't and if the objects have collided
-        """
+        """returns: boolean; if object1 has collided with object2's right_edge"""
         CollisionsFinder.update_data(object1, object2)
         collision_data: CollisionData = CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}")
         return collision_data.is_moving_collision and collision_data.is_right_collision

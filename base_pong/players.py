@@ -208,12 +208,12 @@ class AI(Paddle):
         if self.is_going_to_hit_ball and should_get_ball_coordinates:
             ball_y_coordinate, ball_time_to_ai = self.pong_type.get_ai_data(self.x_coordinate)
             self.move_towards_ball(ball_y_coordinate, ball_time_to_ai)
-            print("HIT BALL", self.number_of_hits)
+            # print("HIT BALL", self.number_of_hits)
 
         elif not self.is_going_to_hit_ball and should_get_ball_coordinates:
             ball_y_coordinate, ball_time_to_ai = self.pong_type.get_ai_data(self.x_coordinate)
             self.move_away_from_ball(ball_y_coordinate, ball_time_to_ai)
-            print("MISS BALL", self.number_of_hits)
+            # print("MISS BALL", self.number_of_hits)
 
         self.run_hitting_balls_logic()
 

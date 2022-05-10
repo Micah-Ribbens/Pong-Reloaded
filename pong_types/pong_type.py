@@ -114,11 +114,14 @@ class PongType(abc.ABC):
 
         return [self.get_ball_end_y_coordinate(ai_x_coordinate), time_to_travel_distance]
 
-    def get_ball_path_from(self, ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down):
-        """returns: Path; the ball's path from the x_coordinate -> end_x_coordinate; NOTE ball must be moving correct horizontal direction"""
+    def _get_ball_path_data(self, ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down):
+        """returns: [ball_path, ball is moving down at the end, times]"""
+
         path = Path(Point(ball_x_coordinate, ball_y_coordinate), self.ball.height, self.ball.length)
 
         time_to_travel_distance = abs(end_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
+        times = []
+        current_time = 0
 
         while time_to_travel_distance > 0:
             ball_bottom = ball_y_coordinate + self.ball.height
@@ -142,34 +145,22 @@ class PongType(abc.ABC):
             path.add_point(Point(ball_x_coordinate, ball_y_coordinate))
             ball_is_moving_down = not ball_is_moving_down
 
+            current_time += time
+            times.append(current_time)
             time_to_travel_distance -= time
 
-        return path
+        return [path, ball_is_moving_down, times]
+
+
+    def get_ball_path_from(self, ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down):
+        """returns: Path; the ball's path from the x_coordinate -> end_x_coordinate; NOTE ball must be moving correct horizontal direction"""
+
+        return self._get_ball_path_data(ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down)[0]
 
     def ball_direction_is_down(self, ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down):
         """returns: boolean; if the ball's movement direction is down"""
 
-        time_to_travel_distance = abs(end_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
-        while time_to_travel_distance > 0:
-            ball_bottom = ball_y_coordinate + self.ball.height
-
-            if ball_is_moving_down:
-                displacement = screen_height - ball_bottom
-
-            else:
-                displacement = -ball_y_coordinate
-
-            time = abs(displacement / self.ball.upwards_velocity)
-
-            if time_to_travel_distance - time < 0:
-                time = time_to_travel_distance
-
-            ball_y_coordinate += displacement
-            ball_is_moving_down = not ball_is_moving_down
-
-            time_to_travel_distance -= time
-
-        return ball_is_moving_down
+        return self._get_ball_path_data(ball_y_coordinate, ball_x_coordinate, end_x_coordinate, ball_is_moving_down)[1]
 
     def get_ball_y_coordinates(self, total_time):
         path = Path(Point(0, self.ball.y_coordinate), 0, 0)

@@ -225,9 +225,12 @@ class Ellipse(GameObject):
         right_side *= pow(b, 2)
 
         # Since a sqrt can either be positive or negative you have to do +-
-        y_min = sqrt(right_side) + k
-        y_max = -sqrt(right_side) + k
-
+        try:
+            y_min = sqrt(right_side) + k
+            y_max = -sqrt(right_side) + k
+        except:
+            print("BADDDD")
+            return [0, 0]
 
         return_value = [y_max, y_min]
 

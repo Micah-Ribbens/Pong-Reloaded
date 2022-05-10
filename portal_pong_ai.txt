@@ -1,9 +1,7 @@
 import random
-from copy import deepcopy
 
 import pygame
 
-from base_pong.engine_utility_classes import CollisionsUtilityFunctions
 from base_pong.equations import Point
 from base_pong.important_variables import game_window
 from base_pong.path import Path, VelocityPath
@@ -190,7 +188,7 @@ class PortalPong(PongType):
         )
     ]
     portal_openings = []
-    portal_paths: [VelocityPath] = []
+    portal_paths = []
     data = ""
     has_added = False
     has_written = False
@@ -209,7 +207,7 @@ class PortalPong(PongType):
         """
 
         super().__init__(player1, player2, ball)
-        
+
         self.normal_pong = NormalPong(player1, player2, ball)
 
         self.portal_openings = []
@@ -315,7 +313,7 @@ class PortalPong(PongType):
         for portal in self.portals:
             portal.render()
         super().draw_game_objects()
-    
+
     def add_needed_objects(self):
         """ summary: adds all the objects to the HistoryKeeper
             params: None
@@ -328,90 +326,24 @@ class PortalPong(PongType):
             HistoryKeeper.add(portal.portal_opening2, portal.portal_opening2.name, False)
 
     def get_ai_data(self, ai_x_coordinate):
-        """returns: [ball_y_coordinate, ball_time_to_ai]"""
 
-        enabled_portals = []
+        p = self.portal_paths
+        por = self.portals
+        self.test_number += 1
+        self.has_added = False
+        self.s = f"test_number{self.test_number}."
+        self.total_time = 0
 
-        for portal in self.portals:
-            if portal.is_enabled:
-                enabled_portals.append(portal)
 
-        portal_paths = deepcopy(self.portal_paths)
+        self.data += f"""{self.s}ball_x_coordinate:{self.ball.x_coordinate}
+{self.s}ball_y_coordinate:{self.ball.y_coordinate}
+{self.s}path_times:[{p[0].total_time},{p[1].total_time},{p[2].total_time},{p[3].total_time},]
+{self.s}ball_forwards_velocity:{self.ball.forwards_velocity}
+{self.s}ball_upwards_velocity:{self.ball.upwards_velocity}
+{self.s}end_x_coordinate:{ai_x_coordinate}
+{self.s}portal_timed_events:[{por[0].can_be_enabled_event.current_time},{por[1].can_be_enabled_event.current_time},]\n"""
 
-        ball_x_coordinate = self.ball.x_coordinate
-        ball_y_coordinate = self.ball.y_coordinate
-        ball_is_moving_down = self.ball.is_moving_down
-        total_time = 0
-
-        while True:
-            hit_a_portal = False
-            for portal in enabled_portals:
-                total_time = (ai_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
-                portal_opening1 = portal.portal_opening1
-                portal_opening2 = portal.portal_opening2
-
-                index = self.portals.index(portal)
-
-                # Portal paths list is twice as big because it is for the portal openings not just the portal
-                portal_opening1_path: VelocityPath = self.portal_paths[index * 2]
-                portal_opening2_path: VelocityPath = self.portal_paths[index * 2 + 1]
-
-                portal_opening1_paths = portal_opening1_path.get_paths(portal_opening1.length, portal_opening1.height, total_time)
-                portal_opening2_paths = portal_opening2_path.get_paths(portal_opening2.length, portal_opening2.height, total_time)
-
-                ball_path_data = self._get_ball_path_data(ball_y_coordinate, ball_x_coordinate, ai_x_coordinate, ball_is_moving_down)
-                ball_path = ball_path_data[0]
-                times = ball_path_data[2]
-                ball_paths = VelocityPath.get_paths_from_path(ball_path, times)
-
-                collision_time1 = CollisionsUtilityFunctions.get_big_path_collision_time(portal_opening1_paths, ball_paths)
-                collision_time2 = CollisionsUtilityFunctions.get_big_path_collision_time(portal_opening2_paths, ball_paths)
-
-                # Have to order it by the less time because if it collided into one opening first then it would not have
-                # Collided into the other
-
-                new_ball_x_coordinate, new_ball_y_coordinate = 0, 0
-                ball_collision_x_coordinate, ball_collision_y_coordinate = 0, 0
-
-                if collision_time1 is not None and collision_time1 < collision_time2:
-                    new_ball_x_coordinate, new_ball_y_coordinate = portal_opening2_path._get_coordinates(collision_time1)
-                    ball_collision_x_coordinate, ball_collision_y_coordinate = portal_opening1_path._get_coordinates(collision_time1)
-                    self._set_portal_path_times(collision_time1, portal_paths)
-
-                    total_time += collision_time1
-
-                if collision_time2 is not None and collision_time2 <= collision_time1:
-                    new_ball_x_coordinate, new_ball_y_coordinate = portal_opening1_path._get_coordinates(collision_time2)
-                    ball_collision_x_coordinate, ball_collision_y_coordinate = portal_opening2_path._get_coordinates(collision_time2)
-                    self._set_portal_path_times(collision_time2, portal_paths)
-
-                    total_time += collision_time2
-
-                if collision_time2 is not None or collision_time1 is not None:
-                    enabled_portals.remove(portal)
-                    ball_is_moving_down = self.ball_direction_is_down(ball_y_coordinate, ball_x_coordinate, ball_collision_x_coordinate, ball_is_moving_down)
-                    ball_x_coordinate, ball_y_coordinate = new_ball_x_coordinate, new_ball_y_coordinate
-                    hit_a_portal = True
-
-            if not hit_a_portal:
-                ball_path_data = self._get_ball_path_data(ball_y_coordinate, ball_x_coordinate, ai_x_coordinate,
-                                                          ball_is_moving_down)
-
-                ball_path, times = ball_path_data[0], ball_path_data[2]
-                # The last time in this list is the total time
-                total_time += times[len(times) - 1]
-
-                ball_y_coordinate = ball_path.get_end_points()[0].y_coordinate
-
-                break
-
-        return [ball_y_coordinate, total_time]
-
-    def _set_portal_path_times(self, time_to_collision, portal_paths):
-        """Sets the portal paths time to the time for the collision; allows for accurate predictions of where the portals will be"""
-
-        for portal_path in portal_paths:
-            portal_path.set_time(portal_path.total_time + time_to_collision)
+        return [self.player2.y_coordinate, 0]
 
     # def get_ai_data(self, ai_x_coordinate):
     #     """ summary: calls get_ball_path() to get the ball's path and then just calculates the time for the ball to reach the ai

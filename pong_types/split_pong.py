@@ -65,8 +65,8 @@ class SplitPong(PongType):
             returns: None
         """
 
-        ball.length += (self.base_ball_length * 1)
-        ball.height += (self.base_ball_length * 1)
+        ball.length += (self.base_ball_length * .25)
+        ball.height += (self.base_ball_length * .25)
 
     def ball_is_ready_to_split(self, ball):
         """ summary: finds out if the ball's size is double the size of its base length

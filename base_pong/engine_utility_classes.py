@@ -3,7 +3,7 @@ from math import sqrt
 from base_pong.ball import Ball
 from base_pong.drawable_objects import GameObject, Ellipse
 from base_pong.equations import Point, LineSegment
-from base_pong.path import Path, ObjectPath
+from base_pong.path import Path, ObjectPath, SimplePath
 from base_pong.utility_classes import HistoryKeeper, Range
 from base_pong.important_variables import (
     screen_height,
@@ -84,7 +84,7 @@ class CollisionsUtilityFunctions:
 
         return CollisionData(is_collision, is_moving_collision, is_right_collision, is_left_collision, object_xy)
 
-    def get_path_collision_time(object1_path: ObjectPath, object2_path: ObjectPath):
+    def get_path_collision_time(object1_path, object2_path):
         """ summary: finds the time that object1 and object2 collide using their paths
 
             params:
@@ -298,26 +298,6 @@ class CollisionsUtilityFunctions:
                 return_value = False
         return return_value
 
-    def is_path_collision(path1: Path, path2: Path):
-        """returns: boolean; if the two paths have collided"""
-
-        return CollisionsUtilityFunctions.get_path_collision_point(path1, path2) is not None
-
-    def get_path_collision_points(path1: Path, path2: Path):
-        """returns: double; the time that the two paths collide (None if they don't collide)"""
-        path1_lines = path1.get_lines()
-        path2_lines = path2.get_lines()
-        collision_points = []
-
-        for line1 in path1_lines:
-            for line2 in path2_lines:
-                collision_point = CollisionsUtilityFunctions.get_line_collision_point(line1, line2)
-
-                if collision_point is not None:
-                    collision_points.append(collision_point)
-
-        return collision_points
-
     def get_time_to_point(distance_to_point, total_distance):
         """returns: double; the time it would take to reach that point and it returns -1 if the time it would take is
         greater than VelocityCalculator.time"""
@@ -346,12 +326,6 @@ class CollisionsUtilityFunctions:
         """returns: boolean; if the two lines have crossed"""
 
         return CollisionsUtilityFunctions.get_line_collision_point(line1, line2) is not None
-
-    # def get_approximate_line_collision_point(line1, line2):
-    #     """returns: Point; the approximate point that the lines intersect- changes the start point if they both start
-    #     at the same location"""
-
-
 
     def get_path_line_collision_point(line: LineSegment, path: Path):
         """returns: Point; the x and y coordinate at which the line and path collide (None if they don't collide)"""
@@ -388,4 +362,90 @@ class CollisionsUtilityFunctions:
         """
 
         return object1 if object1.y_coordinate < object2.y_coordinate else object2
+
+    # TODO COLLISION FOR WHEN LINE ISN'T FROM A TO B; Maybe Combine w/ A to B Collision
+    def get_big_path_collision_time(object1_paths, object2_paths):
+        """ summary: finds the time that object1 and object2 collide using their paths
+
+            params:
+                object1_paths: List of Path; [object1 x path, object1 right edge path]- the path of object1
+
+
+            returns: List of Collision; [object1 CollisionData, object2 CollisionData]"""
+
+        x_path1, y_path1, right_edge_path1, bottom_path1 = object1_paths
+        x_path2, y_path2, right_edge_path2, bottom_path2 = object2_paths
+
+        x_ranges = []
+        x_ranges += CollisionsUtilityFunctions.get_ranges_between(x_path1, x_path2, right_edge_path2)
+        x_ranges += CollisionsUtilityFunctions.get_ranges_between(right_edge_path1, x_path2, right_edge_path2)
+        x_ranges += CollisionsUtilityFunctions.get_ranges_between(x_path2, x_path1, right_edge_path1)
+        x_ranges += CollisionsUtilityFunctions.get_ranges_between(right_edge_path2, x_path1, right_edge_path1)
+
+        y_ranges = []
+        y_ranges += CollisionsUtilityFunctions.get_ranges_between(y_path1, y_path2, bottom_path2)
+        y_ranges += CollisionsUtilityFunctions.get_ranges_between(bottom_path1, y_path2, bottom_path2)
+        y_ranges += CollisionsUtilityFunctions.get_ranges_between(y_path2, y_path1, bottom_path1)
+        y_ranges += CollisionsUtilityFunctions.get_ranges_between(bottom_path2, y_path1, bottom_path1)
+
+        x_ranges = CollisionsUtilityFunctions.filter_ranges(x_ranges)
+        y_ranges = CollisionsUtilityFunctions.filter_ranges(y_ranges)
+        return_value = float('inf')
+
+        for x_range in x_ranges:
+            for y_range in y_ranges:
+                smaller_range = x_range if x_range.is_less_than(y_range) else y_range
+                bigger_range = x_range if not x_range.is_less_than(y_range) else y_range
+                # Meaning that the ranges share a similar point
+                if smaller_range.end >= bigger_range.start and bigger_range.start < return_value:
+                    time = bigger_range.start
+                    return_value = time if time < return_value else return_value
+
+        return return_value if return_value != float('inf') else -1
+
+    def get_ranges_between(path: SimplePath, bottom_path: SimplePath, top_path: SimplePath):
+        """returns: List of Range; the times that 'line' is between 'top_line' and 'bottom_line' NOTE: the lines must have
+        time as their x coordinate and the coordinates (x, y, bottom, or right_edge) as the y coordinate"""
+
+        collision_times = CollisionsUtilityFunctions.get_path_collision_times(path, bottom_path)
+        collision_times += CollisionsUtilityFunctions.get_path_collision_times(path, top_path)
+
+        collision_times.sort()
+        collision_times = list(filter(lambda item: item != 0, collision_times))
+
+        start_time = 0
+
+        try:
+            is_between_lines = CollisionsUtilityFunctions.is_between_lines(path.get_first_line(), bottom_path.get_first_line(), top_path.get_first_line(), False)
+        except:
+            print("BAD")
+        return_value = []
+        for collision_time in collision_times:
+            if is_between_lines:
+                return_value.append(Range(start_time, collision_time))
+
+            is_between_lines = not is_between_lines
+            start_time = collision_time
+
+        if len(collision_times) == 0 or len(return_value) == 0:
+            always_between_lines = is_between_lines and CollisionsUtilityFunctions.is_between_lines(path.get_last_line(), bottom_path.get_last_line(), top_path.get_last_line(), True)
+            # If the lines never collide and it is between the lines that means it was always between the lines otherwise it never was
+            return_value = [Range(0, 0)] if not always_between_lines else [Range(0, VelocityCalculator.time)]
+
+        return return_value
+
+    def get_path_collision_times(path1, path2):
+
+        collision_times = []
+
+        for line1 in path1.get_lines():
+            for line2 in path2.get_lines():
+
+                collision_point = CollisionsUtilityFunctions.get_line_collision_point(line1, line2)
+
+                # Meaning it is a collision
+                if collision_point is not None:
+                    collision_times.append(collision_point.x_coordinate)
+
+        return collision_times
 
