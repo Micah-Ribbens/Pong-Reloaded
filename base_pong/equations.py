@@ -165,6 +165,14 @@ class LineSegment:
 
         return LineSegment(start_point, end_point)
 
+    def contains_x_coordinate(self, x_coordinate):
+        """returns: boolean; if this line contains the x_coordinate"""
+
+        x_min, x_max = self.get_x_min_and_max()
+        return is_between_values(x_min, x_max, x_coordinate, 1)
+
+
+
     def __str__(self):
         return f"{self.start_point} -> {self.end_point}"
 

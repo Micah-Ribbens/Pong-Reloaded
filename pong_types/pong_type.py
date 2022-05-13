@@ -139,11 +139,14 @@ class PongType(abc.ABC):
                 displacement = distance if ball_is_moving_down else -distance
                 time = time_to_travel_distance
 
+            # If there is not enough
+            else:
+                ball_is_moving_down = not ball_is_moving_down
+
             ball_y_coordinate += displacement
             ball_x_coordinate += time * self.ball.forwards_velocity
 
             path.add_point(Point(ball_x_coordinate, ball_y_coordinate))
-            ball_is_moving_down = not ball_is_moving_down
 
             current_time += time
             times.append(current_time)

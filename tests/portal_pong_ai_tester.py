@@ -1,4 +1,5 @@
 import time
+
 import pygame
 
 from base_pong.ball import Ball
@@ -24,16 +25,18 @@ class TestData:
     ball_upwards_velocity = 0
     portal_path_times = []
     portal_timed_events = []
+    ball_is_moving_down = False
 
 
     def __init__(self, end_x_coordinate, ball_x_coordinate, ball_y_coordinate, ball_forwards_velocity,
-                 ball_upwards_velocity, actual_y_coordinate, portal_path_times, portal_timed_events):
+                 ball_upwards_velocity, actual_y_coordinate, portal_path_times, portal_timed_events, ball_is_moving_down):
         """Initializes the object"""
 
         self.end_x_coordinate, self.ball_x_coordinate = end_x_coordinate, ball_x_coordinate
         self.ball_y_coordinate, self.ball_forwards_velocity = ball_y_coordinate, ball_forwards_velocity
         self.ball_upwards_velocity, self.actual_y_coordinate = ball_upwards_velocity, actual_y_coordinate
         self.portal_path_times, self.portal_timed_events = portal_path_times, portal_timed_events
+        self.ball_is_moving_down = ball_is_moving_down
 
 
 class GravityPongAITester:
@@ -54,7 +57,8 @@ class GravityPongAITester:
             self.tests.append(TestData(fr.get_double(f"{s}end_x_coordinate"), fr.get_double(f"{s}ball_x_coordinate"),
                                        fr.get_double(f"{s}ball_y_coordinate"), fr.get_double(f"{s}ball_forwards_velocity"),
                                        fr.get_double(f"{s}ball_upwards_velocity"), fr.get_double(f"{s}actual_y_coordinate"),
-                                       fr.get_number_list(f"{s}path_times"), fr.get_number_list(f"{s}portal_timed_events")))
+                                       fr.get_number_list(f"{s}path_times"), fr.get_number_list(f"{s}portal_timed_events"),
+                                       fr.get_boolean(f"{s}ball_is_moving_down")))
 
         for x in range(len(self.tests)):
             self.run_test(x + 1)
@@ -74,6 +78,10 @@ class GravityPongAITester:
         ball.y_coordinate = test_data.ball_y_coordinate
         ball.forwards_velocity = test_data.ball_forwards_velocity
         ball.upwards_velocity = test_data.ball_upwards_velocity
+        ball.is_moving_down = test_data.ball_is_moving_down
+
+        if test_number == 2:
+            print("NOOOOOOO")
 
         for x in range(len(test_data.portal_timed_events)):
             portal_pong.portals[x].can_be_enabled_event.current_time = test_data.portal_timed_events[x]

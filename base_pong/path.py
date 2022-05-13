@@ -170,6 +170,27 @@ class SimplePath:
         last_index = len(self.get_lines()) - 1
         return self.get_lines()[last_index]
 
+    def get_y_coordinate(self, x_coordinate):
+        """returns: double; the y_coordinate at that x_coordinate (MUST be a function though- one x to one y)"""
+
+        return_value = None
+
+        for line in self.lines:
+            if line.contains_x_coordinate(x_coordinate):
+                return_value = line.get_y_coordinate(x_coordinate)
+                break
+
+        return return_value
+
+    def __str__(self):
+        string = ""
+        for x in range(len(self.lines)):
+            string += f"{self.lines[x]} || "
+
+        return string
+
+
+
 class VelocityPath(Path):
     """A path that takes into account velocity"""
 
@@ -276,16 +297,20 @@ class VelocityPath(Path):
         """returns: List of SimplePath; [x_coordinate_line, right_edge_line, y_coordinate_line, bottom_line]"""
 
         paths = VelocityPath.get_paths_list()
-        current_time = 0
+
+        elapsed_times = [0] + times # Putting a zero in the front because the first start point must be at zero otherwise it wont be
 
         for x in range(len(times)):
             path_line: PathLine = path.path_lines[x].y_coordinate_line
 
             # TODO figure out if this is sound logic :)
-            VelocityPath.add_point_to_paths(paths, current_time, path_line.start_point, path.length, path.height)
+            VelocityPath.add_point_to_paths(paths, elapsed_times[x], path_line.start_point, path.length, path.height)
 
-            current_time += times[x]
+        last_path_line = path.path_lines[len(path.path_lines) - 1].y_coordinate_line
+        last_time = times[len(times) - 1]
 
+        # Have to add the end point of the last path line because it gets skipped otherwise (only use start points)
+        VelocityPath.add_point_to_paths(paths, last_time, last_path_line.end_point, path.length, path.height)
         return paths
 
     @staticmethod
@@ -304,45 +329,66 @@ class VelocityPath(Path):
         """returns: List of SimplePath; [x_coordinate_line, right_edge_line, y_coordinate_line, bottom_line]"""
 
         paths = VelocityPath.get_paths_list()
+        important_times, elapsed_times = self._get_times_data(total_time)
 
-        for time in self.get_important_times(total_time):
-            x_coordinate, y_coordinate = self._get_coordinates(time)
+        for x in range(len(important_times)):
+            x_coordinate, y_coordinate = self._get_coordinates(important_times[x])
 
-            VelocityPath.add_point_to_paths(paths, time, Point(x_coordinate, y_coordinate), length, height)
+            VelocityPath.add_point_to_paths(paths, elapsed_times[x], Point(x_coordinate, y_coordinate), length, height)
 
         return paths
 
-    def get_important_times(self, total_time):
+    def _get_times_data(self, total_time):
+        """ summary: Finds the important_times and elapsed_times which are complementary to each other. The important times
+            are the times that are important for the path (where it changes direction) and elapsed times is the time that
+            has elapsed relative to the start (whereas important times are in relation to the time of the path checkpoints)
+
+            returns: Double[][]; [important_times, elapsed_times]"""
+
         important_times = [self.total_time]
+        elapsed_times = [0]
         time_left = total_time
         current_time = self.total_time
+        total_elapsed_time = 0
 
-        # TODO fix this method; it does not take into account self.total_time
+        has_found_range = False # Whether the range that contains self.total_time has been found
+        previous_time = self.total_time
+
         while time_left != 0:
             for y_coordinate_line in self.y_coordinate_lines:
                 start_time = y_coordinate_line.start_point.x_coordinate
                 end_time = y_coordinate_line.end_point.x_coordinate
-                line_time = end_time - start_time
+                line_time = end_time - previous_time
 
-                if start_time > self.total_time or end_time < total_time:
+                is_within_range = self.total_time >= start_time and self.total_time <= end_time
+                if not is_within_range and not has_found_range:
+                    previous_time = end_time
                     continue
 
+                else:
+                    has_found_range = True
+
                 if line_time >= time_left:
+                    total_elapsed_time += time_left
                     important_times.append(current_time + time_left)
                     time_left = 0
-                    break
 
                 else:
                     important_times.append(current_time + line_time)
                     current_time = end_time
                     time_left -= line_time
+                    total_elapsed_time += line_time
 
-        return important_times
+                elapsed_times.append(total_elapsed_time)
+                previous_time = end_time
+
+        return [important_times, elapsed_times]
+
 
     @staticmethod
     def add_point_to_paths(paths, current_time, point, length, height):
-        """Adds the points to the path; NOTE: paths must be a list like this: [x coordinate line, y coordinate line,
-        right edge line, bottom line]"""
+        """Adds the points to the path; NOTE: paths must be a list like this: [x coordinate line, right edge line,
+            y coordinate line, bottom line]"""
 
         # x coordinate line
         paths[0].add_point(Point(current_time, point.x_coordinate))

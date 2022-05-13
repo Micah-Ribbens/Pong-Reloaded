@@ -364,6 +364,8 @@ class CollisionsUtilityFunctions:
         return object1 if object1.y_coordinate < object2.y_coordinate else object2
 
     # TODO COLLISION FOR WHEN LINE ISN'T FROM A TO B; Maybe Combine w/ A to B Collision
+    # TODO figure out a way to test this code specifically
+
     def get_big_path_collision_time(object1_paths, object2_paths):
         """ summary: finds the time that object1 and object2 collide using their paths
 
@@ -373,8 +375,8 @@ class CollisionsUtilityFunctions:
 
             returns: List of Collision; [object1 CollisionData, object2 CollisionData]"""
 
-        x_path1, y_path1, right_edge_path1, bottom_path1 = object1_paths
-        x_path2, y_path2, right_edge_path2, bottom_path2 = object2_paths
+        x_path1, right_edge_path1, y_path1, bottom_path1 = object1_paths
+        x_path2, right_edge_path2, y_path2, bottom_path2 = object2_paths
 
         x_ranges = []
         x_ranges += CollisionsUtilityFunctions.get_ranges_between(x_path1, x_path2, right_edge_path2)
@@ -415,11 +417,11 @@ class CollisionsUtilityFunctions:
 
         start_time = 0
 
-        try:
-            is_between_lines = CollisionsUtilityFunctions.is_between_lines(path.get_first_line(), bottom_path.get_first_line(), top_path.get_first_line(), False)
-        except:
-            print("BAD")
+        is_between_lines = CollisionsUtilityFunctions.is_between_lines(path.get_first_line(), bottom_path.get_first_line(), top_path.get_first_line(), False)
+
         return_value = []
+
+        # TODO is this logic correct or inaccurate; what if it collides with the bottom line two times in a row?
         for collision_time in collision_times:
             if is_between_lines:
                 return_value.append(Range(start_time, collision_time))
@@ -431,6 +433,10 @@ class CollisionsUtilityFunctions:
             always_between_lines = is_between_lines and CollisionsUtilityFunctions.is_between_lines(path.get_last_line(), bottom_path.get_last_line(), top_path.get_last_line(), True)
             # If the lines never collide and it is between the lines that means it was always between the lines otherwise it never was
             return_value = [Range(0, 0)] if not always_between_lines else [Range(0, VelocityCalculator.time)]
+
+        elif is_between_lines:
+            # Since it ended in between the lines it must go from the previous collision time -> the end of the time of the paths
+            return_value.append(Range(start_time, path.last_point.x_coordinate))
 
         return return_value
 

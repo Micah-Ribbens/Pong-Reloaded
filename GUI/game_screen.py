@@ -19,8 +19,8 @@ class GameScreen(Screen):
     game_paused = False
     ball = Ball()
     player1 = Player()
-    # player2 = AI(7, ball)
-    player2 = Player()
+    player2 = AI(7, ball)
+    # player2 = Player()
     player1_score = 0
     player2_score = 0
     pause_button = PauseButton()
