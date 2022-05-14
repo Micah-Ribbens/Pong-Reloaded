@@ -253,25 +253,12 @@ class PortalPong(PongType):
         """
 
         self.total_time += VelocityCalculator.time
-        if self.ball.right_edge >= self.player2.x_coordinate and not self.has_added:
-            self.data += f"""{self.s}actual_y_coordinate:{self.ball.y_coordinate}
-{self.s}total_time:{self.total_time}\n"""
-            self.has_added = True
-
-        if pygame.key.get_pressed()[pygame.K_SPACE] and not self.has_written:
-            self.has_written = True
-            self.data += f"number_of_tests:{self.test_number}"
-            file_writer = open("portal_pong_data.txt", "w+")
-            file_writer.write(self.data)
 
         self.normal_pong.ball_movement()
         self.normal_pong.run_player_movement()
 
         if CollisionsFinder.is_collision(self.ball, self.player1) or CollisionsFinder.is_collision(self.ball, self.player2):
             self.enable_portals()
-        #
-        # if CollisionsFinder.is_left_collision(self.ball, self.player1):
-        #     CollisionsFinder.is_collision(self.ball, self.player1)
 
         # Must come after logic of enabling portals otherwise the code above could have not detected a collision because
         # The ball has already moved (from the collision) by the time it has reached that code
@@ -289,9 +276,6 @@ class PortalPong(PongType):
 
             portal_xy = f"po1 ({po1.x_coordinate}, {po1.y_coordinate})" if portal_opening1_collision else f"po2 ({po2.x_coordinate}, {po2.y_coordinate})"
             new_ball_xy = f"({po1.x_midpoint}, {po1.y_midpoint})" if portal_opening2_collision else f"({po2.x_midpoint}, {po2.y_midpoint})"
-
-            if is_portal_collision and self.ball.is_moving_right and portal.is_enabled:
-                self.data += f"{self.s}IS COLLISION time {self.total_time} portal_xy {portal_xy} ball_xy ({self.ball.x_coordinate}, {self.ball.y_coordinate}):Portal #{x} new_ball_xy {new_ball_xy} ball_is_moving_down {self.ball.is_moving_down}\n"
 
             portal.run(self.ball)
 
@@ -345,25 +329,6 @@ class PortalPong(PongType):
 
     def get_ai_data(self, ai_x_coordinate):
         """returns: [ball_y_coordinate, ball_time_to_ai]"""
-
-        p = self.portal_paths
-        por = self.portals
-        self.test_number += 1
-        self.has_added = False
-        self.s = f"test_number{self.test_number}."
-        self.total_time = 0
-
-        self.data += f"""{self.s}ball_x_coordinate:{self.ball.x_coordinate}
-{self.s}ball_y_coordinate:{self.ball.y_coordinate}
-{self.s}path_times:[{p[0].total_time},{p[1].total_time},{p[2].total_time},{p[3].total_time},]
-{self.s}ball_forwards_velocity:{self.ball.forwards_velocity}
-{self.s}ball_upwards_velocity:{self.ball.upwards_velocity}
-{self.s}end_x_coordinate:{ai_x_coordinate}
-{self.s}portal_timed_events:[{por[0].can_be_enabled_event.current_time},{por[1].can_be_enabled_event.current_time},]
-{self.s}ball_is_moving_down:{self.ball.is_moving_down}\n"""
-
-        # return [self.player2.y_coordinate, 0]
-
         enabled_portals = []
 
         for portal in self.portals:
@@ -442,9 +407,6 @@ class PortalPong(PongType):
         for portal_path in portal_paths:
             portal_path.set_time(portal_path.total_time + time_to_collision)
 
-    # TODO pick up here. For the ball_collision coordinates use the ball path and the new_ball coordinates use the
-    # Opposite portal path than the one it hit and make sure to add height / 2 and length / 2 because they teleport to the
-    # Middle of the portal
     def get_ball_coordinates(self, ball_x_path, path_of_portal: VelocityPath, portal_opening, collision_time):
         """ summary: finds the necessary ball coordinates for figuring out the time and y coordinate of the ball for the ai
 
@@ -494,79 +456,3 @@ class PortalPong(PongType):
             # collision_times because they are where the portal will be teleported if it collided with a portal_opening
             portal_openings += [portal_opening2, portal_opening1]
             portal_opening_paths += [portal_opening2_path, portal_opening1_path]
-
-    # def get_ai_data(self, ai_x_coordinate):
-    #     """ summary: calls get_ball_path() to get the ball's path and then just calculates the time for the ball to reach the ai
-    #
-    #         params:
-    #             ai_x_coordinate: double; the x coordinate of the ai
-    #
-    #         returns: [ball_y_coordinate, ball_time_to_ai]"""
-    #
-    #     ball_x_coordinate, ball_y_coordinate = self.ball.x_coordinate, self.ball.y_coordinate
-    #     ball_is_moving_down = self.ball.is_moving_down
-    #
-    #     ball_path = None
-    #     last_portal = None
-    #
-    #     while True:
-    #         ball_path = self.get_ball_path_from(ball_y_coordinate, ball_x_coordinate, self.player2.x_coordinate,
-    #                                             ball_is_moving_down)
-    #
-    #         next_portal = self.get_next_portal_collision(ball_path)
-    #
-    #         # If the collision is the same portal it has just teleported to then it can't hit that portal
-    #         if last_portal is not None and self.get_next_portal(ball_path) == last_portal:
-    #             next_portal = None
-    #
-    #         # If it has not hit a portal then all that is needed to get the ball path end points (done below)
-    #         if next_portal is None:
-    #             break
-    #
-    #         ball_is_moving_down = self.ball_direction_is_down(ball_y_coordinate, ball_x_coordinate, self.player2.x_coordinate, ball_is_moving_down)
-    #
-    #         ball_x_coordinate, ball_y_coordinate = next_portal.x_midpoint, next_portal.y_midpoint
-    #         last_portal = self.get_next_portal(ball_path)
-    #
-    #     return [ball_path.get_end_points()[0].y_coordinate, 0]
-    #
-    # def get_next_portal(self, ball_path: Path):
-    #     """ summary:
-    #         returns: Portal; the next portal the ball will hit"""
-    #
-    #     return_value = None
-    #     for line in ball_path.get_lines():
-    #         for portal in self.portals:
-    #             if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening1):
-    #                 return_value = portal
-    #
-    #             if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
-    #                 return_value = portal
-    #
-    #     return return_value
-    #
-    # def get_next_portal_collision(self, ball_path: Path, ball_x_coordinate):
-    #     """returns: PortalOpening; the next portal opening that the ball will hit; None if it doesn't hit a portal"""
-    #
-    #     return_value = None
-    #
-    #     for line in ball_path.get_lines():
-    #         for portal in self.portals:
-    #
-    #             if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening1):
-    #                 return_value = portal.portal_opening2
-    #                 self.total_time += self.get_time_to_point(ball_x_coordinate, portal.portal_opening1.x_coordinate)
-    #
-    #             if CollisionsFinder.is_line_ellipse_collision(line, portal.portal_opening2):
-    #                 return_value = portal.portal_opening1
-    #
-    #     return return_value
-    #
-    # def get_time_to_point(self, ball_x_coordinate, portal_opening, line):
-    #     """returns: double; the time it will take for the ball to reach the point"""
-    #
-    #     # CollisionsUtilityFinder.
-    #     # return abs(ball_x_coordinate - end_ball_x_coordinate) / self.ball.forwards_velocity
-    #     pass
-
-

@@ -34,7 +34,7 @@ class Paddle(GameObject):
         self.y_coordinate = 0
         self.x_coordinate = 0
         self.length = VelocityCalculator.give_measurement(screen_length, 3)
-        self.height = VelocityCalculator.give_measurement(screen_height, 150)
+        self.height = VelocityCalculator.give_measurement(screen_height, 33)
         self.color = white
         self.outline_color = red
 
