@@ -1,298 +1,144 @@
 test_number1.ball_x_coordinate:24.0
-test_number1.ball_y_coordinate:176.42491936683655
-test_number1.path_times:[3.2429676055908203,3.2429676055908203,3.2429676055908203,3.2429676055908203,]
+test_number1.ball_y_coordinate:176.95708394050598
+test_number1.path_times:[3.2377986907958984,3.2377986907958984,3.2377986907958984,3.2377986907958984,]
 test_number1.ball_forwards_velocity:240.0
 test_number1.ball_upwards_velocity:240.0
 test_number1.end_x_coordinate:776.0
 test_number1.portal_timed_events:[0,0,]
 test_number1.ball_is_moving_down:False
-test_number1.IS COLLISION time 0.9430148601531982 portal_xy po2 (179.48180198669434, 70.46627640724182) ball_xy (250.32356643676758, 47.04048156738281):Portal #0 new_ball_xy (618.0181980133057, 414.5337235927582) ball_is_moving_down True
-test_number1.actual_y_coordinate:400.5872404575348
-test_number1.total_time:1.5240132808685303
+test_number1.IS COLLISION time 0.938004732131958 portal_xy po2 (179.97867584228516, 70.81822872161865) ball_xy (249.12113571166992, 47.03310012817383):Portal #0 new_ball_xy (617.5213241577148, 414.18177127838135) ball_is_moving_down True
+test_number1.actual_y_coordinate:401.65839672088623
+test_number1.total_time:1.5090062618255615
 test_number2.ball_x_coordinate:24.0
-test_number2.ball_y_coordinate:325.44015884399414
-test_number2.path_times:[7.781648397445679,7.781648397445679,7.781648397445679,7.781648397445679,]
+test_number2.ball_y_coordinate:325.5627250671387
+test_number2.path_times:[7.766314506530762,7.766314506530762,7.766314506530762,7.766314506530762,]
 test_number2.ball_forwards_velocity:240.0
 test_number2.ball_upwards_velocity:240.0
 test_number2.end_x_coordinate:776.0
 test_number2.portal_timed_events:[0,0,]
 test_number2.ball_is_moving_down:True
-test_number2.IS COLLISION time 0.8310019969940186 portal_xy po2 (248.28227996826172, 319.8235750198364) ball_xy (223.44047927856445, 425.1193618774414):Portal #1 new_ball_xy (549.2177200317383, 215.17642498016357) ball_is_moving_down False
-test_number2.actual_y_coordinate:12.376646995544434
-test_number2.total_time:1.693002462387085
+test_number2.IS COLLISION time 0.837623119354248 portal_xy po2 (248.72756958007812, 319.5452690124512) ball_xy (225.02954864501953, 423.4077262878418):Portal #1 new_ball_xy (548.7724304199219, 215.45473098754883) ball_is_moving_down False
+test_number2.actual_y_coordinate:12.123546600341797
+test_number2.total_time:1.6958510875701904
 test_number3.ball_x_coordinate:24.0
-test_number3.ball_y_coordinate:236.47306442260742
-test_number3.path_times:[2.4956817626953125,2.4956817626953125,2.4956817626953125,2.4956817626953125,]
+test_number3.ball_y_coordinate:234.7229766845703
+test_number3.path_times:[2.4874448776245117,2.4874448776245117,2.4874448776245117,2.4874448776245117,]
 test_number3.ball_forwards_velocity:240.0
 test_number3.ball_upwards_velocity:240.0
 test_number3.end_x_coordinate:776.0
 test_number3.portal_timed_events:[0,0,]
 test_number3.ball_is_moving_down:False
-test_number3.IS COLLISION time 2.6259994506835938 portal_xy po1 (666.7180442810059, 415.59194803237915) ball_xy (654.2398681640625, 393.5976219177246):Portal #0 new_ball_xy (130.78195571899414, 69.40805196762085) ball_is_moving_down True
-test_number3.actual_y_coordinate:259.7031044960022
-test_number3.total_time:5.2330381870269775
+test_number3.IS COLLISION time 2.629098415374756 portal_xy po1 (667.2150897979736, 415.9440219402313) ball_xy (654.9836196899414, 394.0949249267578):Portal #0 new_ball_xy (130.28491020202637, 69.05597805976868) ball_is_moving_down True
+test_number3.actual_y_coordinate:258.6858355998993
+test_number3.total_time:5.232844352722168
 test_number4.ball_x_coordinate:24.0
-test_number4.ball_y_coordinate:160.8410346508026
-test_number4.path_times:[3.0863089561462402,3.0863089561462402,3.0863089561462402,3.0863089561462402,]
+test_number4.ball_y_coordinate:160.81464529037476
+test_number4.path_times:[3.084076404571533,3.084076404571533,3.084076404571533,3.084076404571533,]
 test_number4.ball_forwards_velocity:240.0
 test_number4.ball_upwards_velocity:240.0
 test_number4.end_x_coordinate:776.0
 test_number4.portal_timed_events:[0,0,]
 test_number4.ball_is_moving_down:False
-test_number4.IS COLLISION time 0.9370002746582031 portal_xy po2 (199.00304794311523, 84.29382562637329) ball_xy (248.88006591796875, 62.15984344482422):Portal #0 new_ball_xy (598.4969520568848, 400.7061743736267) ball_is_moving_down True
-test_number4.actual_y_coordinate:395.93406915664673
-test_number4.total_time:1.5920004844665527
+test_number4.IS COLLISION time 0.9299972057342529 portal_xy po2 (199.75146293640137, 84.8239529132843) ball_xy (247.1993293762207, 59.999942779541016):Portal #0 new_ball_xy (597.7485370635986, 400.1760470867157) ball_is_moving_down True
+test_number4.actual_y_coordinate:394.361115694046
+test_number4.total_time:1.5877611637115479
 test_number5.ball_x_coordinate:24.0
-test_number5.ball_y_coordinate:330.95970153808594
-test_number5.path_times:[7.694309711456299,7.694309711456299,7.694309711456299,7.694309711456299,]
+test_number5.ball_y_coordinate:331.93010330200195
+test_number5.path_times:[7.694878101348877,7.694878101348877,7.694878101348877,7.694878101348877,]
 test_number5.ball_forwards_velocity:240.0
 test_number5.ball_upwards_velocity:240.0
 test_number5.end_x_coordinate:776.0
 test_number5.portal_timed_events:[0,0,]
 test_number5.ball_is_moving_down:True
-test_number5.IS COLLISION time 0.8720059394836426 portal_xy po2 (253.96146774291992, 316.27408266067505) ball_xy (233.28142547607422, 409.75887298583984):Portal #1 new_ball_xy (543.5385322570801, 218.72591733932495) ball_is_moving_down False
-test_number5.actual_y_coordinate:7.5275492668151855
-test_number5.total_time:1.7710001468658447
+test_number5.IS COLLISION time 0.8650004863739014 portal_xy po2 (254.13450241088867, 316.1659359931946) ball_xy (231.60011672973633, 410.4697799682617):Portal #1 new_ball_xy (543.3654975891113, 218.83406400680542) ball_is_moving_down False
+test_number5.actual_y_coordinate:10.990588665008545
+test_number5.total_time:1.744018316268921
 test_number6.ball_x_coordinate:24.0
-test_number6.ball_y_coordinate:228.56439590454102
-test_number6.path_times:[2.4863088130950928,2.4863088130950928,2.4863088130950928,2.4863088130950928,]
+test_number6.ball_y_coordinate:234.03690338134766
+test_number6.path_times:[2.459073066711426,2.459073066711426,2.459073066711426,2.459073066711426,]
 test_number6.ball_forwards_velocity:240.0
 test_number6.ball_upwards_velocity:240.0
 test_number6.end_x_coordinate:776.0
 test_number6.portal_timed_events:[0,0,]
 test_number6.ball_is_moving_down:False
-test_number6.IS COLLISION time 2.6685311794281006 portal_xy po1 (662.8610706329346, 412.859925031662) ball_xy (664.4474830627441, 411.48759841918945):Portal #0 new_ball_xy (134.63892936706543, 72.14007496833801) ball_is_moving_down True
-test_number6.actual_y_coordinate:259.7363746166229
-test_number6.total_time:5.255050182342529
+test_number6.IS COLLISION time 2.623538017272949 portal_xy po1 (671.2871551513672, 418.82840156555176) ball_xy (653.6491241455078, 395.5623435974121):Portal #0 new_ball_xy (126.21284484863281, 66.17159843444824) ball_is_moving_down True
+test_number6.actual_y_coordinate:257.41360664367676
+test_number6.total_time:5.243589162826538
 test_number7.ball_x_coordinate:24.0
-test_number7.ball_y_coordinate:160.9296154975891
-test_number7.path_times:[3.100412130355835,3.100412130355835,3.100412130355835,3.100412130355835,]
+test_number7.ball_y_coordinate:161.11117243766785
+test_number7.path_times:[3.0701539516448975,3.0701539516448975,3.0701539516448975,3.0701539516448975,]
 test_number7.ball_forwards_velocity:240.0
 test_number7.ball_upwards_velocity:240.0
 test_number7.end_x_coordinate:776.0
 test_number7.portal_timed_events:[0,0,]
 test_number7.ball_is_moving_down:False
-test_number7.IS COLLISION time 0.9240012168884277 portal_xy po2 (198.26985359191895, 83.77447962760925) ball_xy (245.76029205322266, 59.279937744140625):Portal #0 new_ball_xy (599.230146408081, 401.22552037239075) ball_is_moving_down True
-test_number7.actual_y_coordinate:393.97414088249207
-test_number7.total_time:1.5910038948059082
+test_number7.IS COLLISION time 0.9560017585754395 portal_xy po2 (203.46575736999512, 87.45491147041321) ball_xy (253.44042205810547, 67.68945693969727):Portal #0 new_ball_xy (594.0342426300049, 397.5450885295868) ball_is_moving_down True
+test_number7.actual_y_coordinate:393.1049168109894
+test_number7.total_time:1.6289584636688232
 test_number8.ball_x_coordinate:24.0
-test_number8.ball_y_coordinate:333.1197738647461
-test_number8.path_times:[7.702415466308594,7.702415466308594,7.702415466308594,7.702415466308594,]
+test_number8.ball_y_coordinate:335.33483505249023
+test_number8.path_times:[7.727343559265137,7.727343559265137,7.727343559265137,7.727343559265137,]
 test_number8.ball_forwards_velocity:240.0
 test_number8.ball_upwards_velocity:240.0
 test_number8.end_x_coordinate:776.0
 test_number8.portal_timed_events:[0,0,]
 test_number8.ball_is_moving_down:True
-test_number8.IS COLLISION time 0.872053861618042 portal_xy po2 (253.34345817565918, 316.660338640213) ball_xy (233.29292678833008, 407.5872993469238):Portal #1 new_ball_xy (544.1565418243408, 218.339661359787) ball_is_moving_down False
-test_number8.actual_y_coordinate:9.059609174728394
-test_number8.total_time:1.7630536556243896
+test_number8.IS COLLISION time 0.8570442199707031 portal_xy po2 (251.19400024414062, 318.0037498474121) ball_xy (229.69061279296875, 408.974552154541):Portal #1 new_ball_xy (546.3059997558594, 216.9962501525879) ball_is_moving_down False
+test_number8.actual_y_coordinate:11.317710876464844
+test_number8.total_time:1.725996971130371
 test_number9.ball_x_coordinate:24.0
-test_number9.ball_y_coordinate:232.71860122680664
-test_number9.path_times:[2.489142656326294,2.489142656326294,2.489142656326294,2.489142656326294,]
+test_number9.ball_y_coordinate:234.72286224365234
+test_number9.path_times:[2.4756662845611572,2.4756662845611572,2.4756662845611572,2.4756662845611572,]
 test_number9.ball_forwards_velocity:240.0
 test_number9.ball_upwards_velocity:240.0
 test_number9.end_x_coordinate:776.0
 test_number9.portal_timed_events:[0,0,]
 test_number9.ball_is_moving_down:False
-test_number9.IS COLLISION time 2.618649959564209 portal_xy po1 (668.2650279998779, 416.6877281665802) ball_xy (652.4759902954102, 392.86840438842773):Portal #0 new_ball_xy (129.23497200012207, 68.3122718334198) ball_is_moving_down True
-test_number9.actual_y_coordinate:258.98459553718567
-test_number9.total_time:5.2252442836761475
+test_number9.IS COLLISION time 2.622048854827881 portal_xy po1 (669.6004390716553, 417.6336443424225) ball_xy (653.2917251586914, 393.13207626342773):Portal #0 new_ball_xy (127.89956092834473, 67.36635565757751) ball_is_moving_down True
+test_number9.actual_y_coordinate:258.1508982181549
+test_number9.total_time:5.23406457901001
 test_number10.ball_x_coordinate:24.0
-test_number10.ball_y_coordinate:159.94739770889282
-test_number10.path_times:[3.0752220153808594,3.0752220153808594,3.0752220153808594,3.0752220153808594,]
+test_number10.ball_y_coordinate:161.48742198944092
+test_number10.path_times:[3.068950653076172,3.068950653076172,3.068950653076172,3.068950653076172,]
 test_number10.ball_forwards_velocity:240.0
 test_number10.ball_upwards_velocity:240.0
 test_number10.end_x_coordinate:776.0
 test_number10.portal_timed_events:[0,0,]
 test_number10.ball_is_moving_down:False
-test_number10.IS COLLISION time 0.9309597015380859 portal_xy po2 (200.33808708190918, 85.23947834968567) ball_xy (247.43032836914062, 61.91070556640625):Portal #0 new_ball_xy (597.1619129180908, 399.76052165031433) ball_is_moving_down True
-test_number10.actual_y_coordinate:393.0346214771271
-test_number10.total_time:1.5979588031768799
+test_number10.IS COLLISION time 0.9330382347106934 portal_xy po2 (200.8415985107422, 85.59613227844238) ball_xy (247.9291763305664, 62.160701751708984):Portal #0 new_ball_xy (596.6584014892578, 399.4038677215576) ball_is_moving_down True
+test_number10.actual_y_coordinate:394.84593391418457
+test_number10.total_time:1.5920381546020508
 test_number11.ball_x_coordinate:24.0
-test_number11.ball_y_coordinate:335.2800178527832
-test_number11.path_times:[7.700178623199463,7.700178623199463,7.700178623199463,7.700178623199463,]
+test_number11.ball_y_coordinate:332.8167915344238
+test_number11.path_times:[7.685683965682983,7.685683965682983,7.685683965682983,7.685683965682983,]
 test_number11.ball_forwards_velocity:240.0
 test_number11.ball_upwards_velocity:240.0
 test_number11.end_x_coordinate:776.0
 test_number11.portal_timed_events:[0,0,]
 test_number11.ball_is_moving_down:True
-test_number11.IS COLLISION time 0.8650033473968506 portal_xy po2 (253.85852813720703, 316.3384199142456) ball_xy (231.60080337524414, 407.11917877197266):Portal #1 new_ball_xy (543.641471862793, 218.6615800857544) ball_is_moving_down False
-test_number11.actual_y_coordinate:8.980011940002441
-test_number11.total_time:1.7526869773864746
+test_number11.IS COLLISION time 0.8639705181121826 portal_xy po2 (255.24091720581055, 315.4744267463684) ball_xy (231.35292434692383, 409.83028411865234):Portal #1 new_ball_xy (542.2590827941895, 219.5255732536316) ball_is_moving_down False
+test_number11.actual_y_coordinate:9.489352703094482
+test_number11.total_time:1.749150276184082
 test_number12.ball_x_coordinate:24.0
-test_number12.ball_y_coordinate:233.65598678588867
-test_number12.path_times:[2.4716200828552246,2.4716200828552246,2.4716200828552246,2.4716200828552246,]
+test_number12.ball_y_coordinate:233.87948989868164
+test_number12.path_times:[2.456658124923706,2.456658124923706,2.456658124923706,2.456658124923706,]
 test_number12.ball_forwards_velocity:240.0
 test_number12.ball_upwards_velocity:240.0
 test_number12.end_x_coordinate:776.0
 test_number12.portal_timed_events:[0,0,]
 test_number12.ball_is_moving_down:False
-test_number12.IS COLLISION time 2.6191911697387695 portal_xy po1 (670.1789093017578, 418.0433940887451) ball_xy (652.6058807373047, 394.8464012145996):Portal #0 new_ball_xy (127.32109069824219, 66.95660591125488) ball_is_moving_down True
-test_number12.actual_y_coordinate:258.45850944519043
-test_number12.total_time:5.232630014419556
+test_number12.IS COLLISION time 2.6282098293304443 portal_xy po1 (670.896110534668, 418.55141162872314) ball_xy (654.7703590393066, 395.5096435546875):Portal #0 new_ball_xy (126.60388946533203, 66.44858837127686) ball_is_moving_down True
+test_number12.actual_y_coordinate:257.7842950820923
+test_number12.total_time:5.245573997497559
 test_number13.ball_x_coordinate:24.0
-test_number13.ball_y_coordinate:161.12110018730164
-test_number13.path_times:[3.06669545173645,3.06669545173645,3.06669545173645,3.06669545173645,]
+test_number13.ball_y_coordinate:159.16948199272156
+test_number13.path_times:[3.073737859725952,3.073737859725952,3.073737859725952,3.073737859725952,]
 test_number13.ball_forwards_velocity:240.0
 test_number13.ball_upwards_velocity:240.0
 test_number13.end_x_coordinate:776.0
 test_number13.portal_timed_events:[0,0,]
 test_number13.ball_is_moving_down:False
-test_number13.IS COLLISION time 0.9395432472229004 portal_xy po2 (200.32692909240723, 85.23157477378845) ball_xy (249.4903793334961, 63.12028884887695):Portal #0 new_ball_xy (597.1730709075928, 399.76842522621155) ball_is_moving_down True
-test_number13.actual_y_coordinate:393.5121762752533
-test_number13.total_time:1.607581615447998
-test_number14.ball_x_coordinate:24.0
-test_number14.ball_y_coordinate:332.63946533203125
-test_number14.path_times:[7.695394515991211,7.695394515991211,7.695394515991211,7.695394515991211,]
-test_number14.ball_forwards_velocity:240.0
-test_number14.ball_upwards_velocity:240.0
-test_number14.end_x_coordinate:776.0
-test_number14.portal_timed_events:[0,0,]
-test_number14.ball_is_moving_down:True
-test_number14.IS COLLISION time 0.8649857044219971 portal_xy po2 (254.55432891845703, 315.90354442596436) ball_xy (231.5965690612793, 409.76396560668945):Portal #1 new_ball_xy (542.945671081543, 219.09645557403564) ball_is_moving_down False
-test_number14.actual_y_coordinate:9.132790565490723
-test_number14.total_time:1.7498347759246826
-test_number15.ball_x_coordinate:24.0
-test_number15.ball_y_coordinate:231.75678253173828
-test_number15.path_times:[2.4739439487457275,2.4739439487457275,2.4739439487457275,2.4739439487457275,]
-test_number15.ball_forwards_velocity:240.0
-test_number15.ball_upwards_velocity:240.0
-test_number15.end_x_coordinate:776.0
-test_number15.portal_timed_events:[0,0,]
-test_number15.ball_is_moving_down:False
-test_number15.IS COLLISION time 2.62121844291687 portal_xy po1 (669.6604347229004, 417.67614126205444) ball_xy (653.0924263000488, 395.0545120239258):Portal #0 new_ball_xy (127.83956527709961, 67.32385873794556) ball_is_moving_down True
-test_number15.actual_y_coordinate:257.82535314559937
-test_number15.total_time:5.23775839805603
-test_number16.ball_x_coordinate:24.0
-test_number16.ball_y_coordinate:161.28381729125977
-test_number16.path_times:[3.0724666118621826,3.0724666118621826,3.0724666118621826,3.0724666118621826,]
-test_number16.ball_forwards_velocity:240.0
-test_number16.ball_upwards_velocity:240.0
-test_number16.end_x_coordinate:776.0
-test_number16.portal_timed_events:[0,0,]
-test_number16.ball_is_moving_down:False
-test_number16.IS COLLISION time 0.9370195865631104 portal_xy po2 (199.93674278259277, 84.95519280433655) ball_xy (248.88470077514648, 62.41533279418945):Portal #0 new_ball_xy (597.5632572174072, 400.04480719566345) ball_is_moving_down True
-test_number16.actual_y_coordinate:395.15559792518616
-test_number16.total_time:1.5940208435058594
-test_number17.ball_x_coordinate:24.0
-test_number17.ball_y_coordinate:333.5268974304199
-test_number17.path_times:[7.692496299743652,7.692496299743652,7.692496299743652,7.692496299743652,]
-test_number17.ball_forwards_velocity:240.0
-test_number17.ball_upwards_velocity:240.0
-test_number17.end_x_coordinate:776.0
-test_number17.portal_timed_events:[0,0,]
-test_number17.ball_is_moving_down:True
-test_number17.IS COLLISION time 0.8651738166809082 portal_xy po2 (254.99990463256836, 315.6250596046448) ball_xy (231.64171600341797, 408.8313865661621):Portal #1 new_ball_xy (542.5000953674316, 219.37494039535522) ball_is_moving_down False
-test_number17.actual_y_coordinate:10.576169490814209
-test_number17.total_time:1.750166893005371
-test_number18.ball_x_coordinate:24.0
-test_number18.ball_y_coordinate:234.6354866027832
-test_number18.path_times:[2.457347869873047,2.457347869873047,2.457347869873047,2.457347869873047,]
-test_number18.ball_forwards_velocity:240.0
-test_number18.ball_upwards_velocity:240.0
-test_number18.end_x_coordinate:776.0
-test_number18.portal_timed_events:[0,0,]
-test_number18.ball_is_moving_down:False
-test_number18.IS COLLISION time 2.632002830505371 portal_xy po1 (670.357837677002, 418.1701350212097) ball_xy (655.6806793212891, 395.0404930114746):Portal #0 new_ball_xy (127.14216232299805, 66.82986497879028) ball_is_moving_down True
-test_number18.actual_y_coordinate:258.24713468551636
-test_number18.total_time:5.252848386764526
-test_number19.ball_x_coordinate:24.0
-test_number19.ball_y_coordinate:159.78968739509583
-test_number19.path_times:[3.080979347229004,3.080979347229004,3.080979347229004,3.080979347229004,]
-test_number19.ball_forwards_velocity:240.0
-test_number19.ball_upwards_velocity:240.0
-test_number19.end_x_coordinate:776.0
-test_number19.portal_timed_events:[0,0,]
-test_number19.ball_is_moving_down:False
-test_number19.IS COLLISION time 0.9310891628265381 portal_xy po2 (199.6311855316162, 84.73875641822815) ball_xy (247.46139907836914, 62.399539947509766):Portal #0 new_ball_xy (597.8688144683838, 400.26124358177185) ball_is_moving_down True
-test_number19.actual_y_coordinate:395.27395844459534
-test_number19.total_time:1.589686632156372
-test_number20.ball_x_coordinate:24.0
-test_number20.ball_y_coordinate:312.491512298584
-test_number20.path_times:[7.687517881393433,7.687517881393433,7.687517881393433,7.687517881393433,]
-test_number20.ball_forwards_velocity:240.0
-test_number20.ball_upwards_velocity:240.0
-test_number20.end_x_coordinate:776.0
-test_number20.portal_timed_events:[0,0,]
-test_number20.ball_is_moving_down:True
-test_number20.IS COLLISION time 0.8680496215820312 portal_xy po2 (254.65229034423828, 315.8423185348511) ball_xy (232.3319091796875, 429.1765785217285):Portal #1 new_ball_xy (542.8477096557617, 219.15768146514893) ball_is_moving_down False
-test_number20.actual_y_coordinate:10.837502479553223
-test_number20.total_time:1.7470479011535645
-test_number21.ball_x_coordinate:24.0
-test_number21.ball_y_coordinate:233.60540390014648
-test_number21.path_times:[2.456587076187134,2.456587076187134,2.456587076187134,2.456587076187134,]
-test_number21.ball_forwards_velocity:240.0
-test_number21.ball_upwards_velocity:240.0
-test_number21.end_x_coordinate:776.0
-test_number21.portal_timed_events:[0,0,]
-test_number21.ball_is_moving_down:False
-test_number21.IS COLLISION time 2.626877784729004 portal_xy po1 (671.1838722229004, 418.75524282455444) ball_xy (654.4506683349609, 395.0164031982422):Portal #0 new_ball_xy (126.31612777709961, 66.24475717544556) ball_is_moving_down True
-test_number21.actual_y_coordinate:256.8044066429138
-test_number21.total_time:5.250195026397705
-test_number22.ball_x_coordinate:24.0
-test_number22.ball_y_coordinate:159.78527426719666
-test_number22.path_times:[3.0675299167633057,3.0675299167633057,3.0675299167633057,3.0675299167633057,]
-test_number22.ball_forwards_velocity:240.0
-test_number22.ball_upwards_velocity:240.0
-test_number22.end_x_coordinate:776.0
-test_number22.portal_timed_events:[0,0,]
-test_number22.ball_is_moving_down:False
-test_number22.IS COLLISION time 0.9370009899139404 portal_xy po2 (200.536470413208, 85.37999987602234) ball_xy (248.8802375793457, 63.11994552612305):Portal #0 new_ball_xy (596.963529586792, 399.62000012397766) ball_is_moving_down True
-test_number22.actual_y_coordinate:395.46178698539734
-test_number22.total_time:1.593493938446045
-test_number23.ball_x_coordinate:24.0
-test_number23.ball_y_coordinate:333.69157791137695
-test_number23.path_times:[7.688407897949219,7.688407897949219,7.688407897949219,7.688407897949219,]
-test_number23.ball_forwards_velocity:240.0
-test_number23.ball_upwards_velocity:240.0
-test_number23.end_x_coordinate:776.0
-test_number23.portal_timed_events:[0,0,]
-test_number23.ball_is_moving_down:True
-test_number23.IS COLLISION time 0.8650012016296387 portal_xy po2 (255.39592742919922, 315.3775453567505) ball_xy (231.60028839111328, 408.70813369750977):Portal #1 new_ball_xy (542.1040725708008, 219.6224546432495) ball_is_moving_down False
-test_number23.actual_y_coordinate:9.15027141571045
-test_number23.total_time:1.7519595623016357
-test_number24.ball_x_coordinate:24.0
-test_number24.ball_y_coordinate:231.90092086791992
-test_number24.path_times:[2.4674479961395264,2.4674479961395264,2.4674479961395264,2.4674479961395264,]
-test_number24.ball_forwards_velocity:240.0
-test_number24.ball_upwards_velocity:240.0
-test_number24.end_x_coordinate:776.0
-test_number24.portal_timed_events:[0,0,]
-test_number24.ball_is_moving_down:False
-test_number24.IS COLLISION time 2.6165542602539062 portal_xy po1 (670.8794593811035, 418.539617061615) ball_xy (651.9730224609375, 395.8930778503418):Portal #0 new_ball_xy (126.62054061889648, 66.46038293838501) ball_is_moving_down True
-test_number24.actual_y_coordinate:258.0285620689392
-test_number24.total_time:5.234836101531982
-test_number25.ball_x_coordinate:24.0
-test_number25.ball_y_coordinate:158.96032691001892
-test_number25.path_times:[3.0731875896453857,3.0731875896453857,3.0731875896453857,3.0731875896453857,]
-test_number25.ball_forwards_velocity:240.0
-test_number25.ball_upwards_velocity:240.0
-test_number25.end_x_coordinate:776.0
-test_number25.portal_timed_events:[0,0,]
-test_number25.ball_is_moving_down:False
-test_number25.IS COLLISION time 0.9268417358398438 portal_xy po2 (201.0770320892334, 85.76289772987366) ball_xy (246.4420166015625, 62.88053512573242):Portal #0 new_ball_xy (596.4229679107666, 399.23710227012634) ball_is_moving_down True
-test_number25.actual_y_coordinate:394.2836534976959
-test_number25.total_time:1.5948429107666016
-test_number26.ball_x_coordinate:24.0
-test_number26.ball_y_coordinate:333.80727767944336
-test_number26.path_times:[7.689893484115601,7.689893484115601,7.689893484115601,7.689893484115601,]
-test_number26.ball_forwards_velocity:240.0
-test_number26.ball_upwards_velocity:240.0
-test_number26.end_x_coordinate:776.0
-test_number26.portal_timed_events:[0,0,]
-test_number26.ball_is_moving_down:True
-test_number26.IS COLLISION time 0.8604950904846191 portal_xy po2 (255.3934097290039, 315.37911891937256) ball_xy (230.5188217163086, 409.67390060424805):Portal #1 new_ball_xy (542.1065902709961, 219.62088108062744) ball_is_moving_down False
-test_number26.actual_y_coordinate:9.614357948303223
-test_number26.total_time:1.7475237846374512
-test_number27.ball_x_coordinate:24.0
-test_number27.ball_y_coordinate:232.39622116088867
-test_number27.path_times:[2.4624340534210205,2.4624340534210205,2.4624340534210205,2.4624340534210205,]
-test_number27.ball_forwards_velocity:240.0
-test_number27.ball_upwards_velocity:240.0
-test_number27.end_x_coordinate:776.0
-test_number27.portal_timed_events:[0,0,]
-test_number27.ball_is_moving_down:False
-test_number27.IS COLLISION time 2.6228439807891846 portal_xy po1 (670.846757888794, 418.5164535045624) ball_xy (653.4825553894043, 396.1637878417969):Portal #0 new_ball_xy (126.65324211120605, 66.48354649543762) ball_is_moving_down True
-test_number27.actual_y_coordinate:257.7343451976776
-test_number27.total_time:5.243270635604858
-number_of_tests:27
+test_number13.IS COLLISION time 0.9355170726776123 portal_xy po2 (200.20404815673828, 85.14453411102295) ball_xy (248.52409744262695, 63.59996795654297):Portal #0 new_ball_xy (597.2959518432617, 399.85546588897705) ball_is_moving_down True
+test_number13.actual_y_coordinate:396.0552167892456
+test_number13.total_time:1.5875167846679688
+number_of_tests:13

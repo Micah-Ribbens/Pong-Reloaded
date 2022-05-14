@@ -39,4 +39,4 @@ class FileReader:
         return float(self.name_to_data[item_name])
 
     def get_boolean(self, item_name):
-        return self.name_to_data[item_name] == "true"
+        return self.name_to_data[item_name] == "True"

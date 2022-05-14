@@ -54,6 +54,7 @@ class GravityPongAITester:
 
         for x in range(fr.get_int("number_of_tests")):
             s = f"test_number{x + 1}."
+
             self.tests.append(TestData(fr.get_double(f"{s}end_x_coordinate"), fr.get_double(f"{s}ball_x_coordinate"),
                                        fr.get_double(f"{s}ball_y_coordinate"), fr.get_double(f"{s}ball_forwards_velocity"),
                                        fr.get_double(f"{s}ball_upwards_velocity"), fr.get_double(f"{s}actual_y_coordinate"),
@@ -74,14 +75,14 @@ class GravityPongAITester:
 
         test_data: TestData = self.tests[index]
 
+        if test_number == 2:
+            print("NOOOOOOO")
         ball.x_coordinate = test_data.ball_x_coordinate
         ball.y_coordinate = test_data.ball_y_coordinate
         ball.forwards_velocity = test_data.ball_forwards_velocity
         ball.upwards_velocity = test_data.ball_upwards_velocity
         ball.is_moving_down = test_data.ball_is_moving_down
 
-        if test_number == 2:
-            print("NOOOOOOO")
 
         for x in range(len(test_data.portal_timed_events)):
             portal_pong.portals[x].can_be_enabled_event.current_time = test_data.portal_timed_events[x]

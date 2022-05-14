@@ -52,13 +52,13 @@ class CollisionsUtilityFunctions:
         object2_x_distance_traveled = abs(object2_x_displacement)
 
         # If they are both going right it has to be right collision; same thing for left collisions
-        if object1_x_displacement > 0 and object2_x_displacement > 0:
-            is_right_collision = True
+        # if object1_x_displacement > 0 and object2_x_displacement > 0:
+        #     is_right_collision = True
+        #
+        # elif object1_x_displacement < 0 and object2_x_displacement < 0:
+        #     is_right_collision = False
 
-        elif object1_x_displacement < 0 and object2_x_displacement < 0:
-            is_right_collision = False
-
-        elif object2_x_distance_traveled >= object1_x_distance_traveled:
+        if object2_x_distance_traveled >= object1_x_distance_traveled:
             # Since object2 traveled a greater distance its displacement matters more (if it goes leftwards into the ball
             # it would be a left collision and if it goes rightwards it would be a right collision)
             is_right_collision = object2_x_displacement > 0
@@ -413,7 +413,7 @@ class CollisionsUtilityFunctions:
         collision_times += CollisionsUtilityFunctions.get_path_collision_times(path, top_path)
 
         collision_times.sort()
-        collision_times = list(filter(lambda item: item != 0, collision_times))
+        collision_times = list(filter(lambda item: item > 0, collision_times))
 
         start_time = 0
 

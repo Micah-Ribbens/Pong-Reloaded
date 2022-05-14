@@ -276,7 +276,7 @@ class VelocityPath(Path):
     def set_time(self, time):
         """Sets the time to the provided 'time'- if it is greater than the max time it is reduced to a smaller time"""
 
-        self.total_time %= self.max_time
+        self.total_time = time % self.max_time
 
     @property
     def max_time(self):

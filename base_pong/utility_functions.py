@@ -212,8 +212,6 @@ def solve_quadratic(a, b, c):
     # If the answers are the same I should only return one of them
     return answers if answers[0] != answers[1] else [answers[0]]
 
-
-
 def min_value(item1, item2):
     """returns: double; the smallest item"""
 
@@ -307,4 +305,17 @@ def get_prev_index(current_index, max_index):
     prev_index = current_index - 1
 
     return prev_index if prev_index > 0 else max_index
+
+
+def get_min_list_item(items):
+    """returns: double; the minimum item in the list"""
+
+    min_item = float('inf')
+
+    for item in items:
+        if item < min_item:
+            min_item = item
+
+    return min_item
+
 
