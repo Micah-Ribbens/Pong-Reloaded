@@ -34,7 +34,7 @@ class Paddle(GameObject):
         self.y_coordinate = 0
         self.x_coordinate = 0
         self.length = VelocityCalculator.give_measurement(screen_length, 3)
-        self.height = VelocityCalculator.give_measurement(screen_height, 33)
+        self.height = VelocityCalculator.give_measurement(screen_height, 100)
         self.color = white
         self.outline_color = red
 
@@ -108,6 +108,7 @@ class AI(Paddle):
         self.difficulty_level = difficulty_level
         self.ball = ball
         self.action = self.default_run
+        # self.height = screen_height * .33
 
     def set_pong_type(self, pong_type):
         self.pong_type = pong_type
@@ -123,21 +124,7 @@ class AI(Paddle):
 
         self.action = action
 
-    def should_move_towards_ball(self, ball):
-        """ summary: finds out if the top tip of the paddle or bottom tip of paddle would be hit if the paddle doesn't move
-
-            params:
-                ball: Ball; the ball that this function uses to decide if the computer opponent should move towards it
-
-            returns: boolean; whether the paddle should move towards the ball
-        """
-
-        # Prevents oscillation from trying to move towards the ball, but then overshooting it in an unending cycle
-        # If the tips of the paddle will be hit the paddle is in a "good enough" position
-        return (CollisionsFinder.is_height_collision(self.get_top_tip_of_paddle(), ball)
-                or CollisionsFinder.is_height_collision(self.get_bottom_tip_of_paddle(), ball))
-
-    def move_towards_ball(self, ball_y_coordinate, ball_time_to_ai):
+    def move_towards_ball(self, ball_y_coordinate, additional_time, is_only_ball=True):
         """ summary: changes the property that tells the computer opponent where to move so it hits the ball
 
             params:
@@ -155,9 +142,12 @@ class AI(Paddle):
         elif new_y_coordinate <= 0:
             new_y_coordinate = 0
 
-        self.change_player_path(new_y_coordinate, ball_time_to_ai)
+        if is_only_ball:
+            self.path = VelocityPath(Point(self.x_coordinate, self.y_coordinate), [], self.velocity)
 
-    def move_away_from_ball(self, ball_y_coordinate, ball_time_to_ai):
+        self.add_point_to_player_path(new_y_coordinate, additional_time)
+
+    def move_away_from_ball(self, ball_y_coordinate, additional_time, is_only_ball=True):
         """ summary: changes the property that tells the computer opponent where to move so it misses the ball
 
             params:
@@ -174,24 +164,44 @@ class AI(Paddle):
         else:
             new_y_coordinate = screen_height - self.height
 
-        self.change_player_path(new_y_coordinate, ball_time_to_ai)
+        if is_only_ball:
+            self.path = VelocityPath(Point(self.x_coordinate, self.y_coordinate), [], self.velocity)
 
-    def change_player_path(self, new_y_coordinate, ball_time_to_ai):
-        """Changes the player's path so it will go to the new_y_coordinate within the right amount of time"""
+        self.add_point_to_player_path(new_y_coordinate, additional_time)
 
-        distance_to_new_y_coordinate = abs(new_y_coordinate - self.y_coordinate)
+    def add_point_to_player_path(self, new_y_coordinate, additional_time):
+        """Adds the point to the player path, so it will move there"""
 
+        old_y_coordinate = self.path.last_point.y_coordinate
+        distance_to_new_y_coordinate = abs(new_y_coordinate - old_y_coordinate)
         time_to_reach_new_y_coordinate = distance_to_new_y_coordinate / self.velocity
 
-        # The player should beat the ball to the spot by a little bit
-        time_buffer = .5
+        waiting_time = self.get_waiting_time(additional_time, time_to_reach_new_y_coordinate)
+        end_time = self.path.last_end_time + additional_time
+        time_should_start = end_time - waiting_time - time_to_reach_new_y_coordinate
+        # if time_to_reach_new_y_coordinate > additional_time:
 
-        self.path = VelocityPath(Point(self.x_coordinate, self.y_coordinate), [], self.velocity)
+        # If the ball is coming too quick it should not start moving in negative time
+        if waiting_time > 0:
+            self.path.add_time_point(Point(self.x_coordinate, old_y_coordinate),
+                                     time_should_start)
 
-        self.path.add_time_point(Point(self.x_coordinate, self.y_coordinate),
-                                 ball_time_to_ai - time_to_reach_new_y_coordinate - time_buffer)
+            self.path.add_point(Point(self.x_coordinate, new_y_coordinate))
+            self.path.add_time_point(Point(self.x_coordinate, new_y_coordinate), end_time)
 
-        self.path.add_point(Point(self.x_coordinate, new_y_coordinate))
+        else:
+            self.path.add_point(Point(self.x_coordinate, new_y_coordinate))
+
+        # TODO make it stay at this point until end time otherwise things get really messed up ;(
+        # print("ADD TIME", additional_time)
+
+    def get_waiting_time(self, additional_time, time_to_reach_new_y_coordinate):
+        """returns: double; the time the ai should wait before hitting the ball"""
+
+        max_waiting_time = additional_time - time_to_reach_new_y_coordinate
+
+        # The ai should not wait for no more than a certain amount of time before it hits the ball
+        return max_waiting_time if max_waiting_time < .5 else .5
 
     def default_run(self):
         """summary: runs the logic for figuring out if the player should hit the ball and the players movement;
@@ -206,14 +216,12 @@ class AI(Paddle):
         should_get_ball_coordinates = ball_has_hit_player1 or (self.path is None and self.ball.is_moving_right)
 
         if self.is_going_to_hit_ball and should_get_ball_coordinates:
-            ball_y_coordinate, ball_time_to_ai = self.pong_type.get_ai_data(self.x_coordinate)
+            ball_y_coordinate, ball_time_to_ai = self.pong_type.get_ai_data(self.x_coordinate - self.ball.length)
             self.move_towards_ball(ball_y_coordinate, ball_time_to_ai)
-            # print("HIT BALL", self.number_of_hits)
 
         elif not self.is_going_to_hit_ball and should_get_ball_coordinates:
-            ball_y_coordinate, ball_time_to_ai = self.pong_type.get_ai_data(self.x_coordinate)
+            ball_y_coordinate, ball_time_to_ai = self.pong_type.get_ai_data(self.x_coordinate - self.ball.length)
             self.move_away_from_ball(ball_y_coordinate, ball_time_to_ai)
-            # print("MISS BALL", self.number_of_hits)
 
         self.run_hitting_balls_logic()
 

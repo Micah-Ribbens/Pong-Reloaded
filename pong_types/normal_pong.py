@@ -11,6 +11,8 @@ import pygame
 class NormalPong(PongType):
     """The normal version of pong"""
 
+    total_time = 0
+
     def _ball_collisions(self, ball, player1, player2):
         """ summary: does the collisions of the ball off the players and screen bounds
 
@@ -67,9 +69,6 @@ class NormalPong(PongType):
             ball.tip_hit(paddle.power / 10)
             ball.is_moving_down = False
 
-        if False:
-            pass
-
         elif is_collision:
             ball.middle_hit(paddle.power / 10)
 
@@ -86,7 +85,11 @@ class NormalPong(PongType):
             params: None
             returns: None
         """
+        self.total_time += VelocityCalculator.time
         self.ball_movement()
+
+        if not self.ball.is_moving_right:
+            self.total_time = 0
         self.run_player_movement()
         self.ball_collisions()
 

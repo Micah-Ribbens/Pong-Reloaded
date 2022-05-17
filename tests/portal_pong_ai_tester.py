@@ -92,7 +92,7 @@ class GravityPongAITester:
 
         # for x in range(test):
 
-        predicted_y_coordinate, time = portal_pong.get_ai_data(test_data.end_x_coordinate)
+        predicted_y_coordinate, time = portal_pong.get_ai_data(test_data.end_x_coordinate - ball.length)
         self.cases.append(TestCase(predicted_y_coordinate, test_data.actual_y_coordinate, test_data.end_x_coordinate))
 
 screen = AI_GUI(GravityPongAITester().get_cases(), 10)

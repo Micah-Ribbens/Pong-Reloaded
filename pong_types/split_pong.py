@@ -1,4 +1,6 @@
+from base_pong.equations import Point
 from base_pong.events import Event
+from base_pong.path import VelocityPath
 from base_pong.players import AI
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.engines import CollisionsFinder
@@ -11,11 +13,28 @@ from base_pong.colors import red, white
 from copy import deepcopy
 
 
+class AIData:
+    """A utility class for storing data making the AI for Split Pong easier"""
+
+    time = 0
+    y_coordinate = 0
+
+    def __init__(self, time, y_coordinate):
+        """Initializes the object"""
+
+        self.time, self.y_coordinate = time, y_coordinate
+
+    def __str__(self):
+        return f"time {self.time} y coordinate {self.y_coordinate}"
+
 class SplitPong(PongType):
     """Pong where the balls size increases until it doubles in size and after that it splits"""
     balls = []
     base_ball_length = 0
     normal_pong = None
+    total_time = None
+
+    ai_data = {} # ball to ball data
 
     def __init__(self, player1, player2, ball):
         """ summary: Initializes with the PongType with the needed objects to run its methods
@@ -35,26 +54,8 @@ class SplitPong(PongType):
         ball.color = red
 
         if type(player2) == AI:
-            player2.set_action(self.run_computer_opponent)
-
-    def run_computer_opponent(self):
-        closest_ball = self.ball
-
-        for ball in self.balls:
-            if ball.right_edge > closest_ball.right_edge:
-                closest_ball = ball
-
-        computer_opponent: AI = self.player2
-
-        computer_opponent.run_hitting_balls_logic()
-
-        if computer_opponent.is_going_to_hit_ball:
-            computer_opponent.move_towards_ball(closest_ball)
-
-        else:
-            computer_opponent.move_away_from_ball(closest_ball)
-
-
+            # Don't want it to do anything; I want the AI code to be executed in a very specific spot
+            player2.set_action(lambda: [].__contains__(0))
 
     def increase_ball_size(self, ball):
         """ summary: increases the ball's size
@@ -95,7 +96,7 @@ class SplitPong(PongType):
         new_ball: Ball = deepcopy(ball)
         new_ball.color = white
         new_ball.is_moving_down = not ball.is_moving_down
-        new_ball.forwards_velocity *= 1.1
+        new_ball.forwards_velocity *= 1.2
         distance_change = new_ball.forwards_velocity * .1
 
         new_ball.is_moving_right = True if ball_has_collided_with_player1 else False
@@ -111,37 +112,41 @@ class SplitPong(PongType):
 
         new_balls = []
         for ball in self.balls:
-            ball_has_collided_with_paddle1 = CollisionsFinder.is_collision(
-                ball, self.player1)
+            ball_has_collided_with_paddle1 = CollisionsFinder.is_collision(ball, self.player1)
 
             ball.render()
 
-            # Makes sure that the ball doesn't collide into the same paddle mulitple times
-            if not HistoryKeeper.get_last(f"ball_has_collided{id(ball)}") and self.ball_has_collided(ball):
+            # If the ball is ready to split it shouldn't increase in size again
+            if self.ball_has_collided(ball) and not self.ball_is_ready_to_split(ball):
                 self.increase_ball_size(ball)
 
             if self.ball_is_ready_to_split(ball):
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
+
             self.normal_pong._ball_collisions(ball, self.player1, self.player2)
 
         for new_ball in new_balls:
             self.balls.append(new_ball)
 
     def ball_has_collided(self, ball):
-        """ summary: calls CollisionsFinder.is_collision() for player1 and player2
+        """returns: boolean; if the ball has collided with a player"""
 
-            params:
-                ball
-        """
-        return CollisionsFinder.is_collision(ball, self.player1) or CollisionsFinder.is_collision(ball, self.player2)
+        # The ball has to be going to opposite direction of the player to have collided with the weird splitting mechanics
+        return ((CollisionsFinder.is_collision(ball, self.player1) and not self.ball.is_moving_right)
+                or (CollisionsFinder.is_collision(ball, self.player2) and self.ball.is_moving_right))
 
     def run(self):
+        self.run_ai()
         self.add_needed_objects()
+
         for ball in self.balls:
             self.normal_pong._ball_movement(ball)
 
         self.ball_collisions()
         self.normal_pong.run_player_movement()
+
+        if self.total_time is not None:
+            self.total_time += VelocityCalculator.time
 
     def reset(self):
         """ summary: resets everything necessary after each time someone scores
@@ -157,6 +162,7 @@ class SplitPong(PongType):
         self.ball.length = self.base_ball_length
         self.ball.height = self.base_ball_length
         self.ball.forwards_velocity = self.ball.base_forwards_velocity
+        self.ai_data = {}
 
     def draw_game_objects(self):
         """ summary: draws all the game objects (paddles and ball) onto the screen
@@ -200,14 +206,50 @@ class SplitPong(PongType):
                 has_scored = True
 
         return has_scored
-    
-    def add_needed_objects(self):
-        """ summary: adds all the games objects (paddle and ball) onto the screen
-            params: None
-            returns: None
-        """
 
-        super().add_needed_objects()
+    def add_ball_to_ai_path(self, ball):
+        """Adds the ball to the ai's path, so it will hit it"""
+
+        ball_path, unused, times = self._get_ball_path_data(ball.y_coordinate, ball.x_coordinate, self.player2.x_coordinate - ball.length, ball.is_moving_down, ball.forwards_velocity)
+
+        time_to_ai = times[len(times) - 1]
+        end_y_coordinate = ball_path.get_end_points()[0].y_coordinate
+
+        self.ai_data[ball] = AIData(time_to_ai, end_y_coordinate)
+
+        # Sorting the keys of the ai data so the it goes least to greatest time
+        sorted_ai_data_keys = sorted(self.ai_data.keys(), key=lambda item: self.ai_data.get(item).time)
+
+        self.player2.path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
+
+        current_time = 0
+
+        for key in sorted_ai_data_keys:
+            data = self.ai_data.get(key)
+
+            self.player2.move_towards_ball(data.y_coordinate, data.time - current_time, False)
+            current_time = data.time
+
+
+    def run_ai(self):
+        """Runs the code that makes the ai to work"""
+
         for ball in self.balls:
-            HistoryKeeper.add(self.ball_has_collided(ball),f"ball_has_collided{id(ball)}", False)
+            # Meaning the ball has not been added to the ai path and it should be
+            if ball.is_moving_right and not self.ai_data.__contains__(ball):
+                self.add_ball_to_ai_path(ball)
+
+                if self.total_time is None:
+                    self.total_time = 0
+
+            if CollisionsFinder.is_collision(ball, self.player2) and self.ai_data.__contains__(ball):
+                self.ai_data.pop(ball)
+
+        for data in self.ai_data.values():
+            data.time -= VelocityCalculator.time
+        self.player2.run_hitting_balls_logic()
+
+
+
+
 

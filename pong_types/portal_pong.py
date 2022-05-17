@@ -432,8 +432,6 @@ class PortalPong(PongType):
         """Adds all the necessary data to the lists provided for figuring out where the ball is going to end up"""
 
         for portal in enabled_portals:
-            if enabled_portals.index(portal) == 1:
-                print("DEBUGGING TIME YESSIR")
             total_time = (ai_x_coordinate - ball_x_coordinate) / self.ball.forwards_velocity
             portal_opening1 = portal.portal_opening1
             portal_opening2 = portal.portal_opening2
