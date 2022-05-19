@@ -38,6 +38,8 @@ class LineSegment:
     # If it is either a x_equals or y_equals then these will not be None
     x_equals = None
     y_equals = None
+    is_vertical = False
+    is_horizontal = False
 
     def __init__(self, start_point: Point, end_point: Point):
         """ summary: initializes the object
@@ -50,10 +52,12 @@ class LineSegment:
         """
         # Added .01, so elsewhere when I am doing collisions I don't have to worry about straight lines :)
         if start_point.x_coordinate == end_point.x_coordinate:
-            end_point.x_coordinate += .00000001
+            end_point.x_coordinate += .0000000001
+            self.is_vertical = True
 
         if start_point.y_coordinate == end_point.y_coordinate:
-            end_point.y_coordinate += .00000001
+            end_point.y_coordinate += .0000000001
+            self.is_horizontal = True
 
         self.slope = (start_point.y_coordinate - end_point.y_coordinate) / (start_point.x_coordinate - end_point.x_coordinate)
         self.y_intercept = start_point.y_coordinate - self.slope * start_point.x_coordinate
@@ -96,16 +100,6 @@ class LineSegment:
 
         return self.slope >= 0
 
-    def is_x_equals_line(self):
-        """returns: boolean; if the line is something like 'x = 6'"""
-
-        return self.start_point.x_coordinate == self.end_point.x_coordinate
-
-    def is_y_equals_line(self):
-        """returns: boolean; if the line is something like 'y = 6'"""
-
-        return self.start_point.y_coordinate == self.end_point.y_coordinate
-
     def get_x_min_and_max(self):
         """returns: [min x coordinate, max x coordinate]"""
 
@@ -139,7 +133,14 @@ class LineSegment:
         y_is_on_line = is_between_values(y_min, y_max, point.y_coordinate, amount_can_be_off_by)
         x_and_y_are_on_line = x_is_on_line and y_is_on_line
 
-        return x_and_y_are_on_line and is_within_range(self.get_y_coordinate(point.x_coordinate), point.y_coordinate, amount_can_be_off_by)
+        return_value = None
+
+        if self.is_vertical or self.is_horizontal:
+            return_value = x_and_y_are_on_line
+
+        else:
+            return_value = x_and_y_are_on_line and is_within_range(self.get_y_coordinate(point.x_coordinate), point.y_coordinate, amount_can_be_off_by)
+        return return_value
 
     def get_line_segment(game_object, objects_velocity, is_increasing, is_horizontal):
         """ summary: None

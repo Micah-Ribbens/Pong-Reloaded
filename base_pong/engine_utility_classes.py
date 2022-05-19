@@ -314,7 +314,16 @@ class CollisionsUtilityFunctions:
             return None
 
         x_collision_point = (line2.y_intercept - line1.y_intercept) / (line1.slope - line2.slope)
-        collision_point = Point(x_collision_point, line1.get_y_coordinate(x_collision_point))
+        collision_point = None
+
+        if line1.is_vertical or line2.is_vertical:
+            vertical_line = line1 if line1.is_vertical else line2
+            non_vertical_line = line2 if line1.is_vertical else line1
+            x_collision_point = vertical_line.start_point.x_coordinate
+            collision_point = Point(x_collision_point, non_vertical_line.get_y_coordinate(x_collision_point))
+
+        else:
+            collision_point = Point(x_collision_point, line1.get_y_coordinate(x_collision_point))
 
         # If one of the line segments doesn't contain that collision point then the lines couldn't have collided
         if not line1.contains_point(collision_point, 1) or not line2.contains_point(collision_point, 1):

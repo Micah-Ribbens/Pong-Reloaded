@@ -4,6 +4,7 @@ from base_pong.engine_utility_classes import CollisionsUtilityFunctions, Collisi
 from base_pong.equations import Point, LineSegment
 from base_pong.path import Path, ObjectPath
 from base_pong.utility_classes import HistoryKeeper
+from base_pong.utility_functions import rounded
 
 class CollisionsFinder:
     """Gives a series of methods to find if two (or more objects) have collided"""
@@ -67,8 +68,8 @@ class CollisionsFinder:
         # if CollisionsFinder.objects_to_data.__contains__(f"{id(object1)} {id(object2)}"):
         #     return
 
-        object1_has_moved = prev_object1.x_coordinate != object1.x_coordinate or prev_object1.y_coordinate != object1.y_coordinate
-        object2_has_moved = prev_object2.x_coordinate != object2.x_coordinate or prev_object2.y_coordinate != object2.y_coordinate
+        object1_has_moved = CollisionsFinder.object_has_moved(prev_object1, object1)
+        object2_has_moved = CollisionsFinder.object_has_moved(prev_object2, object2)
 
         object1_path = ObjectPath(prev_object1, object1)
         object2_path = ObjectPath(prev_object2, object2)
@@ -200,6 +201,15 @@ class CollisionsFinder:
 
     def is_line_ellipse_collision(line, ellipse):
         return len(CollisionsUtilityFunctions.get_line_ellipse_collision_points(line, ellipse)) != 0
+
+    def object_has_moved(prev_obect, object):
+        """returns: boolean; if the object has moved"""
+
+        # Have to round the numbers otherwise there is a weird python rounding thing with floats
+        return (rounded(prev_obect.x_coordinate - object.x_coordinate, 4) != 0 or
+                rounded(prev_obect.y_coordinate - object.y_coordinate, 4) != 0)
+
+
 
 
         

@@ -115,9 +115,15 @@ class SplitPong(PongType):
             ball_has_collided_with_paddle1 = CollisionsFinder.is_collision(ball, self.player1)
 
             ball.render()
+            self.normal_pong.ball_screen_boundary_collisions(ball)
+            ball_has_collided = self.ball_has_collided(ball)
+
+            # if ball_has_collided:
+            #     ball.is_moving_right = True if ball_has_collided_with_paddle1 else False
+            #     ball.x_coordinate = self.player1.right_edge if ball_has_collided_with_paddle1 else self.player2.x_coordinate - ball.length
 
             # If the ball is ready to split it shouldn't increase in size again
-            if self.ball_has_collided(ball) and not self.ball_is_ready_to_split(ball):
+            if ball_has_collided:
                 self.increase_ball_size(ball)
 
             if self.ball_is_ready_to_split(ball):
@@ -132,8 +138,8 @@ class SplitPong(PongType):
         """returns: boolean; if the ball has collided with a player"""
 
         # The ball has to be going to opposite direction of the player to have collided with the weird splitting mechanics
-        return ((CollisionsFinder.is_collision(ball, self.player1) and not self.ball.is_moving_right)
-                or (CollisionsFinder.is_collision(ball, self.player2) and self.ball.is_moving_right))
+        return ((CollisionsFinder.is_collision(ball, self.player1) and not ball.is_moving_right)
+                or (CollisionsFinder.is_collision(ball, self.player2) and ball.is_moving_right))
 
     def run(self):
         self.run_ai()
@@ -141,9 +147,9 @@ class SplitPong(PongType):
 
         for ball in self.balls:
             self.normal_pong._ball_movement(ball)
+        self.normal_pong.run_player_movement()
 
         self.ball_collisions()
-        self.normal_pong.run_player_movement()
 
         if self.total_time is not None:
             self.total_time += VelocityCalculator.time
@@ -203,6 +209,7 @@ class SplitPong(PongType):
 
         for ball in self.balls:
             if ScoreKeeper.player_has_scored(ball, player_is_leftside):
+                CollisionsFinder.is_collision(ball, self.player1 if not player_is_leftside else self.player2)
                 has_scored = True
 
         return has_scored
