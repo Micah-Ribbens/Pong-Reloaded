@@ -61,4 +61,5 @@ while True:
     HistoryKeeper.last_time = VelocityCalculator.time
 
     VelocityCalculator.time = time.time() - start_time
+    print("\nCYCLE")
 

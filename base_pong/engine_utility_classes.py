@@ -51,13 +51,6 @@ class CollisionsUtilityFunctions:
         object1_x_distance_traveled = abs(object1_x_displacement)
         object2_x_distance_traveled = abs(object2_x_displacement)
 
-        # If they are both going right it has to be right collision; same thing for left collisions
-        # if object1_x_displacement > 0 and object2_x_displacement > 0:
-        #     is_right_collision = True
-        #
-        # elif object1_x_displacement < 0 and object2_x_displacement < 0:
-        #     is_right_collision = False
-
         if object2_x_distance_traveled >= object1_x_distance_traveled:
             # Since object2 traveled a greater distance its displacement matters more (if it goes leftwards into the ball
             # it would be a left collision and if it goes rightwards it would be a right collision)
@@ -232,6 +225,7 @@ class CollisionsUtilityFunctions:
         for rectangle_line in rectangle_lines:
             collision_point = CollisionsUtilityFunctions.get_line_collision_point(rectangle_line, line)
 
+            # TODO times not lining up RIP
             if collision_point is not None:
                 distance_to_point = get_distance(line.start_point, collision_point)
                 time = CollisionsUtilityFunctions.get_time_to_point(distance_to_point, moving_object_path.get_total_distance())

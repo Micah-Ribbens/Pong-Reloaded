@@ -66,8 +66,14 @@ class SplitPong(PongType):
             returns: None
         """
 
+        # The ball's right edge will change from the length increase making a collision that didn't happen becuase the
+        # Ball will move into player2; this prevents that
+        if ball.right_edge == self.player2.x_coordinate:
+            ball.x_coordinate -= (self.base_ball_length * .25)
+
         ball.length += (self.base_ball_length * .25)
         ball.height += (self.base_ball_length * .25)
+
 
     def ball_is_ready_to_split(self, ball):
         """ summary: finds out if the ball's size is double the size of its base length
@@ -122,14 +128,20 @@ class SplitPong(PongType):
             #     ball.is_moving_right = True if ball_has_collided_with_paddle1 else False
             #     ball.x_coordinate = self.player1.right_edge if ball_has_collided_with_paddle1 else self.player2.x_coordinate - ball.length
 
-            # If the ball is ready to split it shouldn't increase in size again
+            self.normal_pong._ball_collisions(ball, self.player1, self.player2)
+
+            # if ball_has_collided and ball.right_edge == 776.0000000001:
+            #     self.increase_ball_size(ball)
+            # This has to be done later because the ball changing size messes up the collisions
             if ball_has_collided:
                 self.increase_ball_size(ball)
+
+            print("BRC1", ball.right_edge, ball.x_coordinate)
 
             if self.ball_is_ready_to_split(ball):
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
 
-            self.normal_pong._ball_collisions(ball, self.player1, self.player2)
+            print("BRC2", ball.right_edge, ball.x_coordinate)
 
         for new_ball in new_balls:
             self.balls.append(new_ball)
@@ -145,14 +157,29 @@ class SplitPong(PongType):
         self.run_ai()
         self.add_needed_objects()
 
-        for ball in self.balls:
+        for x in range(len(self.balls)):
+            ball = self.balls[x]
+            # ball.name = f"ball #{x + 1}"
             self.normal_pong._ball_movement(ball)
+
         self.normal_pong.run_player_movement()
 
         self.ball_collisions()
 
         if self.total_time is not None:
             self.total_time += VelocityCalculator.time
+
+        for ball in self.balls:
+            print("BR", ball.right_edge, ball.x_coordinate)
+
+    def add_needed_objects(self):
+        """Adds all the objects to the History Keeper that need to be there"""
+
+        super().add_needed_objects()
+
+        for ball in self.balls:
+            ball.name = id(ball)
+            HistoryKeeper.add(ball, ball.name, True)
 
     def reset(self):
         """ summary: resets everything necessary after each time someone scores
@@ -236,7 +263,6 @@ class SplitPong(PongType):
 
             self.player2.move_towards_ball(data.y_coordinate, data.time - current_time, False)
             current_time = data.time
-
 
     def run_ai(self):
         """Runs the code that makes the ai to work"""

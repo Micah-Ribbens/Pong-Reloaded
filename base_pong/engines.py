@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from base_pong.ball import Ball
 from base_pong.drawable_objects import GameObject, Ellipse
 from base_pong.engine_utility_classes import CollisionsUtilityFunctions, CollisionData
@@ -44,6 +46,17 @@ class CollisionsFinder:
         collision_data: CollisionData = CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}")
         return collision_data.is_moving_collision and collision_data.is_right_collision
 
+    def make_dimensions_match(prev_object, current_object):
+        """Makes the height and length of the objects match; changes prev_object to match current_object"""
+
+        height_difference = current_object.height - prev_object.height
+        length_difference = current_object.length - prev_object.length
+
+        prev_object.height = current_object.height
+        prev_object.length = current_object.length
+        prev_object.x_coordinate -= length_difference
+        prev_object.y_coordinate -= height_difference
+
     def update_data(object1: GameObject, object2: GameObject):
         """ summary: uses get_x_coordinates() and get_y_coordinates_from_x_coordinate() (methods from GameObject)
             to check if the objects share a point(s) (x_coordinate, y_coordinate)
@@ -58,6 +71,12 @@ class CollisionsFinder:
         prev_object1 = HistoryKeeper.get_last(object1.name)
         prev_object2 = HistoryKeeper.get_last(object2.name)
 
+        # Prevents None Type Error and saving these coordinates because they have to be modified if the length or height of the object has changed
+        prev_object1_dimensions = [prev_object1.x_coordinate, prev_object1.y_coordinate, prev_object1.length, prev_object1.height] if prev_object1 is not None else [0,0,0,0]
+        prev_object2_dimensions = [prev_object2.x_coordinate, prev_object2.y_coordinate, prev_object2.length, prev_object2.height] if prev_object2 is not None else [0,0,0,0]
+
+        object1_has_moved, object2_has_moved = False, False
+
         if prev_object1 is None or prev_object2 is None:
             # There couldn't have been a collision since both either object1 or object2 didn't exist before this, so
             # objects_to_data should reflect that there is no collision
@@ -65,11 +84,14 @@ class CollisionsFinder:
             CollisionsFinder.objects_to_data[f"{id(object1)} {id(object2)}"] = CollisionData(False, False, False, (0, 0), (0, 0))
             return
 
+        else:
+            CollisionsFinder.make_dimensions_match(prev_object1, object1)
+            CollisionsFinder.make_dimensions_match(prev_object2, object2)
+            object1_has_moved = CollisionsFinder.object_has_moved(prev_object1, object1)
+            object2_has_moved = CollisionsFinder.object_has_moved(prev_object2, object2)
         # if CollisionsFinder.objects_to_data.__contains__(f"{id(object1)} {id(object2)}"):
         #     return
 
-        object1_has_moved = CollisionsFinder.object_has_moved(prev_object1, object1)
-        object2_has_moved = CollisionsFinder.object_has_moved(prev_object2, object2)
 
         object1_path = ObjectPath(prev_object1, object1)
         object2_path = ObjectPath(prev_object2, object2)
@@ -108,6 +130,9 @@ class CollisionsFinder:
 
         CollisionsFinder.objects_to_data[f"{id(object1)} {id(object2)}"] = CollisionsUtilityFunctions.get_collision_data(object1, object2, collision_time, is_moving_collision)
         CollisionsFinder.objects_to_data[f"{id(object2)} {id(object1)}"] = CollisionsUtilityFunctions.get_collision_data(object2, object1, collision_time, is_moving_collision)
+
+        prev_object1.x_coordinate, prev_object1.y_coordinate, prev_object1.length, prev_object1.height = prev_object1_dimensions
+        prev_object2.x_coordinate, prev_object2.y_coordinate, prev_object2.length, prev_object2.height = prev_object2_dimensions
 
     def is_height_collision(object1, object2):
         """ summary: finds out if the object's y_coordinates have collided
