@@ -124,24 +124,14 @@ class SplitPong(PongType):
             self.normal_pong.ball_screen_boundary_collisions(ball)
             ball_has_collided = self.ball_has_collided(ball)
 
-            # if ball_has_collided:
-            #     ball.is_moving_right = True if ball_has_collided_with_paddle1 else False
-            #     ball.x_coordinate = self.player1.right_edge if ball_has_collided_with_paddle1 else self.player2.x_coordinate - ball.length
-
             self.normal_pong._ball_collisions(ball, self.player1, self.player2)
 
-            # if ball_has_collided and ball.right_edge == 776.0000000001:
-            #     self.increase_ball_size(ball)
             # This has to be done later because the ball changing size messes up the collisions
             if ball_has_collided:
                 self.increase_ball_size(ball)
 
-            print("BRC1", ball.right_edge, ball.x_coordinate)
-
             if self.ball_is_ready_to_split(ball):
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
-
-            print("BRC2", ball.right_edge, ball.x_coordinate)
 
         for new_ball in new_balls:
             self.balls.append(new_ball)
@@ -157,9 +147,7 @@ class SplitPong(PongType):
         self.run_ai()
         self.add_needed_objects()
 
-        for x in range(len(self.balls)):
-            ball = self.balls[x]
-            # ball.name = f"ball #{x + 1}"
+        for ball in self.balls:
             self.normal_pong._ball_movement(ball)
 
         self.normal_pong.run_player_movement()
@@ -168,9 +156,6 @@ class SplitPong(PongType):
 
         if self.total_time is not None:
             self.total_time += VelocityCalculator.time
-
-        for ball in self.balls:
-            print("BR", ball.right_edge, ball.x_coordinate)
 
     def add_needed_objects(self):
         """Adds all the objects to the History Keeper that need to be there"""

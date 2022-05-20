@@ -61,12 +61,10 @@ class NormalPong(PongType):
         if CollisionsFinder.is_right_collision(ball, paddle):
             ball.x_coordinate = paddle.right_edge
             ball.is_moving_right = True
-            print("RIGHT COLLISION", id(ball), ball.x_coordinate)
 
         elif CollisionsFinder.is_left_collision(ball, paddle):
             ball.x_coordinate = paddle.x_coordinate - ball.length
             ball.is_moving_right = False
-            print("LEFT COLLISION", id(ball), ball.right_edge)
 
         is_collision = CollisionsFinder.is_collision(ball, paddle)
 
@@ -81,7 +79,6 @@ class NormalPong(PongType):
         elif is_collision:
             ball.middle_hit(paddle.power / 10)
 
-        print("BALL AFTER COLLISION", ball.right_edge, ball.x_coordinate)
 
     def ball_movement(self):
         """ summary: does the horizontal and vertical movement of the ball by calling _ball_movement()

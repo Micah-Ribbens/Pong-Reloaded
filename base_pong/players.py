@@ -108,7 +108,7 @@ class AI(Paddle):
         self.difficulty_level = difficulty_level
         self.ball = ball
         self.action = self.default_run
-        # self.height = screen_height * .33
+        self.height = screen_height * .33
 
     def set_pong_type(self, pong_type):
         self.pong_type = pong_type
@@ -190,7 +190,7 @@ class AI(Paddle):
             self.path.add_time_point(Point(self.x_coordinate, new_y_coordinate), end_time)
 
         else:
-            self.path.add_point(Point(self.x_coordinate, new_y_coordinate))
+            self.path.add_time_point(Point(self.x_coordinate, new_y_coordinate), end_time)
 
         # TODO make it stay at this point until end time otherwise things get really messed up ;(
         # print("ADD TIME", additional_time)
@@ -201,7 +201,13 @@ class AI(Paddle):
         max_waiting_time = additional_time - time_to_reach_new_y_coordinate
 
         # The ai should not wait for no more than a certain amount of time before it hits the ball
-        return max_waiting_time if max_waiting_time < .5 else .5
+        return_value = max_waiting_time if max_waiting_time < .5 else .5
+
+        # Also the AI should not wait at all if it does not have any time to get to the ball
+        if max_waiting_time < 0:
+            return_value = 0
+
+        return return_value
 
     def default_run(self):
         """summary: runs the logic for figuring out if the player should hit the ball and the players movement;
