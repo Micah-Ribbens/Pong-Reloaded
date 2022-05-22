@@ -9,7 +9,7 @@ from base_pong.path import Path, VelocityPath
 from base_pong.score_keeper import ScoreKeeper
 from base_pong.utility_classes import Fraction, HistoryKeeper
 from base_pong.velocity_calculator import VelocityCalculator
-from base_pong.utility_functions import change_attributes
+from base_pong.utility_functions import change_attributes, is_random_chance
 from base_pong.important_variables import *
 from base_pong.colors import *
 from pong_types.pong_type import PongType
@@ -34,7 +34,7 @@ class Paddle(GameObject):
         self.y_coordinate = 0
         self.x_coordinate = 0
         self.length = VelocityCalculator.give_measurement(screen_length, 3)
-        self.height = VelocityCalculator.give_measurement(screen_height, 100)
+        self.height = VelocityCalculator.give_measurement(screen_height, 33)
         self.color = white
         self.outline_color = red
 
@@ -73,6 +73,30 @@ class Player(Paddle):
                 self.velocity)
 
 
+class AIDifficulty:
+    """Stores the data necessary for AI difficulty"""
+
+    min_hits = 0
+    hit_percentage = 0
+    difficulty_level = 0
+
+    def __init__(self, difficulty_level, min_hits, hit_percentage):
+        """Initializes the object"""
+
+        self.difficulty_level = difficulty_level
+        self.min_hits, self.hit_percentage = min_hits, hit_percentage
+
+    def should_hit_ball(self, number_of_hits):
+        """returns: boolean; if the AI should hit the ball"""
+
+        return_value = is_random_chance(Fraction(self.hit_percentage, 100))
+
+        if number_of_hits <= self.min_hits:
+            return_value = True
+
+        return return_value
+
+
 class AI(Paddle):
     """A player that isn't an actual person- it will be used for a single player option"""
 
@@ -91,6 +115,12 @@ class AI(Paddle):
     path: VelocityPath = None
     path_is_leftwards = False
     forwards_velocity = VelocityCalculator.give_velocity(400, screen_length)
+    ai_difficulty_levels = [AIDifficulty(1, 2, 15), AIDifficulty(2, 2, 25), AIDifficulty(3, 3, 32), AIDifficulty(4, 5, 35),
+                            AIDifficulty(5, 5, 42), AIDifficulty(6, 5, 50), AIDifficulty(7, 7, 65), AIDifficulty(8, 7, 70),
+                            AIDifficulty(9, 9, 85), AIDifficulty(10, 12, 95)]
+
+    ai_difficulty_level = None
+    difficulty_level_index = 0
 
     ai_path = None
 
@@ -105,7 +135,8 @@ class AI(Paddle):
         """
         super().__init__()
 
-        self.difficulty_level = difficulty_level
+        self.difficulty_level_index = difficulty_level - 1
+        self.ai_difficulty_level = self.ai_difficulty_levels[self.difficulty_level_index]
         self.ball = ball
         self.action = self.default_run
         self.height = screen_height * .33
@@ -253,25 +284,11 @@ class AI(Paddle):
         if hit_ball_this_cycle:
             self.number_of_hits += 1
 
-        # The computer should hit the ball so many times before it misses
-        if hit_ball_this_cycle and self.number_of_hits > self.difficulty_level // 2:
-            self.is_going_to_hit_ball = self.is_random_chance(
-                Fraction(self.difficulty_level, self.difficulty_level + 1))
+        if hit_ball_this_cycle:
+            self.is_going_to_hit_ball = self.ai_difficulty_level.should_hit_ball(self.number_of_hits)
 
     def run(self):
         self.action()
-
-    def is_random_chance(self, probability: Fraction):
-        """ summary: uses the probability for the random chance (for instance if the probability is 7/10 then 7 out of 10
-            times it will return True and the other 3 times it will return False)
-
-            params:
-                probability: Fraction; the probability this function will return True
-
-            returns: boolean; if the random number between 1-probability.denominator is >= probability.numerator
-        """
-
-        return randint(probability.numerator, probability.denominator) <= probability.numerator
 
     def reset(self):
         """Resets all the variables once a player scores"""

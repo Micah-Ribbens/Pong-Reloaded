@@ -19,8 +19,7 @@ class GameScreen(Screen):
     game_paused = False
     ball = Ball()
     player1 = Player()
-    player2 = AI(7, ball)
-    # player2 = Player()
+    player2 = Player()
     player1_score = 0
     player2_score = 0
     pause_button = PauseButton()
@@ -34,7 +33,10 @@ class GameScreen(Screen):
 
         game_window.set_screen_visible(self, True)
         pong_type_class = GameModeSelector.get_pong_type()
-        is_single_player = True
+
+        if GameModeSelector.is_single_player():
+            self.player2 = AI(GameModeSelector.ai_difficulty, self.ball)
+
         self.pong_type = pong_type_class(self.player1, self.player2, self.ball)
         self.ball.reset()
         self.player1_score = 0

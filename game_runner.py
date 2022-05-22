@@ -9,6 +9,8 @@ from gui.game_screen import GameScreen
 from base_pong.important_variables import *
 import time
 from base_pong.velocity_calculator import VelocityCalculator
+from gui_components.drop_down_menu import DropDownMenu
+from base_pong.colors import *
 
 game_screen = GameScreen()
 start_screen = MainScreen(game_screen)

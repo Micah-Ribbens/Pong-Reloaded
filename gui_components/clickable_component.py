@@ -46,6 +46,7 @@ class ClickableComponent(Component):
         if self.click_event.happened_last_cycle():
             is_clicked = False
 
+
         if not area.collidepoint(mouse_x, mouse_y) or not mouse_clicked:
             is_clicked = False
 

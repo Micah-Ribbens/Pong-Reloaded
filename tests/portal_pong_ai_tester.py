@@ -75,8 +75,6 @@ class GravityPongAITester:
 
         test_data: TestData = self.tests[index]
 
-        if test_number == 2:
-            print("NOOOOOOO")
         ball.x_coordinate = test_data.ball_x_coordinate
         ball.y_coordinate = test_data.ball_y_coordinate
         ball.forwards_velocity = test_data.ball_forwards_velocity

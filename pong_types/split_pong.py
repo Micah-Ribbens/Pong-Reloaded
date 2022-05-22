@@ -1,7 +1,7 @@
 from base_pong.equations import Point
 from base_pong.events import Event
 from base_pong.path import VelocityPath
-from base_pong.players import AI
+from base_pong.players import AI, AIDifficulty
 from base_pong.utility_classes import HistoryKeeper
 from base_pong.engines import CollisionsFinder
 from base_pong.ball import Ball
@@ -33,8 +33,16 @@ class SplitPong(PongType):
     base_ball_length = 0
     normal_pong = None
     total_time = None
+    number_of_hits = 0
 
     ai_data = {} # ball to ball data
+
+    # Remember since the player is hitting more than one ball you have to multiply the chances by the number of balls
+    # To get the true chances
+    ai_difficulty_levels = [AIDifficulty(1, 2, 30), AIDifficulty(2, 2, 40), AIDifficulty(3, 3, 50), AIDifficulty(4, 7, 70),
+                            AIDifficulty(5, 9, 75), AIDifficulty(6, 10, 85), AIDifficulty(7, 12, 90), AIDifficulty(8, 15, 95),
+                            AIDifficulty(9, 17, 97), AIDifficulty(10, 22, 99.2)]
+    ai_should_hit_ball = True
 
     def __init__(self, player1, player2, ball):
         """ summary: Initializes with the PongType with the needed objects to run its methods
@@ -73,7 +81,6 @@ class SplitPong(PongType):
 
         ball.length += (self.base_ball_length * .25)
         ball.height += (self.base_ball_length * .25)
-
 
     def ball_is_ready_to_split(self, ball):
         """ summary: finds out if the ball's size is double the size of its base length
@@ -129,6 +136,10 @@ class SplitPong(PongType):
             # This has to be done later because the ball changing size messes up the collisions
             if ball_has_collided:
                 self.increase_ball_size(ball)
+                self.number_of_hits += 1
+
+            if self.ai_should_hit_ball:
+                self.player2.ai_difficulty_level.should_hit_ball(self.number_of_hits)
 
             if self.ball_is_ready_to_split(ball):
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
@@ -146,6 +157,7 @@ class SplitPong(PongType):
     def run(self):
         self.run_ai()
         self.add_needed_objects()
+        self.player2.ai_difficulty_level = self.ai_difficulty_levels[self.player2.difficulty_level_index]
 
         for ball in self.balls:
             self.normal_pong._ball_movement(ball)
@@ -181,6 +193,7 @@ class SplitPong(PongType):
         self.ball.height = self.base_ball_length
         self.ball.forwards_velocity = self.ball.base_forwards_velocity
         self.ai_data = {}
+        self.number_of_hits = 0
 
     def draw_game_objects(self):
         """ summary: draws all the game objects (paddles and ball) onto the screen
@@ -253,12 +266,13 @@ class SplitPong(PongType):
         """Runs the code that makes the ai to work"""
 
         for ball in self.balls:
+            should_add_ball_to_path = ball.is_moving_right and not self.ai_data.__contains__(ball)
             # Meaning the ball has not been added to the ai path and it should be
-            if ball.is_moving_right and not self.ai_data.__contains__(ball):
+            if should_add_ball_to_path and self.ai_should_hit_ball:
                 self.add_ball_to_ai_path(ball)
 
-                if self.total_time is None:
-                    self.total_time = 0
+            elif should_add_ball_to_path and not self.ai_should_hit_ball:
+                self.player2.move_away_from_ball(ball)
 
             if CollisionsFinder.is_collision(ball, self.player2) and self.ai_data.__contains__(ball):
                 self.ai_data.pop(ball)

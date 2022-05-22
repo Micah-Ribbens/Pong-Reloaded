@@ -16,13 +16,14 @@ class GameModeSelector:
     game_mode = "Pick Pong Type"
     # If a pong_type isn't selected from the gui, then the game mode will be Normal Pong
     pong_type = "Split Pong"
-    number_of_players = "2 Player"
+    number_of_players = "Single Player"
 
     all_game_modes = ["Chaos", "Civilized",
                       "Unique Twist", "Random", "Pick Pong Type"]
     all_player_options = ["Single Player", "2 Player"]
     all_pong_types = ["Gravity Pong", "Middle Paddle Pong",
                       "Normal Pong", "Portal Pong", "Shatter Pong", "Split Pong", "Omnidirectional Pong"]
+    ai_difficulty = 0
 
     def get_pong_type_class(pong_type):
         """ summary: turns the pong type into the class the string represents
@@ -87,3 +88,13 @@ class GameModeSelector:
 
         pong_type = get_random_item(pong_types)
         return GameModeSelector.get_pong_type_class(pong_type)
+
+    def is_single_player():
+        """returns: boolean; if it is Single Player"""
+
+        return GameModeSelector.number_of_players == "Single Player"
+
+    def get_ai_difficulty():
+        """returns: int; the difficulty of the AI (a number between 1 and 10)"""
+
+        return GameModeSelector.ai_difficulty

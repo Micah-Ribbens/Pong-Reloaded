@@ -41,6 +41,7 @@ class TextBox(ClickableComponent):
     unexpanded_dimensions = None
     previous_components = None
     is_expanded = False
+    is_centered = False
 
     def dict_keys_to_list(self, dict_keys):
         """ summary: turns dict_keys into a list by iterating over each dict_key and adding it to a list
@@ -111,6 +112,23 @@ class TextBox(ClickableComponent):
         # Needs to be hear, so doesn't draw over text
         GameObject.render(self)
 
+        if not self.is_centered:
+            self.render_text_normally()
+
+        else:
+            render_words(self.text, self.font, x_coordinate=self.x_midpoint, y_coordinate=self.y_midpoint,
+                         text_color=self.text_color, is_center=True, text_background=self.background_color)
+
+        # Removing the cursor so it doesn't repeatedly add a cursor
+        new_text = ""
+        for ch in self.text:
+            if ch != "|":
+                new_text += ch
+        self.text = new_text
+
+    def render_text_normally(self):
+        """Renders the text line by line without centering the text"""
+
         current_index = 0
         current_height = self.y_coordinate
         max_index = len(self.text)
@@ -133,14 +151,6 @@ class TextBox(ClickableComponent):
 
             current_height += self.font_ch_height
             current_index = last_word_index + 1
-
-        # Removing the cursor so it doesn't repeatedly add a cursor
-        new_text = ""
-        for ch in self.text:
-            if ch != "|":
-                new_text += ch
-        self.text = new_text
-
 
     def get_words_and_their_indexes(self):
         """ summary: finds the words and locations of the text box's text

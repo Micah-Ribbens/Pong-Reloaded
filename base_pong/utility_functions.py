@@ -1,8 +1,10 @@
 from math import sqrt
+from random import randint
 
 import pygame
 
 from base_pong.important_variables import game_window, screen_length, screen_height, background_color
+from base_pong.utility_classes import Fraction
 
 
 def change_attributes(modified_object, object, attributes):
@@ -55,7 +57,7 @@ def render_words(message, font, **kwargs):
         params:
             x_coordinate: int; the x_coordinate of the text
             y_coordinate: int; the y_coordinate of the text
-            text_is_centered: boolean; the x and y coordinates are the center of the text (if True) otherwise start of text
+            is_center: boolean; the x and y coordinates are the center of the text (if True) otherwise start of text
             is_center_of_screen: boolean; the text is in the center of the screen
             text_color (optional): tuple; the (Red, Green, Blue) values of text color; is (255, 255, 255) if not specified
             text_background (optional) tuple; the (Red, Green, Blue) values of the background of the text; is background_color if not specified
@@ -317,5 +319,18 @@ def get_min_list_item(items):
             min_item = item
 
     return min_item
+
+
+def is_random_chance(probability: Fraction):
+    """ summary: uses the probability for the random chance (for instance if the probability is 7/10 then 7 out of 10
+        times it will return True and the other 3 times it will return False)
+
+        params:
+            probability: Fraction; the probability this function will return True
+
+        returns: boolean; if the random number between 1-probability.denominator is >= probability.numerator
+    """
+
+    return randint(probability.numerator, probability.denominator) <= probability.numerator
 
 

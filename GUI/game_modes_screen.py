@@ -1,6 +1,8 @@
+from base_pong.dimensions import Dimensions
 from base_pong.important_variables import screen_length, screen_height
 from base_pong.utility_functions import percentage_to_number
 from gui_components.drop_down_menu import DropDownMenu
+from gui_components.grid import Grid
 from gui_components.sub_screen import SubScreen
 from base_pong.colors import *
 from pong_types.game_mode_selector import GameModeSelector
@@ -10,15 +12,17 @@ class GameModesScreen(SubScreen):
     """The screen that allows the user to select the game mode"""
 
     pong_type_menu = DropDownMenu(
-        "Pong Types", GameModeSelector.all_pong_types, white, blue, 15, GameModeSelector.all_pong_types.index(GameModeSelector.pong_type))
+        "Pong Types", GameModeSelector.all_pong_types, white, blue, 20, GameModeSelector.all_pong_types.index(GameModeSelector.pong_type))
     player_menu = DropDownMenu(
-        "Number Of Players", GameModeSelector.all_player_options, white, blue, 15, GameModeSelector.all_player_options.index(GameModeSelector.number_of_players))
+        "Number Of Players", GameModeSelector.all_player_options, white, blue, 20, GameModeSelector.all_player_options.index(GameModeSelector.number_of_players))
     game_mode_menu = DropDownMenu(
-        "Game Modes", GameModeSelector.all_game_modes, white, blue, 15, GameModeSelector.all_game_modes.index(GameModeSelector.game_mode))
-    components = [game_mode_menu, player_menu, pong_type_menu]
+        "Game Modes", GameModeSelector.all_game_modes, white, blue, 20, GameModeSelector.all_game_modes.index(GameModeSelector.game_mode))
+    ai_difficulty_level_menu = DropDownMenu("AI Difficulty", ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], white, blue, 20, 4)
+    components = [game_mode_menu, player_menu, pong_type_menu, ai_difficulty_level_menu]
     length_used_up = 0
     height_used_up = 0
     name = "Game Modes"
+    most_items = 0
 
     def __init__(self, length_used_up, height_used_up):
         """ summary: initializes the object
@@ -30,17 +34,14 @@ class GameModesScreen(SubScreen):
             returns: None
         """
 
-        menu_lengths = percentage_to_number(30, screen_length)
-        menu_heights = percentage_to_number(6, screen_height)
-        buffer_between_menus = percentage_to_number(5, screen_length)
-
-        self.game_mode_menu.number_set_dimensions(length_used_up, height_used_up, menu_lengths, menu_heights)
-        self.player_menu.number_set_dimensions(self.game_mode_menu.right_edge + buffer_between_menus, height_used_up, menu_lengths, menu_heights)
-        self.pong_type_menu.number_set_dimensions(self.player_menu.right_edge + buffer_between_menus, height_used_up,menu_lengths, menu_heights)
-
         GameModeSelector.pong_type = self.pong_type_menu.selected_item
         GameModeSelector.game_mode = self.game_mode_menu.selected_item
-        
+        self.height_used_up = height_used_up
+
+        for menu in self.components:
+            if len(menu.items) > self.most_items:
+                self.most_items = len(menu.items)
+
     def run(self):
         """ summary: runs all the necessary logic in order for the game modes screen to work
             params: None
@@ -51,13 +52,30 @@ class GameModesScreen(SubScreen):
 
         if self.game_mode_menu.get_selected_item() == "Pick Pong Type":
             GameModeSelector.pong_type = self.pong_type_menu.get_selected_item()
+
+        if self.player_menu.get_selected_item() == "Single Player":
+            GameModeSelector.ai_difficulty = int(self.ai_difficulty_level_menu.get_selected_item())
         
+        items = [self.game_mode_menu, self.player_menu]
+
         # The user gets to choose between certain game modes or choose a specific Pong Type like "Gravity Pong"
         # The Pong Types should only be displayed if they want to pick a specific Pong Type
-        if self.game_mode_menu.get_selected_item() == "Pick Pong Type":
-            self.pong_type_menu.is_visible = True
+        items += [self.pong_type_menu] if self.game_mode_menu.get_selected_item() == "Pick Pong Type" else []
 
-        else:
-            self.pong_type_menu.is_visible = False
+        is_single_player = self.player_menu.get_selected_item() == "Single Player"
+        items += [self.ai_difficulty_level_menu] if is_single_player else []
 
-        
+        # Only the components that are put into the grid should be rendered
+        for component in self.components:
+            if not items.__contains__(component):
+                component.is_visible = False
+
+            else:
+                component.is_visible = True
+
+            component.set_item_height(self.most_items)
+
+        grid = Grid(Dimensions(0, self.height_used_up, screen_length, screen_height - self.height_used_up), 2, None, True)
+        grid.turn_into_grid(items, None, None)
+
+        GameModeSelector.number_of_players = "Single Player" if is_single_player else "2 Player"
