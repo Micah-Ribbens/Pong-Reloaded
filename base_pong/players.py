@@ -94,7 +94,9 @@ class AIDifficulty:
         if number_of_hits <= self.min_hits:
             return_value = True
 
-        return return_value
+        # return return_value
+        # TODO fix me
+        return True
 
 
 class AI(Paddle):
@@ -139,7 +141,6 @@ class AI(Paddle):
         self.ai_difficulty_level = self.ai_difficulty_levels[self.difficulty_level_index]
         self.ball = ball
         self.action = self.default_run
-        self.height = screen_height * .33
 
     def set_pong_type(self, pong_type):
         self.pong_type = pong_type

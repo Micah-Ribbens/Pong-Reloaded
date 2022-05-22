@@ -36,6 +36,9 @@ class GameScreen(Screen):
 
         if GameModeSelector.is_single_player():
             self.player2 = AI(GameModeSelector.ai_difficulty, self.ball)
+            self.player2.reset()
+            self.player2.set_pong_type(self.pong_type)
+            self.components = [self.player1, self.player2, self.ball, self.pause_button]
 
         self.pong_type = pong_type_class(self.player1, self.player2, self.ball)
         self.ball.reset()
@@ -57,9 +60,6 @@ class GameScreen(Screen):
         self.pong_type.reset()
 
         self.player2.y_coordinate = screen_height - self.player2.height
-        if type(self.player2) == AI:
-            self.player2.reset()
-            self.player2.set_pong_type(self.pong_type)
 
     def run(self):
         """ summary: runs all the code for the game objects and just general game stuff

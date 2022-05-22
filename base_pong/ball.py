@@ -13,7 +13,7 @@ class Ball(Ellipse):
     is_moving_down = True
     # TODO change me back to 300
     base_forwards_velocity = VelocityCalculator.give_velocity(
-        screen_length, 600)
+        screen_length, 350)
     forwards_velocity = base_forwards_velocity
     # Forwards and upwards velocity start out as the same number
     upwards_velocity = base_forwards_velocity
