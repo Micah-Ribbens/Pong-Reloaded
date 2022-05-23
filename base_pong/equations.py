@@ -142,26 +142,27 @@ class LineSegment:
             return_value = x_and_y_are_on_line and is_within_range(self.get_y_coordinate(point.x_coordinate), point.y_coordinate, amount_can_be_off_by)
         return return_value
 
-    def get_line_segment(game_object, objects_velocity, is_increasing, is_horizontal):
+    def get_line_segment(game_object, objects_velocity, is_using_larger_coordinate, is_horizontal):
         """ summary: None
 
             params:
                 game_object: GameObject; the object that is moving
                 objects_velocity: double; the velocity of the game_object
-                is_increasing: boolean; whether the game_object's coordinates are increasing
+                is_using_larger_coordinate: boolean; whether coordinates that are being used should be the larger coordinate
                 is_horizontal; boolean; whether the line is based on the game_object's x coordinate
 
             returns: LineSegment; a line that is uses time as the x axis and the coordinate as the y axis
         """
 
-        start_coordinate = game_object.right_edge if is_increasing else game_object.x_coordinate
+        start_coordinate = game_object.right_edge if is_using_larger_coordinate else game_object.x_coordinate
+
         if not is_horizontal:
-            start_coordinate = game_object.bottom if is_increasing else game_object.y_coordinate
+            start_coordinate = game_object.bottom if is_using_larger_coordinate else game_object.y_coordinate
 
         # The time is the x axis and the coordinate is the y axis
         start_point = Point(0, start_coordinate)
         total_time = 10
-        displacement = total_time * objects_velocity if is_increasing else -objects_velocity * total_time
+        displacement = total_time * objects_velocity if is_using_larger_coordinate else -objects_velocity * total_time
         end_point = Point(total_time, start_coordinate + displacement)
 
         return LineSegment(start_point, end_point)

@@ -27,6 +27,7 @@ class AIData:
     def __str__(self):
         return f"time {self.time} y coordinate {self.y_coordinate}"
 
+
 class SplitPong(PongType):
     """Pong where the balls size increases until it doubles in size and after that it splits"""
     balls = []

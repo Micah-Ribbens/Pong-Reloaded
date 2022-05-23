@@ -34,7 +34,7 @@ class Paddle(GameObject):
         self.y_coordinate = 0
         self.x_coordinate = 0
         self.length = VelocityCalculator.give_measurement(screen_length, 3)
-        self.height = VelocityCalculator.give_measurement(screen_height, 100)
+        self.height = VelocityCalculator.give_measurement(screen_height, 33)
         self.color = white
         self.outline_color = red
 
@@ -139,7 +139,6 @@ class AI(Paddle):
         self.ai_difficulty_level = self.ai_difficulty_levels[self.difficulty_level_index]
         self.ball = ball
         self.action = self.default_run
-        self.height = screen_height * .33
 
     def set_pong_type(self, pong_type):
         self.pong_type = pong_type

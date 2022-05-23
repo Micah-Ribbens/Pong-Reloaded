@@ -6,7 +6,7 @@ from base_pong.equations import Point, LineSegment
 from base_pong.events import Event
 from base_pong.important_variables import screen_height, screen_length
 from base_pong.path import VelocityPath, Path
-from base_pong.players import Player
+from base_pong.players import Player, AI
 from base_pong.utility_classes import HistoryKeeper, StateChange
 from base_pong.utility_functions import get_leftmost_object, get_rightmost_object, get_displacement, min_value
 from base_pong.velocity_calculator import VelocityCalculator
@@ -15,11 +15,11 @@ from pong_types.normal_pong import NormalPong
 
 # TODO fix code so you don't have to assume player2 is the ai
 # TODO write the code so it takes into account both vertical and horizontal time
-# TODO get back to OmnidirectionalPong AI; start with someone a bit easier
 class OmnidirectionalPong(NormalPong):
     """Pong where the player can move 4 directions"""''
     # States for the AI
     should_stop = False
+
     class States:
         GOING_TOWARDS_GOAL = "GOING_TOWARDS_GOAL"
         INTERCEPTING_BALL = "INTERCEPTING_BALL"
@@ -42,6 +42,7 @@ class OmnidirectionalPong(NormalPong):
 
     player_who_hit_ball_key = "player who hit ball"
     player_path = None
+    is_top_or_bottom_collision = False
 
     def __init__(self, player1, player2, ball):
         """ summary: Initializes the PongType with the needed objects to run its methods
@@ -59,41 +60,42 @@ class OmnidirectionalPong(NormalPong):
         self.player1.can_move_left, self.player2.can_move_left = False, False
         self.player1.can_move_right, self.player2.can_move_right = False, False
 
-        # TODO change back
-        # self.player2.action = self.run_ai
-        self.player2 = self.player2
+        if type(self.player2) == AI:
+            self.player2.action = self.run_ai
 
     def set_player_coordinates(self):
         """Sets the players coordinates and their ability to move after a collision"""
+
         player1_xy, player2_xy = CollisionsFinder.get_objects_xy(self.player1, self.player2)
+        is_top_or_bottom_collision = self.is_top_or_bottom_collision
         self.player1.x_coordinate, self.player1.y_coordinate = player1_xy.x_coordinate, player1_xy.y_coordinate
         self.player2.x_coordinate, self.player2.y_coordinate = player2_xy.x_coordinate, player2_xy.y_coordinate
 
         # Horizontal Movement
-        # if not is_top_or_bottom_collision:
-        self.get_leftmost_player().can_move_right = False
-        self.get_rightmost_player().can_move_left = False
+        if not is_top_or_bottom_collision:
+            self.get_leftmost_player().can_move_right = False
+            self.get_rightmost_player().can_move_left = False
 
-        if self.get_leftmost_player() == self.player2:
+        if self.get_leftmost_player() == self.player2 and not is_top_or_bottom_collision:
             self.player2.x_coordinate = self.player1.x_coordinate - self.player2.length
 
-        else:
+        elif not is_top_or_bottom_collision:
             self.player2.x_coordinate = self.player1.right_edge
 
         # Vertical Movement
-        # top_player = CollisionsUtilityFunctions.get_topmost_object(self.player1, self.player2)
-        # bottom_player = CollisionsUtilityFunctions.get_bottommost_object(self.player1, self.player2)
-        # if is_top_or_bottom_collision:
-        #     top_player.can_move_down = False
-        #     bottom_player.can_move_up = False
-        #     bottom_player.y_coordinate = top_player.bottom
+        top_player = CollisionsUtilityFunctions.get_topmost_object(self.player1, self.player2)
+        bottom_player = CollisionsUtilityFunctions.get_bottommost_object(self.player1, self.player2)
+
+        if is_top_or_bottom_collision:
+            bottom_player.can_move_up = False
+            top_player.can_move_down = False
+            bottom_player.y_coordinate = top_player.bottom
+
     def run(self):
         """ summary: runs all the code that is necessary for this pong type
             params: None
             returns: None
         """
-
-        # TODO ALWAYS have collisions after movement; very very important
 
         # ORDER MATTERS! This must go first
         if self.ball.can_move:
@@ -107,9 +109,8 @@ class OmnidirectionalPong(NormalPong):
             self.player2.movement()
         else:
             self.player2.run()
-        if not CollisionsFinder.sim_collision(self.player1, self.player2) and CollisionsFinder.is_collision(self.player1, self.player2):
-            CollisionsFinder.is_collision(self.player1, self.player2)
 
+        self.set_is_top_or_bottom_collision
         self.set_player_horizontal_movements(self.player2)
         self.set_player_horizontal_movements(self.player1)
         self.run_player_boundaries(self.player2)
@@ -121,6 +122,21 @@ class OmnidirectionalPong(NormalPong):
         self.ball_collisions(self.player2)
         self.paddle_collisions()
         self.run_ball_sandwiching()
+
+    def set_is_top_or_bottom_collision(self):
+        """Stores whether the players have collided with each other's top or bottom in a variable, which can be accessed by the code"""
+
+        is_moving_top_or_bottom_collision = (CollisionsFinder.is_a_top_collision(self.player1, self.player2)
+                                             or CollisionsFinder.is_a_bottom_collision(self.player1, self.player2))
+
+        players_top_and_bottoms_are_touching = (self.player1.bottom == self.player2.y_coordinate or
+                                                self.player2.bottom == self.player1.y_coordinate)
+
+        if is_moving_top_or_bottom_collision or players_top_and_bottoms_are_touching:
+            self.is_top_or_bottom_collision = True
+
+        else:
+            self.is_top_or_bottom_collision = False
 
     def paddle_collisions(self):
         """ summary: runs all the collisions between paddles
@@ -234,11 +250,15 @@ class OmnidirectionalPong(NormalPong):
 
         within_screen_bottom = player.bottom < screen_height
         within_screen_top = player.y_coordinate > 0
+        other_player = self.player1 if player == self.player2 else self.player2
 
-        if within_screen_top:
+        player_is_on_top = CollisionsUtilityFunctions.get_topmost_object(player, other_player) == player
+
+        # If the players have collided with one another's top or bottom they should not be able to keep moving that direction
+        if within_screen_top and not (self.is_top_or_bottom_collision and not player_is_on_top):
             player.can_move_up = True
 
-        if within_screen_bottom:
+        if within_screen_bottom and not (self.is_top_or_bottom_collision and player_is_on_top):
             player.can_move_down = True
 
     def ball_is_sandwiched(self):
@@ -344,7 +364,7 @@ class OmnidirectionalPong(NormalPong):
 
         velocity_difference = self.player2.velocity - intercepted_object_velocity
 
-        if velocity_difference <= 0:
+        if velocity_difference <= 0 and distance_needed > 0:
             return_value = False
 
         else:
@@ -412,6 +432,7 @@ class OmnidirectionalPong(NormalPong):
             self.player_path.add_point(Point(screen_length / 2, screen_height / 2))
 
         self.current_state = self.next_state
+
     def get_important_times(self, ball_path):
         """Finds and returns the important times for the players path; important is being defined by points where a major
         change happens. The major changes are transitioning into the bottom of the screen and transitioning out of the bottom of the screen"""
@@ -440,9 +461,10 @@ class OmnidirectionalPong(NormalPong):
 
     def get_horizontal_time(self, intercepted_objects_velocity, ball, is_moving_rightwards, player2):
         """returns: double; the time it will take for player2 to reach the ball horizontally"""
-        intercept_object_x_line = LineSegment.get_line_segment(ball, intercepted_objects_velocity, is_moving_rightwards, True)
+
+        intercept_object_x_line = LineSegment.get_line_segment(ball, intercepted_objects_velocity, True, True)
         path_is_rightwards = get_leftmost_object(ball, player2) == player2
-        ai_x_line = LineSegment.get_line_segment(player2, player2.velocity, path_is_rightwards, True)
+        ai_x_line = LineSegment.get_line_segment(player2, player2.velocity, False, True)
 
         if CollisionsFinder.get_line_collision_point(intercept_object_x_line, ai_x_line) is None:
             print("NOO HOR FAILED")
@@ -465,6 +487,7 @@ class OmnidirectionalPong(NormalPong):
         ball_end_x_coordinate = screen_length - ball.length if is_moving_rightwards else 0
         total_time = abs(ball_end_x_coordinate - ball.x_coordinate) / ball.forwards_velocity
         ball_path = self.get_ball_y_coordinates(total_time)
+
         # Two possible cases; the ai moves down to collide with the ball or up to collide the ball (the quicker one will be used)
         ai_y_line1 = LineSegment.get_line_segment(player2, player2.velocity, True, False)
         ai_y_line2 = LineSegment.get_line_segment(player2, player2.velocity, False, False)
