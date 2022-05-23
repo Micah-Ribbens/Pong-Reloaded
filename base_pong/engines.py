@@ -112,19 +112,13 @@ class CollisionsFinder:
             # 2 cases: one for the x coordinate path and the other for the right edge path
             collision_time = CollisionsUtilityFunctions.get_moving_collision_time(moving_object_path, stationary_object)
 
-            objects_were_touching = (prev_object1.x_coordinate == prev_object2.right_edge or
-                                     prev_object2.x_coordinate == prev_object1.right_edge)
-
             # If they started out touching then it was not a moving collision; they were already collided beforehand
-            if objects_were_touching:
+            if CollisionsFinder.objects_are_touching(prev_object1, prev_object2):
                 collision_time = -1
 
             is_moving_collision = collision_time != -1
 
-        # The other one's don't take into account if the objects are touching each other
-        objects_are_touching = ((object1.x_coordinate == object2.right_edge or object2.x_coordinate == object1.right_edge)
-                                and CollisionsFinder.is_height_collision(object1, object2))
-        if objects_are_touching:
+        if CollisionsFinder.objects_are_touching(object1, object2):
             # The last case where neither object has moved and is checking if the objects are touching each other
             collision_time = 0
 
@@ -133,6 +127,17 @@ class CollisionsFinder:
 
         prev_object1.x_coordinate, prev_object1.y_coordinate, prev_object1.length, prev_object1.height = prev_object1_dimensions
         prev_object2.x_coordinate, prev_object2.y_coordinate, prev_object2.length, prev_object2.height = prev_object2_dimensions
+
+    def objects_are_touching(object1, object2):
+        """returns: booolean; if the objects are touching"""
+
+        objects_were_touching_horizontally = (object1.x_coordinate == object2.right_edge or
+                                              object2.x_coordinate == object1.right_edge) and CollisionsFinder.is_height_collision(object1, object2)
+        objects_were_touching_vertically = (object1.y_coordinate == object2.bottom or
+                                            object2.y_coordinate == object1.bottom) and CollisionsFinder.is_length_collision(object1, object2)
+
+        return objects_were_touching_horizontally or objects_were_touching_vertically
+
 
     def is_height_collision(object1, object2):
         """ summary: finds out if the object's y_coordinates have collided

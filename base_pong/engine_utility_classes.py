@@ -115,10 +115,10 @@ class CollisionsUtilityFunctions:
             if y_and_bottom_equal:
                 return_value = x_range.start if x_range.start < return_value else return_value
 
-            if x_and_right_edge_equal:
-                return_value = y_range.start if y_range.start < return_value else return_value
-
             for y_range in y_ranges:
+                if x_and_right_edge_equal:
+                    return_value = y_range.start if y_range.start < return_value else return_value
+
                 smaller_range = x_range if x_range.is_less_than(y_range) else y_range
                 bigger_range = x_range if not x_range.is_less_than(y_range) else y_range
                 # Meaning that the ranges share a similar point

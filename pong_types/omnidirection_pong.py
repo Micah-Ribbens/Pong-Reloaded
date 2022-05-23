@@ -66,6 +66,7 @@ class OmnidirectionalPong(NormalPong):
     def set_player_coordinates(self):
         """Sets the players coordinates and their ability to move after a collision"""
 
+        CollisionsFinder.is_moving_collision(self.player1, self.player2)
         player1_xy, player2_xy = CollisionsFinder.get_objects_xy(self.player1, self.player2)
         is_top_or_bottom_collision = self.is_top_or_bottom_collision
         self.player1.x_coordinate, self.player1.y_coordinate = player1_xy.x_coordinate, player1_xy.y_coordinate
@@ -89,7 +90,10 @@ class OmnidirectionalPong(NormalPong):
         if is_top_or_bottom_collision:
             bottom_player.can_move_up = False
             top_player.can_move_down = False
+
+            # Shouldn't have to do this, but a really weird float not being precise error is occuring
             bottom_player.y_coordinate = top_player.bottom
+            top_player.y_coordinate = bottom_player.y_coordinate - top_player.height
 
     def run(self):
         """ summary: runs all the code that is necessary for this pong type
@@ -110,7 +114,7 @@ class OmnidirectionalPong(NormalPong):
         else:
             self.player2.run()
 
-        self.set_is_top_or_bottom_collision
+        self.set_is_top_or_bottom_collision()
         self.set_player_horizontal_movements(self.player2)
         self.set_player_horizontal_movements(self.player1)
         self.run_player_boundaries(self.player2)
@@ -129,14 +133,11 @@ class OmnidirectionalPong(NormalPong):
         is_moving_top_or_bottom_collision = (CollisionsFinder.is_a_top_collision(self.player1, self.player2)
                                              or CollisionsFinder.is_a_bottom_collision(self.player1, self.player2))
 
-        players_top_and_bottoms_are_touching = (self.player1.bottom == self.player2.y_coordinate or
-                                                self.player2.bottom == self.player1.y_coordinate)
+        # Prevents a weird rounding error by casting them to integers
+        players_top_and_bottoms_are_touching = (int(self.player1.bottom) == int(self.player2.y_coordinate) or
+                                                int(self.player2.bottom) == int(self.player1.y_coordinate))
 
-        if is_moving_top_or_bottom_collision or players_top_and_bottoms_are_touching:
-            self.is_top_or_bottom_collision = True
-
-        else:
-            self.is_top_or_bottom_collision = False
+        self.is_top_or_bottom_collision = is_moving_top_or_bottom_collision or players_top_and_bottoms_are_touching
 
     def paddle_collisions(self):
         """ summary: runs all the collisions between paddles
