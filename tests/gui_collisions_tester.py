@@ -170,7 +170,6 @@ class CollisionsFinderTests:
 
         got = CollisionsFinder.is_collision(object1, object2)
         if got != want:
-            print("CASE FAILED RECTANGLE", f"{case_type}: {test_case_number}")
             CollisionsFinder.is_collision(object1, object2)
             failed_cases.append(FailedCase(want, got, case_type, test_case_number,
                                            ObjectPath(prev_object1, object1), ObjectPath(prev_object2, object2)))

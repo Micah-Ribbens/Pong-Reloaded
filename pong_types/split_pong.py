@@ -39,7 +39,7 @@ class SplitPong(PongType):
 
     # Remember since the player is hitting more than one ball you have to multiply the chances by the number of balls
     # To get the true chances
-    ai_difficulty_levels = [AIDifficulty(1, 2, 30), AIDifficulty(2, 2, 40), AIDifficulty(3, 3, 50), AIDifficulty(4, 7, 70),
+    ai_difficulty_levels = [AIDifficulty(1, 1, 15), AIDifficulty(2, 2, 30), AIDifficulty(3, 4, 50), AIDifficulty(4, 7, 70),
                             AIDifficulty(5, 9, 75), AIDifficulty(6, 10, 85), AIDifficulty(7, 12, 90), AIDifficulty(8, 15, 95),
                             AIDifficulty(9, 17, 97), AIDifficulty(10, 22, 99.2)]
     ai_should_hit_ball = True
@@ -138,8 +138,9 @@ class SplitPong(PongType):
                 self.increase_ball_size(ball)
                 self.number_of_hits += 1
 
-            if self.ai_should_hit_ball:
-                self.player2.ai_difficulty_level.should_hit_ball(self.number_of_hits)
+            if self.ai_should_hit_ball and ball_has_collided:
+                self.ai_should_hit_ball = self.player2.ai_difficulty_level.should_hit_ball(self.number_of_hits)
+                print(self.ai_should_hit_ball)
 
             if self.ball_is_ready_to_split(ball):
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
@@ -161,6 +162,7 @@ class SplitPong(PongType):
 
         for ball in self.balls:
             self.normal_pong._ball_movement(ball)
+
 
         self.normal_pong.run_player_movement()
 
@@ -245,6 +247,7 @@ class SplitPong(PongType):
         ball_path, unused, times = self._get_ball_path_data(ball.y_coordinate, ball.x_coordinate, self.player2.x_coordinate - ball.length, ball.is_moving_down, ball.forwards_velocity)
 
         time_to_ai = times[len(times) - 1]
+
         end_y_coordinate = ball_path.get_end_points()[0].y_coordinate
 
         self.ai_data[ball] = AIData(time_to_ai, end_y_coordinate)
@@ -255,6 +258,11 @@ class SplitPong(PongType):
         self.player2.path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [], self.player2.velocity)
 
         current_time = 0
+
+        times = []
+
+        for key in sorted_ai_data_keys:
+            times.append(self.ai_data.get(key).time)
 
         for key in sorted_ai_data_keys:
             data = self.ai_data.get(key)
@@ -267,18 +275,23 @@ class SplitPong(PongType):
 
         for ball in self.balls:
             should_add_ball_to_path = ball.is_moving_right and not self.ai_data.__contains__(ball)
+
             # Meaning the ball has not been added to the ai path and it should be
             if should_add_ball_to_path and self.ai_should_hit_ball:
                 self.add_ball_to_ai_path(ball)
 
             elif should_add_ball_to_path and not self.ai_should_hit_ball:
-                self.player2.move_away_from_ball(ball)
+                ball_path, unused, times = self._get_ball_path_data(ball.y_coordinate, ball.x_coordinate, self.player2.x_coordinate - ball.length, ball.is_moving_down, ball.forwards_velocity)
+                self.player2.move_away_from_ball(ball_path.get_end_points()[0].y_coordinate, times[len(times) - 1])
+                self.ai_data[ball] = AIData(times[len(times) - 1], ball_path.get_end_points()[0].y_coordinate)
 
-            if CollisionsFinder.is_collision(ball, self.player2) and self.ai_data.__contains__(ball):
+            # Meaning it hit the AI and is not traveling towards it anymore
+            if not ball.is_moving_right and self.ai_data.__contains__(ball):
                 self.ai_data.pop(ball)
 
         for data in self.ai_data.values():
             data.time -= VelocityCalculator.time
+
         self.player2.run_hitting_balls_logic()
 
 

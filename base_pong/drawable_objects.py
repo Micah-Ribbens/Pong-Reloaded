@@ -229,7 +229,6 @@ class Ellipse(GameObject):
             y_min = sqrt(right_side) + k
             y_max = -sqrt(right_side) + k
         except:
-            print("BADDDD")
             return [0, 0]
 
         return_value = [y_max, y_min]

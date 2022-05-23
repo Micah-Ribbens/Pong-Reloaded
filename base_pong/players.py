@@ -34,7 +34,7 @@ class Paddle(GameObject):
         self.y_coordinate = 0
         self.x_coordinate = 0
         self.length = VelocityCalculator.give_measurement(screen_length, 3)
-        self.height = VelocityCalculator.give_measurement(screen_height, 33)
+        self.height = VelocityCalculator.give_measurement(screen_height, 100)
         self.color = white
         self.outline_color = red
 
@@ -89,15 +89,13 @@ class AIDifficulty:
     def should_hit_ball(self, number_of_hits):
         """returns: boolean; if the AI should hit the ball"""
 
-        return_value = is_random_chance(Fraction(self.hit_percentage, 100))
+        # Allows for their to be one decimal for hit percentage
+        return_value = is_random_chance(Fraction(self.hit_percentage * 10, 1000))
 
         if number_of_hits <= self.min_hits:
             return_value = True
 
-        # return return_value
-        # TODO fix me
-        return True
-
+        return return_value
 
 class AI(Paddle):
     """A player that isn't an actual person- it will be used for a single player option"""
@@ -141,6 +139,7 @@ class AI(Paddle):
         self.ai_difficulty_level = self.ai_difficulty_levels[self.difficulty_level_index]
         self.ball = ball
         self.action = self.default_run
+        self.height = screen_height * .33
 
     def set_pong_type(self, pong_type):
         self.pong_type = pong_type
@@ -211,7 +210,6 @@ class AI(Paddle):
         waiting_time = self.get_waiting_time(additional_time, time_to_reach_new_y_coordinate)
         end_time = self.path.last_end_time + additional_time
         time_should_start = end_time - waiting_time - time_to_reach_new_y_coordinate
-        # if time_to_reach_new_y_coordinate > additional_time:
 
         # If the ball is coming too quick it should not start moving in negative time
         if waiting_time > 0:
@@ -223,9 +221,6 @@ class AI(Paddle):
 
         else:
             self.path.add_time_point(Point(self.x_coordinate, new_y_coordinate), end_time)
-
-        # TODO make it stay at this point until end time otherwise things get really messed up ;(
-        # print("ADD TIME", additional_time)
 
     def get_waiting_time(self, additional_time, time_to_reach_new_y_coordinate):
         """returns: double; the time the ai should wait before hitting the ball"""
