@@ -91,7 +91,6 @@ class Path(Component):
         return [y_coordinate_point, bottom_point]
 
 
-
     def get_y_coordinate(self, x_coordinate):
         """returns: double; the y_coordinate at that x_coordinate"""
 
@@ -130,6 +129,27 @@ class Path(Component):
     def run(self):
         pass
 
+    def get_coordinates(self, times, line_type, coordinate_type):
+        """summary: finds the coordinates of the specified type using the line_type and coordinate_type
+
+            params:
+                times: Double[]; the times at each transition of the path
+                line_type: String; either 'y_coordinate_line' or 'bottom_line'
+                coordinate_type: String; either 'x_coordinate' or 'y_coordinate'
+
+            returns: SimplePath; the coordinates in relation to time
+        """
+
+        return_value = SimplePath()
+        for x in range(len(self.path_lines)):
+            line = self.path_lines[x].__dict__[line_type]
+            time = times[x]
+
+            return_value.add_point(time, line.start_point.__dict__[coordinate_type])
+
+        last_line = self.path_lines[len(self.path_lines) - 1].__dict__[line_type]
+        last_time = times[len(times) - 1]
+        return_value.add_point(last_time, last_line.end_point.__dict__[coordinate_type])
 
 class SimplePath:
     """A simple path that doesn't care about length or height of the object"""
@@ -142,7 +162,6 @@ class SimplePath:
 
         self.last_point = start_point
         self.lines = []
-
 
     def add_point(self, point):
         """Adds the point to this path"""
@@ -188,8 +207,6 @@ class SimplePath:
             string += f"{self.lines[x]} || "
 
         return string
-
-
 
 class VelocityPath(Path):
     """A path that takes into account velocity"""

@@ -464,7 +464,6 @@ class OmnidirectionalPong(NormalPong):
         """returns: double; the time it will take for player2 to reach the ball horizontally"""
 
         intercept_object_x_line = LineSegment.get_line_segment(ball, intercepted_objects_velocity, True, True)
-        path_is_rightwards = get_leftmost_object(ball, player2) == player2
         ai_x_line = LineSegment.get_line_segment(player2, player2.velocity, False, True)
 
         if CollisionsFinder.get_line_collision_point(intercept_object_x_line, ai_x_line) is None:
@@ -485,32 +484,52 @@ class OmnidirectionalPong(NormalPong):
 
         horizontal_time = self.get_horizontal_time(intercepted_objects_velocity, ball, is_moving_rightwards, player2)
 
-        ball_end_x_coordinate = screen_length - ball.length if is_moving_rightwards else 0
-        total_time = abs(ball_end_x_coordinate - ball.x_coordinate) / ball.forwards_velocity
-        ball_path = self.get_ball_y_coordinates(total_time)
-
-        # Two possible cases; the ai moves down to collide with the ball or up to collide the ball (the quicker one will be used)
-        ai_y_line1 = LineSegment.get_line_segment(player2, player2.velocity, True, False)
-        ai_y_line2 = LineSegment.get_line_segment(player2, player2.velocity, False, False)
-
-        vertical_time1 = CollisionsFinder.get_path_line_collision(ball_path, ai_y_line1)
-        vertical_time2 = CollisionsFinder.get_path_line_collision(ball_path, ai_y_line2 )
-
         vertical_time = None
+
         # If they are both None then that means the ai doesn't have to move upwards
-        if vertical_time1 is None and vertical_time2 is None:
-            vertical_time = 0
-
-        elif vertical_time1 is None:
-            vertical_time = vertical_time2.x_coordinate
-
-        elif vertical_time2 is None:
-            vertical_time = vertical_time1.x_coordinate
-
-        else:
-            vertical_time = min_value(vertical_time1, vertical_time2)
+        # if vertical_time_point1 is None and vertical_time_point2 is None:
+        #     vertical_time = 0
+        #
+        # elif vertical_time_point1 is None:
+        #     vertical_time = vertical_time_point2.x_coordinate
+        #
+        # elif vertical_time2 is None:
+        #     vertical_time = vertical_time1.x_coordinate
+        #
+        # else:
+        #     vertical_time = min_value(vertical_time1, vertical_time2)
 
         return [horizontal_time, vertical_time]
+
+    def get_valid_vertical_time_points(self, intercepted_objects_velocity, ball, is_moving_rightwards, player2):
+        """returns: Point[]; the vertical time points for the player to intercept the ball either for going over the ball or
+           under the ball"""
+
+        # Finding the ball's path until it reaches the edge of the screen
+        ball_end_x_coordinate = screen_length - ball.length if is_moving_rightwards else 0
+        ball_path, unused, times = self.get_ball_path_data(self.ball.y_coordinate, self.ball.x_coordinate, ball_end_x_coordinate, self.ball.is_moving_down)
+        ball_bottom_path = ball_path.get_coordinates(times, "bottom_line", "y_coordinate")
+        ball_y_path = ball_path.get_coordinates(times, "y_coordinate_line", "y_coordinate")
+
+        # Two possible cases; the ai moves down to collide with the ball or up to collide the ball (the quicker one will be used)
+        ai_y_line = LineSegment.get_line_segment(player2, player2.velocity, False, False)
+        ai_bottom_line = LineSegment.get_line_segment(player2, player2.velocity, True, False)
+
+        vertical_y_time_point = CollisionsFinder.get_path_line_collision(ball_y_path, ai_bottom_line)
+        vertical_bottom_time_point = CollisionsFinder.get_path_line_collision(ball_bottom_path, ai_y_line)
+
+        return_value = []
+
+        # The player cannot be above the screen or below the screen when trying to hit the ball
+        if vertical_y_time_point is not None and vertical_y_time_point.y_coordinate <= screen_height - player2.height:
+            return_value.append(vertical_y_time_point.x_coordinate)
+
+        if vertical_bottom_time_point is not None and vertical_bottom_time_point.y_coordinate <= player2.height:
+            return_value.append(vertical_bottom_time_point.x_coordinate)
+
+        return min_
+
+
 
     # TODO finish implementing this
     def add_start_point(self, intercepted_objects_velocity, ball, is_moving_rightwards, player2):

@@ -245,7 +245,7 @@ class SplitPong(PongType):
     def add_ball_to_ai_path(self, ball):
         """Adds the ball to the ai's path, so it will hit it"""
 
-        ball_path, unused, times = self._get_ball_path_data(ball.y_coordinate, ball.x_coordinate, self.player2.x_coordinate - ball.length, ball.is_moving_down, ball.forwards_velocity)
+        ball_path, unused, times = self.get_ball_path_data(ball.y_coordinate, ball.x_coordinate, self.player2.x_coordinate - ball.length, ball.is_moving_down, ball.forwards_velocity)
 
         time_to_ai = times[len(times) - 1]
 
@@ -282,7 +282,7 @@ class SplitPong(PongType):
                 self.add_ball_to_ai_path(ball)
 
             elif should_add_ball_to_path and not self.ai_should_hit_ball:
-                ball_path, unused, times = self._get_ball_path_data(ball.y_coordinate, ball.x_coordinate, self.player2.x_coordinate - ball.length, ball.is_moving_down, ball.forwards_velocity)
+                ball_path, unused, times = self.get_ball_path_data(ball.y_coordinate, ball.x_coordinate, self.player2.x_coordinate - ball.length, ball.is_moving_down, ball.forwards_velocity)
                 self.player2.move_away_from_ball(ball_path.get_end_points()[0].y_coordinate, times[len(times) - 1])
                 self.ai_data[ball] = AIData(times[len(times) - 1], ball_path.get_end_points()[0].y_coordinate)
 

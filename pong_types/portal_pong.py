@@ -348,7 +348,7 @@ class PortalPong(PongType):
             portal_openings = []
             portal_opening_paths = []
 
-            ball_path_data = self._get_ball_path_data(ball_y_coordinate, ball_x_coordinate, ai_x_coordinate,
+            ball_path_data = self.get_ball_path_data(ball_y_coordinate, ball_x_coordinate, ai_x_coordinate,
                                                       ball_is_moving_down)
             ball_path = ball_path_data[0]
             times = ball_path_data[2]
@@ -388,7 +388,7 @@ class PortalPong(PongType):
                 hit_a_portal = True
 
             if not hit_a_portal:
-                ball_path_data = self._get_ball_path_data(ball_y_coordinate, ball_x_coordinate, ai_x_coordinate,
+                ball_path_data = self.get_ball_path_data(ball_y_coordinate, ball_x_coordinate, ai_x_coordinate,
                                                           ball_is_moving_down)
 
                 ball_path, times = ball_path_data[0], ball_path_data[2]
