@@ -124,13 +124,51 @@ class CollisionsFinder:
         return (is_collision and prev_object1.bottom < prev_object2.y_coordinate
                 and object1.bottom > object2.y_coordinate) or objects_are_touching
 
+    @staticmethod
+    def simple_is_bottom_collision(object1, object2, is_collision=None, time=None):
+        """ :returns: bool; whether object1 has collided with object2's bottom
+        """
+
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            return False
+
+        objects_are_touching = object1.y_coordinate == object2.bottom and CollisionsFinder.is_length_collision(
+            object1,
+            object2)
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+
+        # Meaning that it isn't the bottom object anymore
+        return (is_collision and prev_object1.y_coordinate > prev_object2.bottom and
+                object1.y_coordinate < object2.bottom) or objects_are_touching
+
+    @staticmethod
+    def simple_is_top_collision(object1, object2, is_collision=None, time=None):
+        """:returns: bool; whether object1 has collided with object2's y_coordinate"""
+
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            return False
+
+        # So rounding doesn't cause any issues
+        objects_are_touching = int(object1.bottom) == int(
+            object2.y_coordinate) and CollisionsFinder.is_length_collision(object1, object2)
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+
+        # Meaning that it isn't the bottom object anymore
+        return (is_collision and prev_object1.bottom < prev_object2.y_coordinate
+                and object1.bottom > object2.y_coordinate) or objects_are_touching
+
     # End code that I added on 11/25/2023 to faithfully "restore" the project into a working state
 
     def is_collision(object1, object2):
         # Old Code Below before switching to simpler (and more "robust" code)
-        # CollisionsFinder.update_data(object1, object2)
-        # return CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_collision
-        return CollisionsFinder.is_box_collision(object1, object2)
+        CollisionsFinder.update_data(object1, object2)
+        return CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_collision
 
     def is_moving_collision(object1, object2):
         CollisionsFinder.update_data(object1, object2)
@@ -139,12 +177,9 @@ class CollisionsFinder:
     def is_left_collision(object1, object2):
         """ returns: boolean; if object1 has hit object2's x_coordinate"""
 
-        # Old Code Below before switching to simpler (and more "robust" code)
-        # CollisionsFinder.update_data(object1, object2)
-        # collision_data: CollisionData = CollisionsFinder.get_collision_data(object1, object2)
-        # return collision_data.is_moving_collision and collision_data.is_left_collision
-
-        return CollisionsFinder.simple_is_left_collision(object1, object2)
+        CollisionsFinder.update_data(object1, object2)
+        collision_data: CollisionData = CollisionsFinder.get_collision_data(object1, object2)
+        return collision_data.is_moving_collision and collision_data.is_left_collision
 
     def get_collision_data(object1, object2) -> CollisionData:
         """returns: CollisionData; the data for the collision for 'object1' and 'object2'"""
@@ -158,10 +193,10 @@ class CollisionsFinder:
 
     def is_right_collision(object1, object2):
         """returns: boolean; if object1 has collided with object2's right_edge"""
-        # CollisionsFinder.update_data(object1, object2)
-        # collision_data: CollisionData = CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}")
-        # return collision_data.is_moving_collision and collision_data.is_right_collision
-        return CollisionsFinder.simple_is_right_collision(object1, object2)
+
+        CollisionsFinder.update_data(object1, object2)
+        collision_data: CollisionData = CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}")
+        return collision_data.is_moving_collision and collision_data.is_right_collision
 
     def make_dimensions_match(prev_object, current_object):
         """Makes the height and length of the objects match; changes prev_object to match current_object"""

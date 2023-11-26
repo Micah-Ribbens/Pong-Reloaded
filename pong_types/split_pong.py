@@ -126,7 +126,7 @@ class SplitPong(PongType):
 
         new_balls = []
         for ball in self.balls:
-            ball_has_collided_with_paddle1 = CollisionsFinder.is_collision(ball, self.player1)
+            ball_has_collided_with_paddle1 = CollisionsFinder.is_box_collision(ball, self.player1)
 
             ball.render()
             self.normal_pong.ball_screen_boundary_collisions(ball)
@@ -139,9 +139,8 @@ class SplitPong(PongType):
                 self.increase_ball_size(ball)
                 self.number_of_hits += 1
 
-            if self.ai_should_hit_ball and ball_has_collided:
+            if self.ai_should_hit_ball and ball_has_collided and isinstance(self.player2, AI):
                 self.ai_should_hit_ball = self.player2.ai_difficulty_level.should_hit_ball(self.number_of_hits)
-                print(self.ai_should_hit_ball)
 
             if self.ball_is_ready_to_split(ball):
                 self.split(ball, new_balls, ball_has_collided_with_paddle1)
@@ -153,17 +152,18 @@ class SplitPong(PongType):
         """returns: boolean; if the ball has collided with a player"""
 
         # The ball has to be going to opposite direction of the player to have collided with the weird splitting mechanics
-        return ((CollisionsFinder.is_collision(ball, self.player1) and not ball.is_moving_right)
-                or (CollisionsFinder.is_collision(ball, self.player2) and ball.is_moving_right))
+        return ((CollisionsFinder.is_box_collision(ball, self.player1) and not ball.is_moving_right)
+                or (CollisionsFinder.is_box_collision(ball, self.player2) and ball.is_moving_right))
 
     def run(self):
-        self.run_ai()
         self.add_needed_objects()
-        self.player2.ai_difficulty_level = self.ai_difficulty_levels[self.player2.difficulty_level_index]
+
+        if isinstance(self.player2, AI):
+            self.run_ai()
+            self.player2.ai_difficulty_level = self.ai_difficulty_levels[self.player2.difficulty_level_index]
 
         for ball in self.balls:
             self.normal_pong._ball_movement(ball)
-
 
         self.normal_pong.run_player_movement()
 
@@ -197,6 +197,7 @@ class SplitPong(PongType):
         self.ball.forwards_velocity = self.ball.base_forwards_velocity
         self.ai_data = {}
         self.number_of_hits = 0
+        self.ai_should_hit_ball = True
 
     def draw_game_objects(self):
         """ summary: draws all the game objects (paddles and ball) onto the screen
@@ -237,7 +238,7 @@ class SplitPong(PongType):
 
         for ball in self.balls:
             if ScoreKeeper.player_has_scored(ball, player_is_leftside):
-                CollisionsFinder.is_collision(ball, self.player1 if not player_is_leftside else self.player2)
+                CollisionsFinder.is_box_collision(ball, self.player1 if not player_is_leftside else self.player2)
                 has_scored = True
 
         return has_scored
@@ -294,8 +295,3 @@ class SplitPong(PongType):
             data.time -= VelocityCalculator.time
 
         self.player2.run_hitting_balls_logic()
-
-
-
-
-

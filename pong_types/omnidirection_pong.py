@@ -13,8 +13,6 @@ from base_pong.velocity_calculator import VelocityCalculator
 from pong_types.normal_pong import NormalPong
 
 
-# TODO fix code so you don't have to assume player2 is the ai
-# TODO write the code so it takes into account both vertical and horizontal time
 class OmnidirectionalPong(NormalPong):
     """Pong where the player can move 4 directions"""''
     # States for the AI
@@ -147,6 +145,7 @@ class OmnidirectionalPong(NormalPong):
 
         if CollisionsFinder.is_moving_collision(self.player1, self.player2):
             self.set_player_coordinates()
+
         self.run_player_boundaries(self.player1)
         self.run_player_boundaries(self.player2)
 
@@ -184,6 +183,7 @@ class OmnidirectionalPong(NormalPong):
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
             velocity_reduction = .8
             player.velocity = player.base_velocity * velocity_reduction
+            self.ball.color = player.color
 
         else:
             player.velocity = player.base_velocity
@@ -466,10 +466,10 @@ class OmnidirectionalPong(NormalPong):
         intercept_object_x_line = LineSegment.get_line_segment(ball, intercepted_objects_velocity, True, True)
         ai_x_line = LineSegment.get_line_segment(player2, player2.velocity, False, True)
 
-        if CollisionsFinder.get_line_collision_point(intercept_object_x_line, ai_x_line) is None:
+        if CollisionsUtilityFunctions.get_line_collision_point(intercept_object_x_line, ai_x_line) is None:
             print("NOO HOR FAILED")
 
-        return CollisionsFinder.get_line_collision_point(intercept_object_x_line, ai_x_line).x_coordinate
+        return CollisionsUtilityFunctions.get_line_collision_point(intercept_object_x_line, ai_x_line).x_coordinate
 
     def get_times(self, intercepted_objects_velocity, ball, is_moving_rightwards, player2):
         """ summary: finds the times for player2 to go from above/below the ball to hitting the ball the right direction
@@ -484,25 +484,11 @@ class OmnidirectionalPong(NormalPong):
 
         horizontal_time = self.get_horizontal_time(intercepted_objects_velocity, ball, is_moving_rightwards, player2)
 
-        vertical_time = None
-
-        # If they are both None then that means the ai doesn't have to move upwards
-        # if vertical_time_point1 is None and vertical_time_point2 is None:
-        #     vertical_time = 0
-        #
-        # elif vertical_time_point1 is None:
-        #     vertical_time = vertical_time_point2.x_coordinate
-        #
-        # elif vertical_time2 is None:
-        #     vertical_time = vertical_time1.x_coordinate
-        #
-        # else:
-        #     vertical_time = min_value(vertical_time1, vertical_time2)
-
+        vertical_time = min(self.get_valid_vertical_time_points(intercepted_objects_velocity, ball, is_moving_rightwards, player2))
         return [horizontal_time, vertical_time]
 
     def get_valid_vertical_time_points(self, intercepted_objects_velocity, ball, is_moving_rightwards, player2):
-        """returns: Point[]; the vertical time points for the player to intercept the ball either for going over the ball or
+        """returns: float[]; the vertical time points for the player to intercept the ball either for going over the ball or
            under the ball"""
 
         # Finding the ball's path until it reaches the edge of the screen
@@ -527,7 +513,7 @@ class OmnidirectionalPong(NormalPong):
         if vertical_bottom_time_point is not None and vertical_bottom_time_point.y_coordinate <= player2.height:
             return_value.append(vertical_bottom_time_point.x_coordinate)
 
-        return min_
+        return return_value
 
 
 
@@ -587,7 +573,7 @@ class OmnidirectionalPong(NormalPong):
         self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [],
                                         self.player2.velocity)
 
-        ball_path_end_point = self.get_ball_y_coordinates(vertical_time).get_end_points()[0]
+        ball_path_end_point = self.get_ball_path(vertical_time).get_end_points()[0]
         end_y_coordinate = ball_path_end_point.y_coordinate
 
         if vertical_time > horizontal_time or path_is_leftwards:
@@ -605,8 +591,6 @@ class OmnidirectionalPong(NormalPong):
 
             self.add_path_point(ball.right_edge + horizontal_displacement, end_y_coordinate, horizontal_time)
 
-        print(f"PLAYER PATH {self.player_path}")
-
     def add_path_point(self, x_coordinate, y_coordinate, time):
         """Adds a point to the attribute 'player_path' and makes sure the point is within the screens bounds"""
         if y_coordinate >= screen_height - self.player2.height:
@@ -619,7 +603,7 @@ class OmnidirectionalPong(NormalPong):
         distance_to_goal = self.player2.x_coordinate
         time_to_goal = distance_to_goal / self.player2.velocity
 
-        ball_path: Path = self.get_ball_y_coordinates(time_to_goal)
+        ball_path: Path = self.get_ball_path(time_to_goal)
 
         self.player_path = VelocityPath(Point(self.player2.x_coordinate, self.player2.y_coordinate), [],
                                         self.player2.velocity)

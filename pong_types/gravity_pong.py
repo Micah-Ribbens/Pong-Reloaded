@@ -61,17 +61,19 @@ class GravityPong(PongType):
             returns: None
         """
 
-        ball_has_collided = CollisionsFinder.is_collision(self.ball, self.player1) or CollisionsFinder.is_collision(self.ball, self.player2)
+        ball_has_collided = CollisionsFinder.is_box_collision(self.ball, self.player1) or CollisionsFinder.is_box_collision(self.ball, self.player2)
 
         if ball_has_collided:
             self.ball.is_moving_right = not self.ball.is_moving_right
             self.needed_vertex_increase += self.velocity_increase
 
-        if CollisionsFinder.is_collision(self.ball, self.player1):
+        if CollisionsFinder.is_box_collision(self.ball, self.player1):
             self.ball.x_coordinate = self.player1.right_edge
+            self.ball.color = self.player1.color
 
-        if CollisionsFinder.is_collision(self.ball, self.player2):
+        if CollisionsFinder.is_box_collision(self.ball, self.player2):
             self.ball.x_coordinate = self.player2.x_coordinate - self.ball.length
+            self.ball.color = self.player1.color
 
     def ball_movement(self):
         """ summary: does the horizontal and vertical movement of the ball and the logic that goes into

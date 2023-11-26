@@ -120,9 +120,9 @@ class Portal:
         # Stores value of is_enabled, which other things in this function modify
         is_enabled = self.is_enabled
 
-        portal_opening1_collision = CollisionsFinder.is_collision(ball, self.portal_opening1)
+        portal_opening1_collision = CollisionsFinder.is_box_collision(ball, self.portal_opening1)
 
-        portal_opening2_collision = CollisionsFinder.is_collision(ball, self.portal_opening2)
+        portal_opening2_collision = CollisionsFinder.is_box_collision(ball, self.portal_opening2)
 
         is_portal_collision = portal_opening1_collision or portal_opening2_collision
 
@@ -257,7 +257,7 @@ class PortalPong(PongType):
         self.normal_pong.ball_movement()
         self.normal_pong.run_player_movement()
 
-        if CollisionsFinder.is_collision(self.ball, self.player1) or CollisionsFinder.is_collision(self.ball, self.player2):
+        if CollisionsFinder.is_box_collision(self.ball, self.player1) or CollisionsFinder.is_box_collision(self.ball, self.player2):
             self.enable_portals()
 
         # Must come after logic of enabling portals otherwise the code above could have not detected a collision because
@@ -267,8 +267,8 @@ class PortalPong(PongType):
         for x in range(len(self.portals)):
             portal = self.portals[x]
 
-            portal_opening1_collision = CollisionsFinder.is_collision(self.ball, portal.portal_opening1)
-            portal_opening2_collision = CollisionsFinder.is_collision(self.ball, portal.portal_opening2)
+            portal_opening1_collision = CollisionsFinder.is_box_collision(self.ball, portal.portal_opening1)
+            portal_opening2_collision = CollisionsFinder.is_box_collision(self.ball, portal.portal_opening2)
             is_portal_collision = portal_opening1_collision or portal_opening2_collision
 
             po1 = portal.portal_opening1

@@ -120,6 +120,7 @@ class PongType(abc.ABC):
         ball_forwards_velocity = ball_forwards_velocity if ball_forwards_velocity is not None else self.ball.forwards_velocity
         path = Path(Point(ball_x_coordinate, ball_y_coordinate), self.ball.height, self.ball.length)
 
+        print(end_x_coordinate, ball_x_coordinate, ball_forwards_velocity)
         time_to_travel_distance = abs(end_x_coordinate - ball_x_coordinate) / ball_forwards_velocity
         times = []
         current_time = 0

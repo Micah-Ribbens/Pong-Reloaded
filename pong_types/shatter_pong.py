@@ -36,7 +36,7 @@ class ShatterPong(PongType):
             returns: None
         """
 
-        if CollisionsFinder.is_collision(ball, paddle):
+        if CollisionsFinder.is_box_collision(ball, paddle):
             ball_has_hit_top = ball.y_coordinate <= paddle.y_midpoint
             shatter_function = self.shatter_top if ball_has_hit_top else self.shatter_bottom
             shatter_function(paddle)

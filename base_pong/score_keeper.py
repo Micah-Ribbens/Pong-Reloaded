@@ -30,4 +30,4 @@ class ScoreKeeper:
             returns: if ball has exited the side of the screen that the player is not on (opposite side of screen is where player scores)
         """
 
-        return ball.x_coordinate >= screen_length if player_is_leftside else ball.x_coordinate <= 0
+        return ball.x_coordinate >= screen_length if player_is_leftside else ball.right_edge <= 0

@@ -55,7 +55,7 @@ class MiddlePaddlePong(PongType):
 
         # Ball collisions changes colors if it hits middle_paddle
         # and I won't to change it back to color before hitting it
-        if CollisionsFinder.is_collision(self.ball, self.middle_paddle):
+        if CollisionsFinder.is_box_collision(self.ball, self.middle_paddle):
             self.normal_pong.paddle_collisions(self.ball, self.middle_paddle)
 
     def run(self):

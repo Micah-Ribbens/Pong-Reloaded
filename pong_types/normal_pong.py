@@ -26,11 +26,11 @@ class NormalPong(PongType):
 
         self.ball_screen_boundary_collisions(ball)
 
-        if CollisionsFinder.is_collision(player1, ball):
+        if CollisionsFinder.is_box_collision(player1, ball):
             self.paddle_collisions(ball, player1)
             ball.color = player1.color
 
-        if CollisionsFinder.is_collision(player2, ball):
+        if CollisionsFinder.is_box_collision(player2, ball):
             self.paddle_collisions(ball, player2)
             ball.color = player2.color
 
@@ -52,19 +52,29 @@ class NormalPong(PongType):
             returns: None
         """
 
-        if CollisionsFinder.is_right_collision(ball, paddle):
+        if CollisionsFinder.simple_is_right_collision(ball, paddle):
             ball.x_coordinate = paddle.right_edge
             ball.is_moving_right = True
 
-        elif CollisionsFinder.is_left_collision(ball, paddle):
+        elif CollisionsFinder.simple_is_left_collision(ball, paddle):
             ball.x_coordinate = paddle.x_coordinate - ball.length
             ball.is_moving_right = False
 
-        if CollisionsFinder.is_bottom_collision(ball, paddle):
+        else:
+            # Added this code 11/25/2023 so top and bottom collisions work with the new Collisions code
+            if paddle == self.player1:
+                ball.x_coordinate = paddle.right_edge
+                ball.is_moving_right = True
+
+            else:
+                ball.x_coordinate = paddle.x_coordinate - ball.length
+                ball.is_moving_right = False
+
+        if CollisionsFinder.simple_is_bottom_collision(ball, paddle):
             ball.tip_hit(paddle.power / 10)
             ball.is_moving_down = True
 
-        elif CollisionsFinder.is_top_collision(ball, paddle):
+        elif CollisionsFinder.simple_is_top_collision(ball, paddle):
             ball.tip_hit(paddle.power / 10)
             ball.is_moving_down = False
 

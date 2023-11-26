@@ -272,7 +272,7 @@ class AI(Paddle):
     def run_hitting_balls_logic(self):
         """Runs the logic for figuring out if the computer opponent should hit the next ball"""
 
-        hit_ball_this_cycle = CollisionsFinder.is_collision(self.ball, self)
+        hit_ball_this_cycle = CollisionsFinder.is_box_collision(self.ball, self)
 
         if self.path is not None:
             self.x_coordinate, self.y_coordinate = self.path.get_coordinates()
