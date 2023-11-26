@@ -127,9 +127,10 @@ class CollisionsFinder:
     # End code that I added on 11/25/2023 to faithfully "restore" the project into a working state
 
     def is_collision(object1, object2):
-        CollisionsFinder.update_data(object1, object2)
-        return (CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_collision or
-                CollisionsFinder.is_box_collision(object1, object2))
+        # Old Code Below before switching to simpler (and more "robust" code)
+        # CollisionsFinder.update_data(object1, object2)
+        # return CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_collision
+        return CollisionsFinder.is_box_collision(object1, object2)
 
     def is_moving_collision(object1, object2):
         CollisionsFinder.update_data(object1, object2)
@@ -138,10 +139,12 @@ class CollisionsFinder:
     def is_left_collision(object1, object2):
         """ returns: boolean; if object1 has hit object2's x_coordinate"""
 
-        CollisionsFinder.update_data(object1, object2)
-        collision_data: CollisionData = CollisionsFinder.get_collision_data(object1, object2)
-        return ((collision_data.is_moving_collision and collision_data.is_left_collision) or
-                CollisionsFinder.simple_is_left_collision(object1, object2))
+        # Old Code Below before switching to simpler (and more "robust" code)
+        # CollisionsFinder.update_data(object1, object2)
+        # collision_data: CollisionData = CollisionsFinder.get_collision_data(object1, object2)
+        # return collision_data.is_moving_collision and collision_data.is_left_collision
+
+        return CollisionsFinder.simple_is_left_collision(object1, object2)
 
     def get_collision_data(object1, object2) -> CollisionData:
         """returns: CollisionData; the data for the collision for 'object1' and 'object2'"""
@@ -155,10 +158,10 @@ class CollisionsFinder:
 
     def is_right_collision(object1, object2):
         """returns: boolean; if object1 has collided with object2's right_edge"""
-        CollisionsFinder.update_data(object1, object2)
-        collision_data: CollisionData = CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}")
-        return ((collision_data.is_moving_collision and collision_data.is_right_collision) or
-                CollisionsFinder.simple_is_right_collision(object1, object2))
+        # CollisionsFinder.update_data(object1, object2)
+        # collision_data: CollisionData = CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}")
+        # return collision_data.is_moving_collision and collision_data.is_right_collision
+        return CollisionsFinder.simple_is_right_collision(object1, object2)
 
     def make_dimensions_match(prev_object, current_object):
         """Makes the height and length of the objects match; changes prev_object to match current_object"""
