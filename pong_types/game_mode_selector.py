@@ -12,9 +12,9 @@ from pong_types.omnidirection_pong import OmnidirectionalPong
 class GameModeSelector:
     """The class that holds the game modes and pong types"""
 
-    # If a game mode isn't selected from the gui, then the game mode will be Random
+    # If a game mode isn't selected from the GUI, then the game mode will be Random
     game_mode = "Pick Pong Type"
-    # If a pong_type isn't selected from the gui, then the game mode will be Normal Pong
+    # If a pong_type isn't selected from the GUI, then the game mode will be Normal Pong
     pong_type = "Omnidirectional Pong"
     number_of_players = "2 Player"
 

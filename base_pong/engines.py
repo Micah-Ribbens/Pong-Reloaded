@@ -13,11 +13,123 @@ class CollisionsFinder:
 
     objects_to_data = {}
 
-    # def update_data(object1, object2):
+    # Simple Collision Code I put in to ensure that the collisions don't break as often 11/25/2023 (added much after project
+    # development to ensure the game was still playable)
+
+    def is_height_collision(object1, object2):
+        return (object1.bottom >= object2.y_coordinate and
+                object1.y_coordinate <= object2.bottom)
+
+    def is_length_collision(object1, object2):
+        return (object1.x_coordinate <= object2.right_edge and
+                object1.right_edge >= object2.x_coordinate)
+
+    @staticmethod
+    def is_box_collision(object1, object2):
+        """:returns: bool; whether object1 and object2 have collided vertically and horizontally (box collision)"""
+
+        return CollisionsFinder.is_length_collision(object1, object2) and CollisionsFinder.is_height_collision(object1, object2)
+
+    @staticmethod
+    def simple_is_left_collision(object1, object2, is_collision=None, last_time=None):
+        """ :returns: bool; if object1 has collided with object2's left edge"""
+
+        objects_are_touching = object1.right_edge == object2.x_coordinate and CollisionsFinder.is_height_collision(
+            object1, object2)
+        is_moving_left_collision = CollisionsFinder.simple_is_moving_left_collision(object1, object2, is_collision, last_time)
+
+        return is_moving_left_collision or objects_are_touching
+
+    @staticmethod
+    def simple_is_right_collision(object1, object2, is_collision=None, last_time=None):
+        """:returns: bool; if object1 has collided with object2's right_edge"""
+
+        is_moving_right_collision = CollisionsFinder.simple_is_moving_right_collision(object1, object2, is_collision,
+                                                                               last_time)
+
+        objects_are_touching = object1.x_coordinate == object2.right_edge and CollisionsFinder.is_height_collision(
+            object1, object2)
+
+        return is_moving_right_collision or objects_are_touching
+
+    @staticmethod
+    def simple_is_moving_right_collision(object1, object2, is_collision=None, last_time=None):
+        """ :returns: bool; if object1 has collided with object2's right_edge because one of the objects has moved
+            (the object1 did not collide with object2 horizontally last cycle)"""
+
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            return False
+
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+        object1_has_moved_into_object2 = (
+                prev_object1.x_coordinate > prev_object2.right_edge and object1.x_coordinate < object2.right_edge)
+
+        return is_collision and object1_has_moved_into_object2
+
+    @staticmethod
+    def simple_is_moving_left_collision(object1, object2, is_collision=None, last_time=None):
+        """ :returns: bool; if object1 has hit object2's x_coordinate because one of the objects has moved
+            (the object1 did not collide with object2 horizontally last cycle)"""
+
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            return False
+
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+
+        object1_has_moved_into_object2 = prev_object1.right_edge < prev_object2.x_coordinate and object1.right_edge > object2.x_coordinate
+        return is_collision and object1_has_moved_into_object2
+
+    @staticmethod
+    def simple_is_bottom_collision(object1, object2, is_collision=None, time=None):
+        """ :returns: bool; whether object1 has collided with object2's bottom
+        """
+
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            return False
+
+        objects_are_touching = object1.y_coordinate == object2.bottom and CollisionsFinder.is_length_collision(
+            object1,
+            object2)
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+
+        # Meaning that it isn't the bottom object anymore
+        return (is_collision and prev_object1.y_coordinate > prev_object2.bottom and
+                object1.y_coordinate < object2.bottom) or objects_are_touching
+
+    @staticmethod
+    def simple_is_top_collision(object1, object2, is_collision=None, time=None):
+        """:returns: bool; whether object1 has collided with object2's y_coordinate"""
+
+        prev_object1 = HistoryKeeper.get_last(object1.name)
+        prev_object2 = HistoryKeeper.get_last(object2.name)
+
+        if prev_object1 is None or prev_object2 is None:
+            return False
+
+        # So rounding doesn't cause any issues
+        objects_are_touching = int(object1.bottom) == int(
+            object2.y_coordinate) and CollisionsFinder.is_length_collision(object1, object2)
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+
+        # Meaning that it isn't the bottom object anymore
+        return (is_collision and prev_object1.bottom < prev_object2.y_coordinate
+                and object1.bottom > object2.y_coordinate) or objects_are_touching
+
+    # End code that I added on 11/25/2023 to faithfully "restore" the project into a working state
 
     def is_collision(object1, object2):
         CollisionsFinder.update_data(object1, object2)
-        return CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_collision
+        return (CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}").is_collision or
+                CollisionsFinder.is_box_collision(object1, object2))
 
     def is_moving_collision(object1, object2):
         CollisionsFinder.update_data(object1, object2)
@@ -28,7 +140,8 @@ class CollisionsFinder:
 
         CollisionsFinder.update_data(object1, object2)
         collision_data: CollisionData = CollisionsFinder.get_collision_data(object1, object2)
-        return collision_data.is_moving_collision and collision_data.is_left_collision
+        return ((collision_data.is_moving_collision and collision_data.is_left_collision) or
+                CollisionsFinder.simple_is_left_collision(object1, object2))
 
     def get_collision_data(object1, object2) -> CollisionData:
         """returns: CollisionData; the data for the collision for 'object1' and 'object2'"""
@@ -44,7 +157,8 @@ class CollisionsFinder:
         """returns: boolean; if object1 has collided with object2's right_edge"""
         CollisionsFinder.update_data(object1, object2)
         collision_data: CollisionData = CollisionsFinder.objects_to_data.get(f"{id(object1)} {id(object2)}")
-        return collision_data.is_moving_collision and collision_data.is_right_collision
+        return ((collision_data.is_moving_collision and collision_data.is_right_collision) or
+                CollisionsFinder.simple_is_right_collision(object1, object2))
 
     def make_dimensions_match(prev_object, current_object):
         """Makes the height and length of the objects match; changes prev_object to match current_object"""
@@ -138,36 +252,6 @@ class CollisionsFinder:
 
         return objects_were_touching_horizontally or objects_were_touching_vertically
 
-
-    def is_height_collision(object1, object2):
-        """ summary: finds out if the object's y_coordinates have collided
-
-            params:
-                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
-                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
-
-            returns: boolean; if one of the object's y coordinates is within the other's y coordinates
-        """
-
-        return (object1.bottom >= object2.y_coordinate and
-                object1.y_coordinate <= object2.bottom)
-
-    def is_length_collision(object1, object2):
-        """ summary: finds out if the object's x coordinates have collided
-
-            params:
-                object1: GameObject; one of the objects that is used to see if the two objects provided have collided
-                object2: GameObject; one of the objects that is used to see if the two objects provided have collided
-
-            returns: boolean; if one of the object's x coordinates is within the other's x coordinates
-        """
-
-        return (object1.x_coordinate <= object2.right_edge and
-                object1.right_edge >= object2.x_coordinate)
-
-    def sim_collision(object1, object2):
-        return CollisionsFinder.is_height_collision(object1, object2) and CollisionsFinder.is_length_collision(object1, object2)
-
     def is_a_bottom_collision(object1, object2):
         """returns: boolean; if either object1 or object2 collided with the other one's bottom"""
 
@@ -194,7 +278,7 @@ class CollisionsFinder:
         if prev_object1 is None or prev_object2 is None:
             print("ERROR NO PREVIOUS GAME OBJECTS FOUND")
             return False
-
+        
         return (CollisionsFinder.is_collision(object1, object2) and prev_object1.y_coordinate > prev_object2.bottom and
                 object1.y_coordinate <= object2.bottom) # Meaning that it isn't the bottom object anymore
 

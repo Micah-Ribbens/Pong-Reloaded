@@ -1,9 +1,14 @@
+import time
+
 import pygame.key
 
+from base_pong import function_runner
 from base_pong.dimensions import Dimensions
 from base_pong.events import Event
-from base_pong.important_variables import screen_length, screen_height
+from base_pong.important_variables import screen_length, screen_height, game_window, changer
 from base_pong.path import ObjectPath
+from base_pong.utility_classes import HistoryKeeper
+from base_pong.velocity_calculator import VelocityCalculator
 from gui_components.graph import Graph
 from gui_components.grid import Grid
 from gui_components.screen import Screen
@@ -137,18 +142,3 @@ class CollisionsTester(Screen):
         stationary_object.height = y_units * stationary_object.height
 
         return [moving_object_path, stationary_object]
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -47,7 +47,7 @@ class GravityPongAITester:
         """returns: List of Case; all the data necessary for the GUI to display stuff; gotten from running the tests"""
 
         self.all_data = []
-        fr = FileReader("C:\\Users\\mdrib\\Downloads\\Games\\Pong\\data.txt")
+        fr = FileReader("data.txt")
 
         for x in range(fr.get_int("number_of_tests")):
             s = f"test_number{x + 1}."

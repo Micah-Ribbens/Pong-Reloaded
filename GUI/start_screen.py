@@ -1,5 +1,5 @@
-from gui.game_modes_screen import GameModesScreen
-from gui.alter_sizes_screen import AlterSizesScreen
+from GUI.game_modes_screen import GameModesScreen
+from GUI.alter_sizes_screen import AlterSizesScreen
 from gui_components.button import Button
 from gui_components.grid import Grid
 from base_pong.colors import *

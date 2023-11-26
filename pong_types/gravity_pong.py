@@ -70,7 +70,6 @@ class GravityPong(PongType):
         if CollisionsFinder.is_collision(self.ball, self.player1):
             self.ball.x_coordinate = self.player1.right_edge
 
-
         if CollisionsFinder.is_collision(self.ball, self.player2):
             self.ball.x_coordinate = self.player2.x_coordinate - self.ball.length
 

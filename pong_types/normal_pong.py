@@ -26,17 +26,13 @@ class NormalPong(PongType):
 
         self.ball_screen_boundary_collisions(ball)
 
-        if CollisionsFinder.is_right_collision(ball, player2):
-            CollisionsFinder.is_right_collision(ball, player2)
-
-        if CollisionsFinder.is_left_collision(ball, player1):
-            CollisionsFinder.is_left_collision(ball, player1)
-
         if CollisionsFinder.is_collision(player1, ball):
             self.paddle_collisions(ball, player1)
+            ball.color = player1.color
 
         if CollisionsFinder.is_collision(player2, ball):
             self.paddle_collisions(ball, player2)
+            ball.color = player2.color
 
     def ball_collisions(self):
         """ summary: does the ball collisions by calling _ball_collisions()
@@ -55,8 +51,6 @@ class NormalPong(PongType):
 
             returns: None
         """
-        if not CollisionsFinder.is_right_collision(ball, paddle) and not CollisionsFinder.is_left_collision(ball, paddle):
-            CollisionsFinder.is_collision(ball, paddle)
 
         if CollisionsFinder.is_right_collision(ball, paddle):
             ball.x_coordinate = paddle.right_edge
@@ -66,8 +60,6 @@ class NormalPong(PongType):
             ball.x_coordinate = paddle.x_coordinate - ball.length
             ball.is_moving_right = False
 
-        is_collision = CollisionsFinder.is_collision(ball, paddle)
-
         if CollisionsFinder.is_bottom_collision(ball, paddle):
             ball.tip_hit(paddle.power / 10)
             ball.is_moving_down = True
@@ -76,7 +68,7 @@ class NormalPong(PongType):
             ball.tip_hit(paddle.power / 10)
             ball.is_moving_down = False
 
-        elif is_collision:
+        else:
             ball.middle_hit(paddle.power / 10)
 
 
@@ -103,6 +95,7 @@ class NormalPong(PongType):
 
     def run_player_movement(self):
         """Runs the code that allows the players to move"""
+
         self.set_paddles_movements(self.player2)
         self.set_paddles_movements(self.player1)
         self.player1.movement()

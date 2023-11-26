@@ -2,7 +2,7 @@ import pygame
 
 from gui_components.grid import Grid
 from base_pong.utility_functions import percentages_to_numbers, change_attributes
-from gui.menu_item import MenuItem
+from GUI.menu_item import MenuItem
 from base_pong.players import Player
 from base_pong.ball import Ball
 from base_pong.important_variables import *

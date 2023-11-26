@@ -227,7 +227,7 @@ class AI(Paddle):
         max_waiting_time = additional_time - time_to_reach_new_y_coordinate
 
         # The ai should not wait for no more than a certain amount of time before it hits the ball
-        return_value = max_waiting_time if max_waiting_time < .5 else .5
+        return_value = max_waiting_time if max_waiting_time < 1 else 1
 
         # Also the AI should not wait at all if it does not have any time to get to the ball
         if max_waiting_time < 0:
@@ -271,6 +271,7 @@ class AI(Paddle):
 
     def run_hitting_balls_logic(self):
         """Runs the logic for figuring out if the computer opponent should hit the next ball"""
+
         hit_ball_this_cycle = CollisionsFinder.is_collision(self.ball, self)
 
         if self.path is not None:

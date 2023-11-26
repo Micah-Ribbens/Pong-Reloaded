@@ -35,13 +35,12 @@ class GameScreen(Screen):
         pong_type_class = GameModeSelector.get_pong_type()
 
         if GameModeSelector.is_single_player():
-            self.player2 = AI(GameModeSelector.ai_difficulty, self.ball)
             self.player2.reset()
-            self.player2.set_pong_type(self.pong_type)
-            self.components = [self.player1, self.player2, self.ball, self.pause_button]
+            self.player2 = AI(GameModeSelector.ai_difficulty, self.ball)
 
         self.pong_type = pong_type_class(self.player1, self.player2, self.ball)
         self.ball.reset()
+        self.player1.x_coordinate = 0
         self.player1_score = 0
         self.player2_score = 0
         self.pong_type.reset()
@@ -54,11 +53,15 @@ class GameScreen(Screen):
         self.player1.down_key = pygame.K_s
         self.player1.right_key = pygame.K_d
         self.player1.left_key = pygame.K_a
-        self.player2.x_coordinate = screen_length - self.player2.length
         HistoryKeeper.reset()
         self.ball.reset()
         self.pong_type.reset()
 
+        if GameModeSelector.is_single_player():
+            self.components = [self.player1, self.player2, self.ball, self.pause_button]
+            self.player2.set_pong_type(self.pong_type)
+
+        self.player2.x_coordinate = screen_length - self.player2.length
         self.player2.y_coordinate = screen_height - self.player2.height
 
     def run(self):

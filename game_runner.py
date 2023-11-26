@@ -3,9 +3,9 @@ import pygame.display
 from base_pong.engines import CollisionsFinder
 from base_pong.path import *
 from base_pong.utility_classes import HistoryKeeper
-from gui.main_screen import MainScreen
-from gui.pause_screen import PauseScreen
-from gui.game_screen import GameScreen
+from GUI.main_screen import MainScreen
+from GUI.pause_screen import PauseScreen
+from GUI.game_screen import GameScreen
 from base_pong.important_variables import *
 import time
 from base_pong.velocity_calculator import VelocityCalculator
