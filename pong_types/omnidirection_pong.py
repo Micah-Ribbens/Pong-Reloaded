@@ -1,5 +1,6 @@
 import pygame
 
+from base_pong.drawable_objects import GameObject
 from base_pong.engine_utility_classes import CollisionsUtilityFunctions
 from base_pong.engines import CollisionsFinder
 from base_pong.equations import Point, LineSegment
@@ -10,6 +11,7 @@ from base_pong.players import Player, AI
 from base_pong.utility_classes import HistoryKeeper, StateChange
 from base_pong.utility_functions import get_leftmost_object, get_rightmost_object, get_displacement, min_value
 from base_pong.velocity_calculator import VelocityCalculator
+from gui_components.component import Component
 from pong_types.normal_pong import NormalPong
 
 
@@ -41,6 +43,9 @@ class OmnidirectionalPong(NormalPong):
     player_who_hit_ball_key = "player who hit ball"
     player_path = None
     is_top_or_bottom_collision = False
+    was_previously_right_collision = False
+    was_previously_left_collision = False
+    previous_collision_player = None
 
     def __init__(self, player1, player2, ball):
         """ summary: Initializes the PongType with the needed objects to run its methods
@@ -54,7 +59,7 @@ class OmnidirectionalPong(NormalPong):
         """
 
         super().__init__(player1, player2, ball)
-        self.last_ball = self.ball
+        self.last_ball = self.get_game_object_copy(self.ball)
         self.player1.can_move_left, self.player2.can_move_left = False, False
         self.player1.can_move_right, self.player2.can_move_right = False, False
 
@@ -103,7 +108,7 @@ class OmnidirectionalPong(NormalPong):
         if self.ball.can_move:
             self.ball_movement()
 
-        self.last_ball = self.ball
+        self.last_ball = self.get_game_object_copy(self.last_ball)
         self.horizontal_player_movements(self.player1, pygame.K_a, pygame.K_d)
         self.horizontal_player_movements(self.player2, pygame.K_LEFT, pygame.K_RIGHT)
         self.player1.movement()
@@ -124,6 +129,7 @@ class OmnidirectionalPong(NormalPong):
         self.ball_collisions(self.player2)
         self.paddle_collisions()
         self.run_ball_sandwiching()
+        HistoryKeeper.add(self.ball, self.ball.name, True)
 
     def set_is_top_or_bottom_collision(self):
         """Stores whether the players have collided with each other's top or bottom in a variable, which can be accessed by the code"""
@@ -179,7 +185,8 @@ class OmnidirectionalPong(NormalPong):
 
             returns: None
         """
-        if CollisionsFinder.is_moving_collision(self.last_ball, player):
+
+        if CollisionsFinder.is_box_collision(self.ball, player):
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
             velocity_reduction = .8
             player.velocity = player.base_velocity * velocity_reduction
@@ -188,16 +195,48 @@ class OmnidirectionalPong(NormalPong):
         else:
             player.velocity = player.base_velocity
 
-        if CollisionsFinder.is_right_collision(self.last_ball, player) and not self.ball_is_sandwiched():
+        is_right_collision = CollisionsFinder.simple_is_right_collision(self.ball, player) or (
+                             CollisionsFinder.is_box_collision(self.ball, player) and self.was_previously_right_collision
+                             and self.previous_collision_player is not None and self.previous_collision_player == player
+        )
+        is_left_collision = CollisionsFinder.simple_is_left_collision(self.ball, player) or (
+                            CollisionsFinder.is_box_collision(self.ball, player) and self.was_previously_left_collision
+                            and self.previous_collision_player is not None and self.previous_collision_player == player
+        )
+
+        if self.was_previously_left_collision or self.was_previously_right_collision:
+            CollisionsFinder.is_box_collision(self.ball, player)
+
+        if is_right_collision and not self.ball_is_sandwiched():
             self.ball.x_coordinate = player.right_edge
             self.ball.is_moving_right = True
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
+            self.was_previously_right_collision = True
+            self.previous_collision_player = player
 
-        elif CollisionsFinder.is_left_collision(self.last_ball, player) and not self.ball_is_sandwiched():
-            CollisionsFinder.is_left_collision(self.last_ball, player)
+        elif self.previous_collision_player is not None and self.previous_collision_player == player and self.was_previously_right_collision:
+            self.was_previously_right_collision = False
+            self.previous_collision_player = None
+
+        if is_left_collision and not self.ball_is_sandwiched():
             self.ball.x_coordinate = player.x_coordinate - self.ball.length
             self.ball.is_moving_right = False
             HistoryKeeper.add(player, self.player_who_hit_ball_key, True)
+            self.was_previously_left_collision = True
+            self.previous_collision_player = player
+
+        elif self.previous_collision_player is not None and self.previous_collision_player == player and self.was_previously_left_collision:
+            self.was_previously_left_collision = False
+            self.previous_collision_player = None
+            CollisionsFinder.is_box_collision(self.ball, player)
+
+        if CollisionsFinder.is_top_collision(self.ball, player) or CollisionsFinder.is_bottom_collision(self.ball, player):
+            if self.ball.is_moving_right:
+                self.ball.x_coordinate = player.x_coordinate - self.ball.length
+            else:
+                self.ball.x_coordinate = player.right_edge
+
+            self.ball.is_moving_right = not self.ball.is_moving_right
 
         self.ball_screen_boundary_collisions(self.ball)
 
@@ -274,8 +313,8 @@ class OmnidirectionalPong(NormalPong):
 
         distance_needed = self.ball.length
 
-        ball_is_between_players = (self.last_ball.x_coordinate >= leftmost_player.x_coordinate
-                                           and self.last_ball.right_edge <= rightmost_player.right_edge)
+        ball_is_between_players = (self.ball.right_edge >= leftmost_player.x_coordinate
+                                    and self.ball.x_coordinate <= rightmost_player.right_edge)
 
         return distance_between_players <= distance_needed and self.ball_is_between_players() and ball_is_between_players
 
@@ -289,8 +328,8 @@ class OmnidirectionalPong(NormalPong):
         rightmost_player = self.get_rightmost_player()
 
         players_are_at_same_height = CollisionsFinder.is_height_collision(leftmost_player, rightmost_player)
-        ball_y_coordinate_is_between_players = (CollisionsFinder.is_height_collision(self.last_ball, rightmost_player)
-                                                and CollisionsFinder.is_height_collision(self.last_ball, leftmost_player))
+        ball_y_coordinate_is_between_players = (CollisionsFinder.is_height_collision(self.ball, rightmost_player)
+                                                and CollisionsFinder.is_height_collision(self.ball, leftmost_player))
 
         return players_are_at_same_height and ball_y_coordinate_is_between_players
 
@@ -313,6 +352,8 @@ class OmnidirectionalPong(NormalPong):
         super().reset()
         self.ball_is_spawned = True
         self.a_player_has_scored = True
+        self.was_previously_right_collision = False
+        self.was_previously_left_collision = False
 
     # AI CODE
     def run_ai(self):
@@ -613,8 +654,12 @@ class OmnidirectionalPong(NormalPong):
 
             self.add_path_point(x_coordinate, ball_path.get_y_coordinate(time), time)
 
+    def get_game_object_copy(self, game_object: GameObject):
+        if game_object is None:
+            print("NONE!")
+            return None
 
-
-
-
-
+        t = game_object
+        copy = GameObject(t.x_coordinate, t.y_coordinate, t.height, t.length)
+        copy.name = game_object.name
+        return copy

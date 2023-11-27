@@ -62,5 +62,5 @@ while True:
     changer.run_changes()
     HistoryKeeper.last_time = VelocityCalculator.time
 
-    VelocityCalculator.time = time.time() - start_time
+    VelocityCalculator.time = max(time.time() - start_time, pow(10, -9))
 

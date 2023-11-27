@@ -63,7 +63,7 @@ class CollisionsFinder:
         if prev_object1 is None or prev_object2 is None:
             return False
 
-        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_box_collision(object1, object2)
         object1_has_moved_into_object2 = (
                 prev_object1.x_coordinate > prev_object2.right_edge and object1.x_coordinate < object2.right_edge)
 
@@ -80,7 +80,7 @@ class CollisionsFinder:
         if prev_object1 is None or prev_object2 is None:
             return False
 
-        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_collision(object1, object2)
+        is_collision = is_collision if is_collision is not None else CollisionsFinder.is_box_collision(object1, object2)
 
         object1_has_moved_into_object2 = prev_object1.right_edge < prev_object2.x_coordinate and object1.right_edge > object2.x_coordinate
         return is_collision and object1_has_moved_into_object2

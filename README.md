@@ -22,7 +22,7 @@ I spent a good amount of a year working on this off and on. This is one of my fa
 This was the most complicated collision logic that I developed for a game. With that complexity came a lot of power like
 being able to have game objects being incredibly thin and collisions working perfectly. The thinness of game objects change
 collisions because in one game tick the other game object could end up passing directly through the other game object.
-However, with these complexity came many bugs and float math imprecisions eventually made me abandon this methodology. Although
+However, with these complexity came many bugs and float math imprecision eventually made me abandon this methodology. Although
 it was quite powerful, it was difficult to get working and collision logic that complex was never needed. The basics of the
 collision logic was to see where all the lines of the game object collide with another game object. One line was made for
 each corner of the object (a rectangle). The line's start point would be the object's previous position and the line's
@@ -33,3 +33,6 @@ however, came in with the float math messing up the logic. Floats are not guaran
 That inaccuracy significantly compounds, especially, when that number is already close to 0. Those inaccuracies could either
 mean that a collision is missed, or the collision location is predicted wrongly. This was mostly random, so collisions
 could randomly break.
+
+# Bug Fixes 11/27/2023
+I did multiple things in order to get this project back into a working condition. The Collision Logic 
