@@ -35,4 +35,9 @@ mean that a collision is missed, or the collision location is predicted wrongly.
 could randomly break.
 
 # Bug Fixes 11/27/2023
-I did multiple things in order to get this project back into a working condition. The Collision Logic 
+I did multiple things in order to get this project back into a working condition:
+- Changed most of the collision code to a simpler collision system that I have thoroughly tested. This collision code was
+my original collisions system before I transitioned to the more complex one. I decided to go back to the simpler one because
+it worked better and was less buggy.
+- Changed some function calls that were not correct (they crashed the game).
+- Made Omnidirectional Pong impossible to play Single Player because the AI in that game crashes the game.
