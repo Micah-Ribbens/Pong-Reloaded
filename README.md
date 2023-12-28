@@ -1,7 +1,5 @@
 Finished Development: 05/24/2022
 
-First three years of programming
-
 # Summary
 This is a game where there are many different versions of pong. For all but Omnidirectional Pong I developed an AI that
 worked nearly every time! Writing the AI code was a fun challenge because it forced me to be able to predict where the ball
@@ -17,6 +15,20 @@ I spent a good amount of a year working on this off and on. This is one of my fa
 - Portal Pong &rarr; Pong with portals! The portals move around the screen and if the ball collides with a portal, the ball teleports to the other end of that same colored portal
 - Shatter Pong &rarr; Pong, but with each hit the paddle gets smaller. When the ball hits the paddle, that end of the paddle is removed
 - Omnidirectional Pong &rarr; Pong, but four directional movement is possible! Pretty self-explanatory.
+
+# Game Images:
+## Game Modes
+![Game Modes](documentation/Game%20Modes.png)
+
+## Altering Game Component Sizes
+![Alter Sizes](documentation/Alter%20Sizes.png)
+
+## Game
+![Normal Pong](documentation/Normal%20Pong.png)
+![Portal Pong](documentation/Portal%20Pong.png)
+
+## Proposed Omnidirectional Pong AI (never finished it)
+![Proposed Omnidirectional Pong AI](documentation/Omnidirectional%20Pong%20AI.png)
 
 # Collision Logic
 This was the most complicated collision logic that I developed for a game. With that complexity came a lot of power like
@@ -35,7 +47,6 @@ mean that a collision is missed, or the collision location is predicted wrongly.
 could randomly break.
 
 # Bug Fixes 11/27/2023
-I did multiple things in order to get this project back into a working condition:
 - Changed most of the collision code to a simpler collision system that I have thoroughly tested. This collision code was
 my original collisions system before I transitioned to the more complex one. I decided to go back to the simpler one because
 it worked better and was less buggy.

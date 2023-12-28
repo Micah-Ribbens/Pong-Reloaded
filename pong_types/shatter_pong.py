@@ -87,7 +87,9 @@ class ShatterPong(PongType):
             returns: None
         """
 
+
         self.player1.height = VelocityCalculator.give_measurement(50, screen_height)
         self.player2.height = VelocityCalculator.give_measurement(50, screen_height)
         self.normal_pong.reset()
+        print(self.player1.height)
 
